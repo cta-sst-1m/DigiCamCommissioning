@@ -7,7 +7,7 @@ from cts import cameratestsetup as cts
 from data_treatement import adc_hist
 from utils.geometry import generate_geometry
 from utils.histogram import histogram
-from specta_fit import fit_hv_off
+from spectra_fit import fit_hv_off
 
 parser = OptionParser()
 # Job configuration
