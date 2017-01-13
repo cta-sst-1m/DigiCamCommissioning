@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.linalg import inv
 import scipy.optimize
-from utils.fitting import gaussian_residual,gaussian
+from utils.pdf import gaussian
 import matplotlib.pyplot as plt
 
 class histogram :
