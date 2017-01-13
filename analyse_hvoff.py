@@ -5,7 +5,7 @@ import numpy as np
 from utils.plots import display, display_var
 from cts import cameratestsetup as cts
 from data_treatement import adc_hist
-from utils.geometry import generate_geometry
+from utils.geometry import generate_geometry_0
 from utils.histogram import histogram
 from spectra_fit import fit_hv_off
 
@@ -15,11 +15,11 @@ parser.add_option("-q", "--quiet",
                   action="store_false", dest="verbose", default=True,
                   help="don't print status messages to stdout")
 
-parser.add_option("-s", "--use_saved_histo", dest="use_saved_histo", action="store_true",
-                  help="load the ADC with HV OFF histograms from file", default=False)
+parser.add_option("-c", "--create_histo", dest="create_histo", action="store_true",
+                  help="create the histogram", default=False)
 
-parser.add_option("-p", "--perform_fit", dest="perform_fit", action="store_false",
-                  help="perform fit of ADC with HV OFF", default=True)
+parser.add_option("-p", "--perform_fit", dest="perform_fit", action="store_true",
+                  help="perform fit of ADC with HV OFF", default=False)
 
 parser.add_option("-f", "--file_list", dest="file_list",
                   help="input filenames separated by ','", default='109,110,111')
@@ -29,10 +29,6 @@ parser.add_option("--evt_max", dest="evt_max",
 
 parser.add_option("-n", "--n_evt_per_batch", dest="n_evt_per_batch",
                   help="number of events per batch", default=300, type=int)
-
-# Setup configuration
-parser.add_option("--cts_sector", dest="cts_sector",
-                  help="Sector covered by CTS", default=1, type=int)
 
 # File management
 parser.add_option("--file_basename", dest="file_basename",
@@ -57,7 +53,7 @@ options.file_list = options.file_list.split(',')
 adcs = histogram(bin_center_min=0., bin_center_max=4095., bin_width=1., data_shape=(1296,))
 
 # Get the adcs
-if not options.use_saved_histo:
+if options.create_histo:
     # Fill the adcs hist from data
     adc_hist.run(adcs, options, 'ADC')
 else:
@@ -86,13 +82,11 @@ else:
 plt.ion()
 
 # Define Geometry
-sector_to_angle = {1: 120., 2: 240., 3: 0.}
-cts = cts.CTS('/data/software/CTS/config/cts_config_%d.cfg' % (sector_to_angle[options.cts_sector]),
-              '/data/software/CTS/config/camera_config.cfg',
-              angle=sector_to_angle[options.cts_sector], connected=False)
-geom, good_pixels = generate_geometry(cts)
+geom = generate_geometry_0()
 
 # Perform some plots
 display_var(adcs, geom, title='$\sigma_e$ [ADC]', index_var=2, limit_min=0., limit_max=2., bin_width=0.05)
 display_var(adcs, geom, title='Baseline [ADC]', index_var=1, limit_min=1950., limit_max=2050., bin_width=10.)
 display([adcs],geom,fit_hv_off.slice_func,norm='linear')
+
+r = input('press button to quit')
