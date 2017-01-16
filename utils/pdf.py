@@ -5,12 +5,12 @@ import numpy as np
 
 
 def poisson(k, mu):
-
     return mu ** k * np.exp(-mu) / math.factorial(k)
 
-def gaussian(x, sigma, mean, amplitude=1):
 
+def gaussian(x, sigma, mean, amplitude=1):
     return amplitude / np.sqrt(2 * sigma ** 2 * math.pi) * np.exp(-(x - mean) ** 2 / (2 * sigma ** 2))
+
 
 def generalized_poisson(k, mu, mu_xt, amplitude=1):
     if mu_xt < 0 or mu < 0 or k < 0:
@@ -24,9 +24,10 @@ def generalized_poisson(k, mu, mu_xt, amplitude=1):
 
         return amplitude * mu * (mu + k * mu_xt) ** (k - 1) * np.exp(-mu - k * mu_xt) / factorial(k)
 
+
 def erlang_compound(x, mu, mu_xt):
     temp = 0
-    mu_xt = (mu_xt)
+    mu_xt = mu_xt
     n = 15
     for k in range(n):
 
@@ -38,35 +39,34 @@ def erlang_compound(x, mu, mu_xt):
     return temp
 
 
-def mpe_gaussian_distribution( p , x):
+def mpe_gaussian_distribution(p, x):
     p[0] = gain
     p[1] = sigma_e
     p[2] = sigma_1
     p[3] = offset
     amplitude = []
-    for i in range(4,len(p)-4):
+    for i in range(4, len(p) - 4):
         amplitude.append(p[i])
     n_peak = len(amplitude)
     temp = np.zeros(len(x))
     x = x - offset
     amplitude = np.array(amplitude)
-    x = x - offset
+    x = x - offset # TODO: Cyril check
     for n in range(int(n_peak)):
         sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2) * gain
         temp += amplitude[n] * gaussian(x, sigma_n, n * gain)
     return temp
 
-def mpe_distribution_general(p, x, config=None):
 
+def mpe_distribution_general(p, x, config=None):
     mu, mu_xt, gain, offset, sigma_e, sigma_1, amplitude = p
 
-    #print(p)
+    # print(p)
 
     temp = np.zeros(x.shape)
     x = x - offset
     n_peak = 40
     for n in range(0, n_peak, 1):
-
         sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2) * gain
 
         temp += generalized_poisson(n, mu, mu_xt) * gaussian(x, sigma_n, n * gain)
@@ -75,22 +75,19 @@ def mpe_distribution_general(p, x, config=None):
 
 
 def mpe_distribution_general_sh(p, x, config=None):
+    mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset = p
 
-    mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude , offset= p
-
-    #print(p)
+    # print(p)
 
     temp = np.zeros(x.shape)
     x = x - baseline
     n_peak = 15
     for n in range(0, n_peak, 1):
+        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2)  # * gain
 
-        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2) #* gain
-
-        temp += generalized_poisson(n, mu, mu_xt) * gaussian(x, sigma_n, n * gain + (offset if n!=0 else 0))
+        temp += generalized_poisson(n, mu, mu_xt) * gaussian(x, sigma_n, n * gain + (offset if n != 0 else 0))
 
     return temp * amplitude
-
 
 
 if __name__ == '__main__':
@@ -105,8 +102,8 @@ if __name__ == '__main__':
     offset = 10.
     plt.figure()
 
-    for type in type_list:
-        y = mpe_distribution(x, n_peak, gain, mu, mu_xt, sigma_e, sigma_e, offset, type)
+    for type_pdf in type_list:
+        y = mpe_distribution(x, n_peak, gain, mu, mu_xt, sigma_e, sigma_e, offset, type_pdf) #TODO: check
 
         plt.plot(x, y, label=type)
 

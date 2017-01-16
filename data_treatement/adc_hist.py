@@ -3,12 +3,13 @@ from ctapipe.io import zfits
 from utils.peakdetect import spe_peaks_in_event_list
 
 
-def run(hist, options, h_type='ADC',prev_fit_result=None):
+def run(hist, options, h_type='ADC', prev_fit_result=None):
     """
     Fill the adcs histogram out of darkrun/baseline runs
     :param h_type: type of histogram to produce: ADC for all samples adcs or SPE for only peaks
     :param hist: the histogram to fill
     :param options: see analyse_spe.py
+    :param prev_fit_result: fit result of a previous step needed for the calculations
     :return:
     """
     # Reading the file
@@ -23,14 +24,14 @@ def run(hist, options, h_type='ADC',prev_fit_result=None):
             url=_url
             , data_type='r1', max_events=options.evt_max)
 
-        if options.verbose: 
+        if options.verbose:
             print('--|> Moving to file %s' % _url)
         # Loop over event in this file
         for event in inputfile_reader:
             n_evt += 1
-            if n_evt > max_evt: 
+            if n_evt > max_evt:
                 break
-            if (n_evt - n_batch * batch_num) % n_batch/100 == 0:
+            if (n_evt - n_batch * batch_num) % n_batch / 100 == 0:
                 print("Progress {:2.1%}".format(float(n_evt - batch_num * n_batch) / n_batch), end="\r")
             for telid in event.r1.tels_with_data:
                 if n_evt % n_batch == 0:

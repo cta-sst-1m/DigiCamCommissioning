@@ -3,7 +3,7 @@ import numpy as np
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 
 
-# noinspection PyUnusedLocal,PyUnusedLocal
+# noinspection PyUnusedLocal,PyUnusedLocal,PyTypeChecker,PyTypeChecker
 def p0_func(y, x, *args, **kwargs):
     """
     return the parameters for a pure gaussian distribution
@@ -13,7 +13,8 @@ def p0_func(y, x, *args, **kwargs):
     :param kwargs:
     :return: starting points for [norm,mean,std]
     """
-    if np.average(x, weights=y)==0 and np.average((x - np.average(x, weights=y)) ** 2, weights=y)==0: return [np.nan,np.nan,np.nan]
+    if np.average(x, weights=y) == 0 and np.average((x - np.average(x, weights=y)) ** 2, weights=y) == 0:
+        return [np.nan, np.nan, np.nan]
     return [np.sum(y), np.average(x, weights=y), np.average((x - np.average(x, weights=y)) ** 2, weights=y)]
 
 
