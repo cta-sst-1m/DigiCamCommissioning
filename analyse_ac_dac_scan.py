@@ -170,7 +170,11 @@ plt.ion()
 # Define Geometry
 geom= generate_geometry_0()
 
+display_var(mpes_full, geom, title='$\sigma_e$ [ADC]', index_var=1, limit_min=0., limit_max=1., bin_width=0.05)
+display_var(mpes_full, geom, title='$\sigma_i$ [ADC]', index_var=2, limit_min=0., limit_max=1., bin_width=0.05)
+display_var(mpes_full, geom, title='Gain [ADC/p.e.]' , index_var=3, limit_min=4., limit_max=6., bin_width=0.05)
 display([mpes_full], geom, fit_full_mpe.slice_func, norm='log', config=prev_fit_result)
+
 
 def show_level(level,hist):
     fig, ax = plt.subplots(1, 2, figsize=(30, 10))
