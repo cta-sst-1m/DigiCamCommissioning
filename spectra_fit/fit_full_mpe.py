@@ -56,9 +56,6 @@ def slice_func(y, x, *args,config=None, **kwargs):
     if np.where(y != 0)[0].shape[0] < 2:
         return [0, 1, 1]
     xmax_hist_for_fit = config[0,0] + 23 * config[1,0] * 1.1
-    print(x)
-    print(xmax_hist_for_fit)
-    print(np.where(x < xmax_hist_for_fit))
     return [np.where(y != 0)[0][1], np.where(x < xmax_hist_for_fit)[0][-1], 1]
 
 
