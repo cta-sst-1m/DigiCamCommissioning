@@ -57,11 +57,11 @@ adcs = histogram(bin_center_min=0., bin_center_max=4095., bin_width=1., data_sha
 if options.create_histo:
     # Fill the adcs hist from data
     adc_hist.run(adcs, options, 'ADC')
-else:
-    if options.verbose:
-        print('--|> Recover data from %s' % (options.output_directory + options.histo_filename))
-    file = np.load(options.output_directory + options.histo_filename)
-    adcs = histogram(data=np.copy(file['adcs']), bin_centers=np.copy(file['adcs_bin_centers']))
+
+if options.verbose:
+    print('--|> Recover data from %s' % (options.output_directory + options.histo_filename))
+file = np.load(options.output_directory + options.histo_filename)
+adcs = histogram(data=np.copy(file['adcs']), bin_centers=np.copy(file['adcs_bin_centers']))
 
 if options.perform_fit:
     print('--|> Compute baseline and sigma_e from ADC distributions with HV OFF')
@@ -71,12 +71,12 @@ if options.perform_fit:
         print('--|> Save the data in %s' % (options.output_directory + options.fit_filename))
     np.savez_compressed(options.output_directory + options.fit_filename,
                         adcs_fit_result=adcs.fit_result)
-else:
-    if options.verbose:
-        print('--|> Recover data from %s' % (options.output_directory + options.fit_filename))
-    file = np.load(options.output_directory + options.fit_filename)
-    adcs.fit_result = np.copy(file['adcs_fit_result'])
-    adcs.fit_function = fit_hv_off.fit_func
+
+if options.verbose:
+    print('--|> Recover data from %s' % (options.output_directory + options.fit_filename))
+file = np.load(options.output_directory + options.fit_filename)
+adcs.fit_result = np.copy(file['adcs_fit_result'])
+adcs.fit_function = fit_hv_off.fit_func
 
 # Leave the hand
 plt.ion()
