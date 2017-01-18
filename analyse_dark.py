@@ -56,11 +56,11 @@ adcs = histogram(bin_center_min=0., bin_center_max=4095., bin_width=1., data_sha
 if options.create_histo:
     # Fill the adcs hist from data
     adc_hist.run(adcs, options, 'ADC')
-else:
-    if options.verbose:
-        print('--|> Recover data from %s' % (options.output_directory + options.histo_filename))
-    file = np.load(options.output_directory + options.histo_filename)
-    adcs = histogram(data=np.copy(file['adcs']), bin_centers=np.copy(file['adcs_bin_centers']))
+
+if options.verbose:
+    print('--|> Recover data from %s' % (options.output_directory + options.histo_filename))
+file = np.load(options.output_directory + options.histo_filename)
+adcs = histogram(data=np.copy(file['adcs']), bin_centers=np.copy(file['adcs_bin_centers']))
 
 # Recover fit from the HV off
 '''
