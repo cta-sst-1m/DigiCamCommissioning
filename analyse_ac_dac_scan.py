@@ -11,7 +11,8 @@ import numpy as np
 from scipy.optimize import curve_fit
 from data_treatement import mpe_hist,synch_hist
 from utils.plots import pickable_visu
-from spectra_fit import fit_low_light
+from spectra_fit import fit_low_light,fit_full_mpe
+from utils.plots import display, display_var
 
 parser = OptionParser()
 
@@ -26,26 +27,28 @@ parser.add_option("-c", "--create_histo", dest="create_histo", action="store_tru
 parser.add_option("-t", "--create_time_histo", dest="create_time_histo", action="store_true",
                   help="load the mpe histo from file", default=False)
 
-parser.add_option("-g", "--perform_fit_gain", dest="perform_fit_gain", action="store_false",
-                  help="perform fit of all mpe to get gain, sigma_e, sigma1", default=True)
+parser.add_option("-g", "--perform_fit_gain", dest="perform_fit_gain", action="store_true",
+                  help="perform fit of all mpe to get gain, sigma_e, sigma1", default=False)
 
-parser.add_option("-p", "--perform_fit_mu", dest="perform_fit_mu", action="store_false",
-                  help="perform fit of mpe", default=True)
+parser.add_option("-p", "--perform_fit_mu", dest="perform_fit_mu", action="store_true",
+                  help="perform fit of mpe", default=False)
 
 parser.add_option("-f", "--file_list", dest="file_list",
                   help="input filenames separated by ','", default=
-                  '''124,125,126,127,128,129,130,131,132,133,134,135,136,
-                  137,138,139,140,141,142,143,144,145,146,147,148,149''')
+                  '124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149')
 
 parser.add_option("-l", "--scan_level", dest="scan_level",
                   help="list of scans DC level, separated by ',', if only three argument, min,max,step",
-                  default='''0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60,
-                  65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125,
-                  130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180,
-                  185, 190, 195, 200, 210, 220, 230, 240, 250, 260, 270,
-                  280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380,
-                  390, 400, 410, 420, 430, 440, 450, 460, 470, 480, 490,
-                  500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600''')
+                  default=
+                  '''
+0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60,
+65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120,
+130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180,
+185, 190, 195, 200, 210, 220, 230, 240, 250, 260, 270,
+280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380,
+390, 400, 410, 420, 430, 440, 450,460, 470, 480, 490,
+500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600
+''')
 
 parser.add_option("-e", "--events_per_level", dest="events_per_level",
                   help="number of events per level", default=5000,type=int)
@@ -70,21 +73,17 @@ parser.add_option( "--peak_histo_filename", dest="peak_histo_filename",
                   help="name of peak histo file", default='peaks.npz')
 
 parser.add_option("--output_directory", dest="output_directory",
-                  help="directory of histo file", default='/data/datasets/CTA/LevelScan/20161214/')
+                  help="directory of histo file", default='/data/datasets/CTA/DarkRun/20161214/')
 
 parser.add_option("--fit_filename", dest="fit_filename",
                   help="name of fit file with MPE", default='mpe_scan_200_600_10_fit.npz')
-
-'''
-parser.add_option("--input_directory", dest="output_directory",
-                  help="directory of histo file", default='/data/datasets/CTA/DarkRun/20161214/')
 
 parser.add_option("--input_fit_hvoff_filename", dest="input_hvoff_filename",
                   help="Input fit file name", default="adc_hv_off_fit.npz")
 
 parser.add_option("--input_fit_dark_filename", dest="input_dark_filename",
                   help="Input fit file name", default="spe_hv_on_fit.npz")
-'''
+
 
 
 # Arange the options
@@ -124,22 +123,54 @@ if options.create_histo:
 
 if options.verbose: print('--|> Recover data from %s' % (options.output_directory+options.histo_filename))
 file = np.load(options.output_directory+options.histo_filename)
-mpes = histogram(data=file['mpes'],bin_centers=file['mpes_bin_centers'],xlabel = 'Peak ADC',
+mpes = histogram(data=np.copy(file['mpes']),bin_centers=np.copy(file['mpes_bin_centers']),xlabel = 'Peak ADC',
                  ylabel='$\mathrm{N_{trigger}}$',label='MPE from peak value')
+
 # Add an histogram corresponding to the sum of all other
 mpes_full = histogram(data=np.sum(mpes.data,axis=0),bin_centers=file['mpes_bin_centers'],xlabel = 'Peak ADC',
                  ylabel='$\mathrm{N_{trigger}}$',label='MPE from peak value')
+file.close()
+
+# recover previous fit
+if options.verbose: print(
+    '--|> Recover fit results from %s' % (options.output_directory + options.input_dark_filename))
+file = np.load(options.output_directory + options.input_dark_filename)
+spes_fit_result = np.copy(file['adcs_fit_result'])
+file.close()
+if options.verbose: print(
+    '--|> Recover fit results from %s' % (options.output_directory + options.input_hvoff_filename))
+file = np.load(options.output_directory + options.input_hvoff_filename)
+adcs_fit_result = np.copy(file['adcs_fit_result'])
+file.close()
+# Now build a fake fit result for stating point
+# get the baseline
+prev_fit_result = np.expand_dims(adcs_fit_result[:, 1] + spes_fit_result[:, 6], axis=1)
+prev_fit_result = np.append(prev_fit_result, np.expand_dims(spes_fit_result[:, 2], axis=1), axis=1)
+prev_fit_result = np.append(prev_fit_result, np.expand_dims(spes_fit_result[:, 0], axis=1), axis=1)
+prev_fit_result = np.append(prev_fit_result, np.expand_dims(spes_fit_result[:, 1], axis=1), axis=1)
+
 
 if options.perform_fit_gain :
     mpes_full.fit(fit_full_mpe.fit_func, fit_full_mpe.p0_func, fit_full_mpe.slice_func,
-                  fit_full_mpe.bounds_func, config=prev_fit_result)
+                  fit_full_mpe.bounds_func, config=prev_fit_result)#,limited_indices=(700,))
 
+    print('--|> Save the full mpe fit result to %s' % (options.output_directory + 'full_'+ options.fit_filename))
+    np.savez_compressed(options.output_directory + 'full_'+ options.fit_filename,
+                        full_mpe_fit_result=mpes_full.fit_result)
+
+if options.verbose:
+    print('--|> Recover data from %s' % (options.output_directory + 'full_'+ options.fit_filename))
+file = np.load(options.output_directory+ 'full_' + options.fit_filename)
+mpes_full.fit_result = np.copy(file['full_mpe_fit_result'])
+mpes_full.fit_function = fit_full_mpe.fit_func
 
 # Leave the hand
 plt.ion()
 
 # Define Geometry
 geom= generate_geometry_0()
+
+display([mpes_full], geom, fit_full_mpe.slice_func, norm='log', config=prev_fit_result)
 
 def show_level(level,hist):
     fig, ax = plt.subplots(1, 2, figsize=(30, 10))
@@ -164,7 +195,7 @@ def show_level(level,hist):
 
 
 
-show_level(0,mpes)
+#show_level(0,mpes)
 
 '''
 #display([peaks])

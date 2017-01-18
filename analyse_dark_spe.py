@@ -17,8 +17,8 @@ parser.add_option("-q", "--quiet",
 parser.add_option("-c", "--create_histo", dest="create_histo", action="store_true",
                   help="load the SPE from dark run histograms from file", default=False)
 
-parser.add_option("-p", "--perform_fit", dest="perform_fit", action="store_false",
-                  help="perform fit of SPE from dark run", default=True)
+parser.add_option("-p", "--perform_fit", dest="perform_fit", action="store_true",
+                  help="perform fit of SPE from dark run", default=False)
 
 parser.add_option("-f", "--file_list", dest="file_list",
                   help="input filenames separated by ','", default='117,118,119,120,121')
