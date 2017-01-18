@@ -24,6 +24,23 @@ def generalized_poisson(k, mu, mu_xt, amplitude=1):
 
         return amplitude * mu * (mu + k * mu_xt) ** (k - 1) * np.exp(-mu - k * mu_xt) / factorial(k)
 
+def gaussian_sum(param, x):
+
+    temp = np.zeros(x.shape)
+
+    baseline = param[0]
+    gain = param[1]
+    sigma_e = param[2]
+    sigma_1 = param[3]
+    amplitudes = param[4:len(param)+1]
+
+    n_peaks = len(amplitudes)
+
+    for i in range(n_peaks):
+        sigma = np.sqrt(sigma_e**2 + i*sigma_1**2)
+        temp += gaussian(x, sigma, baseline + i*gain, amplitude=amplitudes[i])
+
+    return temp
 
 def erlang_compound(x, mu, mu_xt):
     temp = 0

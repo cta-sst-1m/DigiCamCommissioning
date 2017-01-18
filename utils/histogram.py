@@ -193,6 +193,21 @@ class histogram :
                                                           config=config[indices]),
                                          bounds=bound_func(self.data[indices], self.bin_centers,
                                                            config=config[indices]))
+            # make sure sizes matches
+            if self.fit_result[indices].shape[-2]<fit_res.shape[-2]:
+                num_column_to_add = fit_res.shape[-2]-self.fit_result[indices].shape[-2]
+                additionnal_shape = list(self.fit_result.shape)
+                additionnal_shape[-2] = num_column_to_add
+                additionnal_columns = np.zeros(tuple(additionnal_shape),dtype = fit_res.dtype)
+                self.fit_result = np.append(self.fit_result,additionnal_columns,axis=-2)
+
+            if self.fit_result[indices].shape[-2]>fit_res.shape[-2]:
+                num_column_to_add = self.fit_result[indices].shape[-2]-fit_res.shape[-2]
+                additionnal_shape = list(fit_res.shape)
+                additionnal_shape[-2] = num_column_to_add
+                additionnal_columns = np.zeros(tuple(additionnal_shape),dtype = self.fit_result.dtype)
+                fit_res = np.append(fit_res,additionnal_columns,axis=-2)
+
             self.fit_result[indices]=fit_res
 
 
