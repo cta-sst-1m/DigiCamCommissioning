@@ -71,17 +71,38 @@ Run the fit only on saved histograms:
 Only display the results:
 `./analyse_hvoff.py /my/output/dir --histo_filename ouput_histo_file.npz --fit_filename ouput_fit_file.npz`
 
-### `analyse_hvon.py` script
+### `analyse_dark.py` script
 
 This script produces ADC distribution out of `zfits` files
- in `DIRECTORY+file_basename+FILE_LIST[:]` taken with HV on. ...fit?
-
+ in `DIRECTORY+file_basename+FILE_LIST[:]` taken with HV on but dark conditions.
  
 Histograms are saved in `output_directory+histo_filename`
 and fit results in `output_directory+fit_filename`
 
+WARNING: No fit is implemented for the moment. This is where we should develop the fit using convolution
+of pdfs for the sliding signal in 4ns.
 
-### `bla` script
+
+
+
+### `analyse_dark_spe.py` script
+
+This script produces ADC distribution out of `zfits` files
+ in `DIRECTORY+file_basename+FILE_LIST[:]` taken with HV on but dark conditions.
+ 
+Histograms are saved in `output_directory+histo_filename`
+and fit results in `output_directory+fit_filename`
+
+Fit takes as input the result of the `analyse_hvoff.py` script.
+
+
+
+
+### `analyse_ac_dac_scan.py` script
+
+
+
+
 
 ## Modules
 

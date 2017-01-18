@@ -90,6 +90,23 @@ def mpe_distribution_general_sh(p, x, config=None):
     return temp * amplitude
 
 
+def multi_gaussian_with0( p, x):
+    """
+    Multiple gaussian fit for the SPE
+    :param p:
+    :param x:
+    :return:
+    """
+    gaus0 = p[0] / (p[9]) / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x)-(p[7])) ** 2 / (2. * (p[9]**2)))
+    gaus1 = p[4] / (np.sqrt(p[1]**2+1*(p[2])**2)) / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x)-(p[3]+p[7]+p[8])) ** 2 / (2. * (p[1]**2+1*(p[2])**2)))
+    gaus2 = p[5] / (np.sqrt(p[1]**2+2*(p[2])**2)) / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x)-(p[3]*2+p[7]+p[8])) ** 2 / (2. * (p[1]**2+2*(p[2])**2)))
+    gaus3 = p[6] / (np.sqrt(p[1]**2+3*(p[2])**2)) / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x)-(p[3]*3+p[7]+[p[8]])) ** 2 / (2. * (p[1]**2+3*(p[2])**2)))
+    gaus4 = p[10] / (np.sqrt(p[1]**2+4*(p[2])**2)) / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x)-(p[3]*4+p[7]+[p[8]])) ** 2 / (2. * (p[1]**2+4*(p[2])**2)))
+    gaus5 = p[11] / (np.sqrt(p[1]**2+5*(p[2])**2)) / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x)-(p[3]*5+p[7]+[p[8]])) ** 2 / (2. * (p[1]**2+5*(p[2])**2)))
+
+    return gaus0+gaus1+gaus2+gaus3+gaus4+gaus5
+
+
 if __name__ == '__main__':
     x = np.arange(0, 200, 1)
     n_peak = 20
