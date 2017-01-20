@@ -133,6 +133,7 @@ class histogram :
                 except np.linalg.linalg.LinAlgError as inst:
                     if verbose: print(inst)
                     print('Could not compute errors')
+                    print(inst)
                     fit_result = np.append(val.reshape(val.shape + (1,)), np.ones((len(reduced_p0), 1)) * np.nan, axis=1)
 
             except Exception as inst:

@@ -27,6 +27,9 @@ parser.add_option("-c", "--create_histo", dest="create_histo", action="store_tru
 parser.add_option("-t", "--create_time_histo", dest="create_time_histo", action="store_true",
                   help="load the mpe histo from file", default=False)
 
+parser.add_option("-k", "--create_full_histo", dest="create_full_histo", action="store_true",
+                  help="load the mpe full histo from file", default=False)
+
 parser.add_option("-g", "--perform_fit_gain", dest="perform_fit_gain", action="store_true",
                   help="perform fit of all mpe to get gain, sigma_e, sigma1", default=False)
 
@@ -67,7 +70,7 @@ parser.add_option("-d", "--directory", dest="directory",
                   help="input directory", default="/data/datasets/CTA/DATA/20161214/")
 
 parser.add_option("--histo_filename", dest="histo_filename",
-                  help="Histogram SPE file name", default="mpe_scan_0_195_5_200_600_10.npz")
+                  help="Histogram SPE file name", default="mpe_scan_0_195_5_200_600_10_max.npz")
 
 parser.add_option( "--peak_histo_filename", dest="peak_histo_filename",
                   help="name of peak histo file", default='peaks.npz')
@@ -76,7 +79,7 @@ parser.add_option("--output_directory", dest="output_directory",
                   help="directory of histo file", default='/data/datasets/CTA/DarkRun/20161214/')
 
 parser.add_option("--fit_filename", dest="fit_filename",
-                  help="name of fit file with MPE", default='mpe_scan_200_600_10_fit.npz')
+                  help="name of fit file with MPE", default='mpe_scan_200_600_10_fit_max.npz')
 
 parser.add_option("--input_fit_hvoff_filename", dest="input_hvoff_filename",
                   help="Input fit file name", default="adc_hv_off_fit.npz")
@@ -119,17 +122,8 @@ peaks = histogram(data=file['peaks'],bin_centers=file['peaks_bin_centers'],xlabe
 
 if options.create_histo:
     # Loop over the files
-    mpe_hist.run([mpes], options, peak_positions = peaks.data)
+    mpe_hist.run([mpes], options, peak_positions = None )#peaks.data)
 
-if options.verbose: print('--|> Recover data from %s' % (options.output_directory+options.histo_filename))
-file = np.load(options.output_directory+options.histo_filename)
-mpes = histogram(data=np.copy(file['mpes']),bin_centers=np.copy(file['mpes_bin_centers']),xlabel = 'Peak ADC',
-                 ylabel='$\mathrm{N_{trigger}}$',label='MPE from peak value')
-
-# Add an histogram corresponding to the sum of all other
-mpes_full = histogram(data=np.sum(mpes.data,axis=0),bin_centers=file['mpes_bin_centers'],xlabel = 'Peak ADC',
-                 ylabel='$\mathrm{N_{trigger}}$',label='MPE from peak value')
-file.close()
 
 # recover previous fit
 if options.verbose: print(
@@ -149,11 +143,68 @@ prev_fit_result = np.append(prev_fit_result, np.expand_dims(spes_fit_result[:, 2
 prev_fit_result = np.append(prev_fit_result, np.expand_dims(spes_fit_result[:, 0], axis=1), axis=1)
 prev_fit_result = np.append(prev_fit_result, np.expand_dims(spes_fit_result[:, 1], axis=1), axis=1)
 
+if options.verbose: print('--|> Recover data from %s' % (options.output_directory+options.histo_filename))
+file = np.load(options.output_directory+options.histo_filename)
+mpes = histogram(data=np.copy(file['mpes']),bin_centers=np.copy(file['mpes_bin_centers']),xlabel = 'Peak ADC',
+                 ylabel='$\mathrm{N_{trigger}}$',label='MPE from peak value')
+file.close()
+
+
+if options.create_full_histo:
+    # Add an histogram corresponding to the sum of all other only if the mu is above a certain threshold
+    print('--|> Create summed MPE')
+    mpe_tmp = np.copy(mpes.data)
+    mpe_tmp[mpe_tmp == 0] = 1e-6
+    mpe_mean = np.average(np.repeat(
+        np.repeat(
+            mpes.bin_centers[1:-1:1].reshape(1, 1, -1), mpe_tmp.shape[0], axis=0), mpe_tmp.shape[1], axis=1),
+        weights=mpe_tmp[..., 1:-1:1], axis=2)
+    del (mpe_tmp)
+    # subtract the baseline
+    mpe_mean = np.subtract(mpe_mean, np.repeat(prev_fit_result[:, 0, 0].reshape((1,) + prev_fit_result[:, 0, 0].shape),
+                                               mpe_mean.shape[0], axis=0))
+
+    mpe_tmp = np.copy(mpes.data)
+    for i in range(mpe_tmp.shape[0]):
+        for j in range(mpe_tmp.shape[1]):
+            if mpe_mean[i, j] < 5 or np.where(mpe_tmp[i, j] != 0)[0].shape[0] < 2: mpe_tmp[i, j, :] = 0
+
+    mpe_tmp = np.sum(mpe_tmp, axis=0)
+    mpes_full = histogram(data=np.copy(mpe_tmp), bin_centers=mpes.bin_centers, xlabel='ADC',
+                          ylabel='$\mathrm{N_{trigger}}$', label='Summed MPE')
+    np.savez_compressed(options.output_directory + 'full_' + options.histo_filename,
+                        full_mpe=mpes_full.data, full_mpe_bin_centers=mpes_full.bin_centers)
+    del (mpe_tmp)
+    # for i in range(1296):
+    #    print(np.mean(mpes_full.data[i]))
+
+if options.verbose: print('--|> Recover data from %s' % (options.output_directory+'full_' +options.histo_filename))
+file = np.load(options.output_directory+'full_' +options.histo_filename)
+mpes_full = histogram(data=np.copy(file['full_mpe']),bin_centers=np.copy(file['full_mpe_bin_centers']),xlabel = 'ADC',
+                 ylabel='$\mathrm{N_{trigger}}$',label='Summed MPE')
+file.close()
 
 if options.perform_fit_gain :
-    mpes_full.fit(fit_full_mpe.fit_func, fit_full_mpe.p0_func, fit_full_mpe.slice_func,
-                  fit_full_mpe.bounds_func, config=prev_fit_result)#,limited_indices=(700,))
+    reduced_bounds = lambda *args,config=None, **kwargs: fit_full_mpe.bounds_func(*args,n_peaks = 22, config=config, **kwargs)
+    reduced_p0 = lambda *args,config=None, **kwargs: fit_full_mpe.p0_func(*args,n_peaks = 22, config=config, **kwargs)
+    mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, fit_full_mpe.slice_func,
+                  reduced_bounds, config=prev_fit_result)
+    # get the bad fits
+    for pix,pix_fit_result in enumerate(mpes_full.fit_result):
+        if np.isnan(pix_fit_result[0,1]):
+            i = 25
+            while np.isnan(pix_fit_result[0,1]) or i == 15:
+                reduced_bounds = lambda *args, config=None, **kwargs: fit_full_mpe.bounds_func(*args, n_peaks = i ,
+                                                                                             config=config, **kwargs)
+                reduced_p0 = lambda *args, config=None, **kwargs: fit_full_mpe.p0_func(*args, n_peaks = i , config=config,
+                                                                                       **kwargs)
+                mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, fit_full_mpe.slice_func,
+                              reduced_bounds, config=prev_fit_result ,limited_indices=(pix,))
 
+                i-=1
+
+    for pix,pix_fit_result in enumerate(mpes_full.fit_result):
+        if np.isnan(pix_fit_result[0,1]): print('-----|> Pixel %d is still badly fitted'%pix)
     print('--|> Save the full mpe fit result to %s' % (options.output_directory + 'full_'+ options.fit_filename))
     np.savez_compressed(options.output_directory + 'full_'+ options.fit_filename,
                         full_mpe_fit_result=mpes_full.fit_result)
@@ -170,10 +221,11 @@ plt.ion()
 # Define Geometry
 geom= generate_geometry_0()
 
-display_var(mpes_full, geom, title='$\sigma_e$ [ADC]', index_var=1, limit_min=0., limit_max=1., bin_width=0.05)
-display_var(mpes_full, geom, title='$\sigma_i$ [ADC]', index_var=2, limit_min=0., limit_max=1., bin_width=0.05)
-display_var(mpes_full, geom, title='Gain [ADC/p.e.]' , index_var=3, limit_min=4., limit_max=6., bin_width=0.05)
-display([mpes_full], geom, fit_full_mpe.slice_func, norm='log', config=prev_fit_result)
+display_var(mpes_full, geom, title='$\sigma_e$ [ADC]', index_var=2, limit_min=0.8, limit_max=1.2, bin_width=0.05)
+display_var(mpes_full, geom, title='$\sigma_i$ [ADC]', index_var=3, limit_min=0.4, limit_max=0.5, bin_width=0.002)
+display_var(mpes_full, geom, title='Gain [ADC/p.e.]' , index_var=1, limit_min=5.1, limit_max=6., bin_width=0.04)
+
+display([mpes_full], geom, fit_full_mpe.slice_func, norm='log',pix_init=485, config=prev_fit_result)
 
 
 def show_level(level,hist):
@@ -194,12 +246,35 @@ def show_level(level,hist):
     vis_baseline.axes.yaxis.get_label().set_position((0, 1))
     vis_baseline.image = val
     fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
-    vis_baseline.on_pixel_clicked(700)
+    vis_baseline.on_pixel_clicked(486)
     plt.show()
 
 
 
-#show_level(0,mpes)
+#show_level(10,mpes)
+plt.figure()
+plt.errorbar(peaks.bin_centers,peaks.data[485],yerr=peaks.errors[485],label='485_%d')
+plt.errorbar(peaks.bin_centers,peaks.data[486],yerr=peaks.errors[486],label='486_%d')
+plt.errorbar(peaks.bin_centers,peaks.data[700],yerr=peaks.errors[700],label='700_%d')
+plt.legend()
+plt.figure()
+for v in [55,56,57,58,59,60]:
+    plt.errorbar(mpes.bin_centers,mpes.data[v,485],yerr=mpes.errors[v,485],label='485_%d'%v)
+
+plt.legend()
+
+plt.figure()
+for v in [25,26,27,28,29,30,31,32,33]:
+    plt.errorbar(mpes.bin_centers,mpes.data[v,486],yerr=mpes.errors[v,486],label='486_%d'%v)
+
+plt.legend()
+plt.figure()
+
+for v in [35,36,37,38,39,40]:
+    plt.errorbar(mpes.bin_centers,mpes.data[v,700],yerr=mpes.errors[v,700],label='700_%d'%v)
+
+plt.legend()
+plt.show()
 
 '''
 #display([peaks])
