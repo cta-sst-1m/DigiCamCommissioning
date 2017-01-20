@@ -149,10 +149,10 @@ def display(hists, geom,slice_func,pix_init=700,norm='lin',config=None):
     vis_baseline.add_colorbar()
     vis_baseline.colorbar.set_label('Peak position [4ns]')
     plt.subplot(1, 2, 1)
-    peak = hists[0].fit_result[:, 2, 0]
-    peak[np.isnan(peak)] = 2.
-    peak[peak < 0.] = 2.
-    peak[peak > 10.] = 8.
+    peak = hists[0].fit_result[:, 1, 0]
+    peak[np.isnan(peak)] = 3.5
+    peak[peak < 0.] = 3.5
+    peak[peak > 10.] = 6.
 
     vis_baseline.axes.xaxis.get_label().set_ha('right')
     vis_baseline.axes.xaxis.get_label().set_position((1, 0))
