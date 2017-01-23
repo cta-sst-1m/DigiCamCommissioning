@@ -121,11 +121,12 @@ and fit results in `output_directory+fit_filename`
 Fit takes as input the result of the `analyse_hvoff.py` script.
 
 
+### `analyse_gain_sigmas.py` script
 
 
-### `analyse_ac_dac_scan.py` script
-```
-Usage: analyse_ac_dac_scan.py [options]
+```buildoutcfg
+
+Usage: analyse_gain_sigmas.py [options]
 
 Options:
   -h, --help            show this help message and exit
@@ -135,9 +136,8 @@ Options:
                         load the mpe histo from file
   -k, --create_full_histo
                         load the mpe full histo from file
-  -g, --perform_fit_gain
+  -p, --perform_fit_gain
                         perform fit of all mpe to get gain, sigma_e, sigma1
-  -p, --perform_fit_mu  perform fit of mpe
   -f FILE_LIST, --file_list=FILE_LIST
                         input filenames separated by ','
   -l SCAN_LEVEL, --scan_level=SCAN_LEVEL
@@ -164,9 +164,36 @@ Options:
                         Input fit file name
   --input_fit_dark_filename=INPUT_DARK_FILENAME
                         Input fit file name
+
 ```
 
+### `analyse_ac_dac_scan.py` script
 
+```buildoutcfg
+
+Usage: analyse_ac_dac_scan.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -q, --quiet           don't print status messages to stdout
+  -p, --perform_fit_mu  perform fit of mpe
+  -l SCAN_LEVEL, --scan_level=SCAN_LEVEL
+                        list of scans DC level, separated by ',', if only
+                        three argument, min,max,step
+  -n N_EVT_PER_BATCH, --n_evt_per_batch=N_EVT_PER_BATCH
+                        number of events per batch
+  --file_basename=FILE_BASENAME
+                        file base name
+  -d DIRECTORY, --directory=DIRECTORY
+                        input directory
+  --histo_filename=HISTO_FILENAME
+                        Histogram SPE file name
+  --output_directory=OUTPUT_DIRECTORY
+                        directory of histo file
+  --fit_filename=FIT_FILENAME
+                        name of fit file with MPE
+
+```
 
 ## Modules
 
