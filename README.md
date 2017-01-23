@@ -73,6 +73,31 @@ Only display the results:
 
 ### `analyse_dark.py` script
 
+```
+Usage: analyse_dark.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -q, --quiet           don't print status messages to stdout
+  -c, --create_histo    load the ADC with HV ON histograms from file
+  -p, --perform_fit     perform fit of ADC from dark run
+  -f FILE_LIST, --file_list=FILE_LIST
+                        input filenames separated by ','
+  --evt_max=EVT_MAX     maximal number of events
+  -n N_EVT_PER_BATCH, --n_evt_per_batch=N_EVT_PER_BATCH
+                        number of events per batch
+  --file_basename=FILE_BASENAME
+                        file base name
+  -d DIRECTORY, --directory=DIRECTORY
+                        input directory
+  --histo_filename=HISTO_FILENAME
+                        Histogram SPE file name
+  --output_directory=OUTPUT_DIRECTORY
+                        directory of histo file
+  --fit_filename=FIT_FILENAME (NOT IMPLEMENTED)
+                        name of fit file with dark
+```
+
 This script produces ADC distribution out of `zfits` files
  in `DIRECTORY+file_basename+FILE_LIST[:]` taken with HV on but dark conditions.
  
@@ -99,8 +124,47 @@ Fit takes as input the result of the `analyse_hvoff.py` script.
 
 
 ### `analyse_ac_dac_scan.py` script
+```
+Usage: analyse_ac_dac_scan.py [options]
 
-
+Options:
+  -h, --help            show this help message and exit
+  -q, --quiet           don't print status messages to stdout
+  -c, --create_histo    load the mpe histo from file
+  -t, --create_time_histo
+                        load the mpe histo from file
+  -k, --create_full_histo
+                        load the mpe full histo from file
+  -g, --perform_fit_gain
+                        perform fit of all mpe to get gain, sigma_e, sigma1
+  -p, --perform_fit_mu  perform fit of mpe
+  -f FILE_LIST, --file_list=FILE_LIST
+                        input filenames separated by ','
+  -l SCAN_LEVEL, --scan_level=SCAN_LEVEL
+                        list of scans DC level, separated by ',', if only
+                        three argument, min,max,step
+  -e EVENTS_PER_LEVEL, --events_per_level=EVENTS_PER_LEVEL
+                        number of events per level
+  --evt_max=EVT_MAX     maximal number of events
+  -n N_EVT_PER_BATCH, --n_evt_per_batch=N_EVT_PER_BATCH
+                        number of events per batch
+  --file_basename=FILE_BASENAME
+                        file base name
+  -d DIRECTORY, --directory=DIRECTORY
+                        input directory
+  --histo_filename=HISTO_FILENAME
+                        Histogram SPE file name
+  --peak_histo_filename=PEAK_HISTO_FILENAME
+                        name of peak histo file
+  --output_directory=OUTPUT_DIRECTORY
+                        directory of histo file
+  --fit_filename=FIT_FILENAME
+                        name of fit file with MPE
+  --input_fit_hvoff_filename=INPUT_HVOFF_FILENAME
+                        Input fit file name
+  --input_fit_dark_filename=INPUT_DARK_FILENAME
+                        Input fit file name
+```
 
 
 

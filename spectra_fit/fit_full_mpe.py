@@ -42,7 +42,6 @@ def p0_func(y, x, *args,n_peaks = 22,config=None, **kwargs):
         # Fit only the first 15 peaks, give 17 gaussian
         amplitudes = [100.] * n_peaks
         param += amplitudes
-        print(param)
     return param
 
 
@@ -87,8 +86,8 @@ def bounds_func(*args,n_peaks = 22, config=None, **kwargs):
     bound_min += [0.4]  # 0.2*sigma_1
     bound_max += [1.3]  # 5.*sigma_1
     '''
-    bound_min += [0.7*config[1, 0]]  # 0.8*gain
-    bound_max += [2.*config[1, 0]]  # 1.2*gain
+    bound_min += [0.7*5.6]  # 0.8*gain
+    bound_max += [2.*5.6]  # 1.2*gain
 
     bound_min += [0.2*config[2, 0]]  # 0.2*sigma_e
     bound_max += [3.333*config[2, 0]]  # 5.*sigma_e
@@ -98,7 +97,6 @@ def bounds_func(*args,n_peaks = 22, config=None, **kwargs):
 
     bound_min += [0.] * n_peaks
     bound_max += [np.inf] * n_peaks
-    print(bound_min),print(bound_max)
     return bound_min,bound_max
 
 
