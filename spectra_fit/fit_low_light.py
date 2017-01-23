@@ -17,25 +17,25 @@ def p0_func(y, x, *args, config=None, **kwargs):
     :param kwargs: potential unused keyword arguments
     :return: starting points for []
     """
-
-    if config==None:
-
+    if type(config).__name__=='NoneType':
         mu = mu_xt = gain = baseline = sigma_e = sigma_1 = amplitude = offset = np.nan
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
-
     else:
-
-        mu = np.nan
-        mu_xt = config[1, 0]
-        gain = config[2, 0]
-        baseline = config[3, 0]
-        sigma_e = config[4, 0]
-        sigma_1 = np.nan
+        mu = 0.001
+        mu_xt = 0.08 #config[1, 0]
+        gain = config[1, 0]
+        baseline = config[0, 0]
+        sigma_e = config[2, 0]
+        sigma_1 = config[3,0]
         amplitude = np.nan
-        offset = config[7, 0]
+        offset = 0.
         #variance = config[8, 0]
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
 
+
+    if np.isnan(config[1, 0]):
+        #print('mu is nan')
+        return param
     # Get a primary amplitude to consider
     param[6] = np.sum(y)
 
@@ -77,7 +77,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
         sigma_n = lambda sigma_1, n: np.sqrt(param[4] ** 2 + n * sigma_1 ** 2)
         sigma, sigma_error = curve_fit(sigma_n, photo_peak, sigma, bounds=[0., np.inf])
         param[5] = sigma / param[2]
-
+        if not( param[0]<np.inf): param[0]=100.
         return param
 
 
@@ -110,7 +110,7 @@ def bounds_func(*args, config=None, **kwargs):
 
     if True:
 
-        param_min = [0., 0., 0., -np.inf, 0., 0., 0.,-np.inf]
+        param_min = [1.e-3, 1.e-2, 0., -np.inf, 0., 0., 0.,-np.inf]
         param_max = [np.inf, 1, np.inf, np.inf, np.inf, np.inf, np.inf,np.inf]
 
 
@@ -131,7 +131,7 @@ def bounds_func(*args, config=None, **kwargs):
     return param_min, param_max
 
 
-def fit_func(p, x):
+def fit_func(p, x ,*args, **kwargs):
     """
     Simple gaussian pdf
     :param p: [norm,mean,sigma]

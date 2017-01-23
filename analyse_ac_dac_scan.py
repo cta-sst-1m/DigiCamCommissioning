@@ -112,6 +112,7 @@ peaks = histogram(bin_center_min=0., bin_center_max=50., bin_width=1.,
 if options.create_time_histo:
     # Loop over the files
     synch_hist.run(peaks, options)
+    del(peaks)
 
 if options.verbose:
     print('--|> Recover data from %s' % (options.output_directory+options.peak_histo_filename))
@@ -123,7 +124,7 @@ peaks = histogram(data=file['peaks'],bin_centers=file['peaks_bin_centers'],xlabe
 if options.create_histo:
     # Loop over the files
     mpe_hist.run([mpes], options, peak_positions = None )#peaks.data)
-
+    del(mpes)
 
 # recover previous fit
 if options.verbose: print(
@@ -190,31 +191,62 @@ if options.perform_fit_gain :
     mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, fit_full_mpe.slice_func,
                   reduced_bounds, config=prev_fit_result)
     # get the bad fits
+    print('Try to correct the pixels with wrong fit results')
     for pix,pix_fit_result in enumerate(mpes_full.fit_result):
-        if np.isnan(pix_fit_result[0,1]):
+        if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]):
+            print('Pixel %d refit',pix)
             i = 25
-            while np.isnan(pix_fit_result[0,1]) or i == 15:
+            while  np.isnan(mpes_full.fit_result[pix,0,1]) and i > 15:
                 reduced_bounds = lambda *args, config=None, **kwargs: fit_full_mpe.bounds_func(*args, n_peaks = i ,
                                                                                              config=config, **kwargs)
                 reduced_p0 = lambda *args, config=None, **kwargs: fit_full_mpe.p0_func(*args, n_peaks = i , config=config,
                                                                                        **kwargs)
                 mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, fit_full_mpe.slice_func,
-                              reduced_bounds, config=prev_fit_result ,limited_indices=(pix,))
-
+                              reduced_bounds, config=prev_fit_result ,limited_indices=(pix,),force_quiet=True)
                 i-=1
 
     for pix,pix_fit_result in enumerate(mpes_full.fit_result):
-        if np.isnan(pix_fit_result[0,1]): print('-----|> Pixel %d is still badly fitted'%pix)
+        if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]): print('-----|> Pixel %d is still badly fitted'%pix)
     print('--|> Save the full mpe fit result to %s' % (options.output_directory + 'full_'+ options.fit_filename))
     np.savez_compressed(options.output_directory + 'full_'+ options.fit_filename,
                         full_mpe_fit_result=mpes_full.fit_result)
 
 if options.verbose:
-    print('--|> Recover data from %s' % (options.output_directory + 'full_'+ options.fit_filename))
+    print('--|> Recover fit results for G and sigmas from %s' % (options.output_directory + 'full_'+ options.fit_filename))
 file = np.load(options.output_directory+ 'full_' + options.fit_filename)
-mpes_full.fit_result = np.copy(file['full_mpe_fit_result'])
-mpes_full.fit_function = fit_full_mpe.fit_func
 
+mpes_full_fit_result = np.copy(file['full_mpe_fit_result'])
+
+mpes_full_fit_result=mpes_full_fit_result.reshape((1,)+mpes_full_fit_result.shape)
+mpes_full_fit_result = np.repeat(mpes_full_fit_result,mpes.data.shape[0],axis=0)
+
+#del(mpes_full)
+#mpes_full.fit_function = fit_full_mpe.fit_func
+file.close()
+
+
+## Now perform the mu and mu_XT fits
+if options.perform_fit_mu:
+    fixed_param = [
+        [2,(1,0)], # gain
+        [3,(0,0)], # baseline
+        [4,(2,0)], # sigma_e
+        [5,(3,0)], # sigma_1
+        [7, 0.]  # offset
+    ]
+    mpes.fit(fit_low_light.fit_func, fit_low_light.p0_func, fit_low_light.slice_func,
+             fit_low_light.bounds_func, config=mpes_full_fit_result,fixed_param=fixed_param)#,limited_indices=[(30, 387)])#(i,4,) for i in range(20)])
+    np.savez_compressed(options.output_directory + options.fit_filename,mpes_fit_result=mpes.fit_result)
+
+if options.verbose:
+    print('--|> Recover fit results for mu and mu_XT from %s' % (options.output_directory + options.fit_filename))
+file = np.load(options.output_directory + options.fit_filename)
+mpes.fit_result = np.copy(file['mpes_fit_result'])
+mpes.fit_function = fit_low_light.fit_func
+file.close()
+
+
+5./0
 # Leave the hand
 plt.ion()
 

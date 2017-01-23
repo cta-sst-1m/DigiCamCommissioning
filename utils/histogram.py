@@ -87,7 +87,7 @@ class histogram :
         reduced_bounds = bounds
         reduced_func = func
         #TODO optimize this part
-        if type(fixed_param).__name__ == 'ndarray':
+        if type(fixed_param).__name__ != 'None':
             def reduced_func(p,x):
                 p_new,j=[],0
                 for i,param in enumerate(p0):
@@ -97,12 +97,15 @@ class histogram :
                     else:
                         for k,val in enumerate(fixed_param[0]):
                             if val==i: p_new+=[fixed_param[1][k]]
+                #print('red_func',p_new)
                 return func(p_new,x)
 
             reduced_p0 = []
             for i, param in enumerate(p0):
                 if not (i in fixed_param[0]):
                     reduced_p0 += [param]
+            #print('red_p0',reduced_p0)
+
             reduced_bounds = [[],[]]
             for i, param in enumerate(p0):
                 if not (i in fixed_param[0]):
@@ -111,7 +114,7 @@ class histogram :
                     reduced_bounds[1]+=[bounds[1][i]]
 
             reduced_bounds=tuple(reduced_bounds )
-
+            #print('red_bound',reduced_bounds)
         fit_result = None
         if slice == [0,0,1] or self.data[idx][slice[0]:slice[1]:slice[2]].shape == 0 or np.any(np.isnan(reduced_p0))\
                 or np.any(np.isnan(reduced_bounds[0])) or np.any(np.isnan(reduced_bounds[1])) \
@@ -138,7 +141,9 @@ class histogram :
 
             except Exception as inst:
                 print('failed fit',inst,'index',idx)
-
+                print(reduced_p0)
+                print(reduced_bounds[0])
+                print(reduced_bounds[1])
                 5./0.
                 fit_result = (np.ones((len(reduced_p0), 2)) * np.nan)
 
@@ -148,7 +153,8 @@ class histogram :
                 fit_result=np.insert(fit_result,int(i),[fixed_param[1][k], 0.], axis=0)
         return fit_result
 
-    def fit(self,func, p0_func, slice_func, bound_func, config = None , limited_indices = None):
+    def fit(self,func, p0_func, slice_func, bound_func, config = None , limited_indices = None, fixed_param = [],
+            force_quiet = False):
         """
         An helper to fit histogram
         :param func:
@@ -158,42 +164,52 @@ class histogram :
         data_shape.pop()
         data_shape = tuple(data_shape)
         self.fit_function = func
-        self.fit_result = None
+        #self.fit_result = None
         # perform the fit of the 1D array in the last dimension
         count = 0
         indices_list = np.ndindex(data_shape)
         if limited_indices:
             indices_list = limited_indices
         for indices in indices_list:
+            #print(indices)
             if type(self.fit_result).__name__ != 'ndarray':
                 if type(config).__name__!='ndarray':
-                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=None)),2))*np.nan
+                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=None))-len(fixed_param),2))*np.nan
                 else:
-                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=config[indices])),2))*np.nan
-            print("Fit Progress {:2.1%}".format(count/np.prod(data_shape)), end="\r")
+                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=config[indices]))-len(fixed_param),2))*np.nan
+            if not force_quiet : print("Fit Progress {:2.1%}".format(count/np.prod(data_shape)), end="\r")
             count+=1
             fit_res = None
+            # treat the fixed parameters
+            list_fixed_param = None
+            if len(fixed_param)>0:
+                list_fixed_param = [[],[]]
+                for p in fixed_param:
+                    list_fixed_param[0].append(p[0])
+                    if isinstance(p[1],tuple):
+                        list_fixed_param[1].append(config[indices][p[1]])
+                    else:
+                        list_fixed_param[1].append(p[1])
+
             if type(config).__name__!='ndarray':
                 fit_res = self._axis_fit( indices , func , p0_func(self.data[indices],self.bin_centers,config=None),
-                                      slice=slice_func(self.data[indices],self.bin_centers,config=None),
-                                      bounds = bound_func(self.data[indices],self.bin_centers,config=None))
+                                          slice=slice_func(self.data[indices],self.bin_centers,config=None),
+                                          bounds = bound_func(self.data[indices],self.bin_centers,config=None),
+                                          fixed_param=list_fixed_param)
 
             else:
                 func_reduced = lambda p,x : func(p,x,config=config[indices])
-                '''
-                fit_res = self._axis_fit(indices, func_reduced,
-                                         p0_func(self.data[indices], self.bin_centers, config=config[indices[0]]),
-                                         slice=slice_func(self.data[indices[0]], self.bin_centers,
-                                                          config=config[indices[0]]),
-                                         bounds=bound_func(self.data[indices[0]], self.bin_centers,
-                                                           config=config[indices[0]]))
-                '''
+                #print('slice',slice_func(self.data[indices], self.bin_centers, config=config[indices]))
+                #print('bounds',bound_func(self.data[indices], self.bin_centers,config=config[indices]))
+                #print('fixed_param',list_fixed_param)
+
                 fit_res = self._axis_fit(indices, func_reduced,
                                          p0_func(self.data[indices], self.bin_centers, config=config[indices]),
                                          slice=slice_func(self.data[indices], self.bin_centers,
                                                           config=config[indices]),
                                          bounds=bound_func(self.data[indices], self.bin_centers,
-                                                           config=config[indices]))
+                                                           config=config[indices]),
+                                         fixed_param=list_fixed_param)
             # make sure sizes matches
             if self.fit_result[indices].shape[-2]<fit_res.shape[-2]:
                 num_column_to_add = fit_res.shape[-2]-self.fit_result[indices].shape[-2]
