@@ -6,7 +6,7 @@ from utils.geometry import generate_geometry,generate_geometry_0
 from utils.plots import pickable_visu_mpe,pickable_visu_led_mu
 from utils.pdf import mpe_distribution_general,mpe_distribution_general_sh
 from optparse import OptionParser
-from utils.histogram import histogram
+from utils.histogram import Histogram
 import peakutils
 from matplotlib import pyplot as plt
 import numpy as np
@@ -74,15 +74,15 @@ else:
     options.scan_level = np.array(options.scan_level)
 
 # Prepare the mpe histograms
-mpes = histogram(bin_center_min=1950., bin_center_max=4095., bin_width=1.,
-                       data_shape=(options.scan_level.shape+(1296,)),
-                 xlabel='Peak ADC',ylabel='$\mathrm{N_{entries}}$',label='MPE')
+mpes = Histogram(bin_center_min=1950., bin_center_max=4095., bin_width=1.,
+                 data_shape=(options.scan_level.shape+(1296,)),
+                 xlabel='Peak ADC', ylabel='$\mathrm{N_{entries}}$', label='MPE')
 
 
 if options.verbose: print('--|> Recover data from %s' % (options.output_directory+options.histo_filename))
 file = np.load(options.output_directory+options.histo_filename)
-mpes = histogram(data=np.copy(file['mpes']),bin_centers=np.copy(file['mpes_bin_centers']),xlabel = 'Peak ADC',
-                 ylabel='$\mathrm{N_{trigger}}$',label='MPE from peak value')
+mpes = Histogram(data=np.copy(file['mpes']), bin_centers=np.copy(file['mpes_bin_centers']), xlabel ='Peak ADC',
+                 ylabel='$\mathrm{N_{trigger}}$', label='MPE from peak value')
 file.close()
 
 

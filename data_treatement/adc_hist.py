@@ -5,9 +5,9 @@ from utils.peakdetect import spe_peaks_in_event_list
 
 def run(hist, options, h_type='ADC', prev_fit_result=None):
     """
-    Fill the adcs histogram out of darkrun/baseline runs
-    :param h_type: type of histogram to produce: ADC for all samples adcs or SPE for only peaks
-    :param hist: the histogram to fill
+    Fill the adcs Histogram out of darkrun/baseline runs
+    :param h_type: type of Histogram to produce: ADC for all samples adcs or SPE for only peaks
+    :param hist: the Histogram to fill
     :param options: see analyse_spe.py
     :param prev_fit_result: fit result of a previous step needed for the calculations
     :return:

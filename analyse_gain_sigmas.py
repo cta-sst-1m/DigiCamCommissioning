@@ -4,7 +4,7 @@ from utils.geometry import generate_geometry,generate_geometry_0
 from utils.plots import pickable_visu_mpe,pickable_visu_led_mu
 from utils.pdf import mpe_distribution_general,mpe_distribution_general_sh
 from optparse import OptionParser
-from utils.histogram import histogram
+from utils.histogram import Histogram
 import peakutils
 from matplotlib import pyplot as plt
 import numpy as np
@@ -97,11 +97,11 @@ else:
     options.scan_level = np.array(options.scan_level)
 
 # Prepare the mpe histograms
-mpes = histogram(bin_center_min=1950., bin_center_max=4095., bin_width=1.,
-                       data_shape=(options.scan_level.shape+(1296,)),
-                 xlabel='Peak ADC',ylabel='$\mathrm{N_{entries}}$',label='MPE')
+mpes = Histogram(bin_center_min=1950., bin_center_max=4095., bin_width=1.,
+                 data_shape=(options.scan_level.shape+(1296,)),
+                 xlabel='Peak ADC', ylabel='$\mathrm{N_{entries}}$', label='MPE')
 
-peaks = histogram(bin_center_min=0., bin_center_max=50., bin_width=1.,
+peaks = Histogram(bin_center_min=0., bin_center_max=50., bin_width=1.,
                   data_shape=((1296,)),
                   xlabel='Peak maximum position [4ns]', ylabel='$\mathrm{N_{entries}}$', label='peak position')
 
@@ -115,8 +115,8 @@ if options.create_time_histo:
 if options.verbose:
     print('--|> Recover data from %s' % (options.output_directory+options.peak_histo_filename))
 file = np.load(options.output_directory+options.peak_histo_filename)
-peaks = histogram(data=file['peaks'],bin_centers=file['peaks_bin_centers'],xlabel = 'sample [$\mathrm{4 ns^{1}}$]',
-                  ylabel = '$\mathrm{N_{trigger}}$',label='synchrone peak position')
+peaks = Histogram(data=file['peaks'], bin_centers=file['peaks_bin_centers'], xlabel ='sample [$\mathrm{4 ns^{1}}$]',
+                  ylabel = '$\mathrm{N_{trigger}}$', label='synchrone peak position')
 
 
 if options.create_histo:
@@ -144,13 +144,13 @@ prev_fit_result = np.append(prev_fit_result, np.expand_dims(spes_fit_result[:, 1
 
 if options.verbose: print('--|> Recover data from %s' % (options.output_directory+options.histo_filename))
 file = np.load(options.output_directory+options.histo_filename)
-mpes = histogram(data=np.copy(file['mpes']),bin_centers=np.copy(file['mpes_bin_centers']),xlabel = 'Peak ADC',
-                 ylabel='$\mathrm{N_{trigger}}$',label='MPE from peak value')
+mpes = Histogram(data=np.copy(file['mpes']), bin_centers=np.copy(file['mpes_bin_centers']), xlabel ='Peak ADC',
+                 ylabel='$\mathrm{N_{trigger}}$', label='MPE from peak value')
 file.close()
 
 
 if options.create_full_histo:
-    # Add an histogram corresponding to the sum of all other only if the mu is above a certain threshold
+    # Add an Histogram corresponding to the sum of all other only if the mu is above a certain threshold
     print('--|> Create summed MPE')
     mpe_tmp = np.copy(mpes.data)
     mpe_tmp[mpe_tmp == 0] = 1e-6
@@ -169,7 +169,7 @@ if options.create_full_histo:
             if mpe_mean[i, j] < 5 or np.where(mpe_tmp[i, j] != 0)[0].shape[0] < 2: mpe_tmp[i, j, :] = 0
 
     mpe_tmp = np.sum(mpe_tmp, axis=0)
-    mpes_full = histogram(data=np.copy(mpe_tmp), bin_centers=mpes.bin_centers, xlabel='ADC',
+    mpes_full = Histogram(data=np.copy(mpe_tmp), bin_centers=mpes.bin_centers, xlabel='ADC',
                           ylabel='$\mathrm{N_{trigger}}$', label='Summed MPE')
     np.savez_compressed(options.output_directory + 'full_' + options.histo_filename,
                         full_mpe=mpes_full.data, full_mpe_bin_centers=mpes_full.bin_centers)
@@ -179,8 +179,8 @@ if options.create_full_histo:
 
 if options.verbose: print('--|> Recover data from %s' % (options.output_directory+'full_' +options.histo_filename))
 file = np.load(options.output_directory+'full_' +options.histo_filename)
-mpes_full = histogram(data=np.copy(file['full_mpe']),bin_centers=np.copy(file['full_mpe_bin_centers']),xlabel = 'ADC',
-                 ylabel='$\mathrm{N_{trigger}}$',label='Summed MPE')
+mpes_full = Histogram(data=np.copy(file['full_mpe']), bin_centers=np.copy(file['full_mpe_bin_centers']), xlabel ='ADC',
+                      ylabel='$\mathrm{N_{trigger}}$', label='Summed MPE')
 file.close()
 
 if options.perform_fit_gain :

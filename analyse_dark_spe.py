@@ -5,7 +5,7 @@ import numpy as np
 from utils.plots import display, display_var
 from data_treatement import adc_hist
 from utils.geometry import generate_geometry_0
-from utils.histogram import histogram
+from utils.histogram import Histogram
 from spectra_fit import fit_dark_spe
 
 parser = OptionParser()
@@ -52,7 +52,7 @@ parser.add_option("--input_fit_filename", dest="input_fit_filename",
 options.file_list = options.file_list.split(',')
 
 # Define the histograms
-adcs = histogram(bin_center_min=0., bin_center_max=4095., bin_width=1., data_shape=(1296,))
+adcs = Histogram(bin_center_min=0., bin_center_max=4095., bin_width=1., data_shape=(1296,))
 
 # Get the fit results from the HV OFF run
 if options.verbose:
@@ -68,7 +68,7 @@ if options.create_histo:
 if options.verbose:
     print('--|> Recover data from %s' % (options.output_directory + options.histo_filename))
 file = np.load(options.output_directory + options.histo_filename)
-adcs = histogram(data=np.copy(file['adcs']), bin_centers=np.copy(file['adcs_bin_centers']))
+adcs = Histogram(data=np.copy(file['adcs']), bin_centers=np.copy(file['adcs_bin_centers']))
 
 
 # Recover fit from the HV off

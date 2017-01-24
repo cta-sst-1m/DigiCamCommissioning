@@ -10,8 +10,8 @@ __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 def p0_func(y, x, *args, config=None, **kwargs):
     """
     find the parameters to start a mpe fit with low light
-    :param y: the histogram values
-    :param x: the histogram bins
+    :param y: the Histogram values
+    :param x: the Histogram bins
     :param args: potential unused positionnal arguments
     :param config: should be the fit result of a previous fit
     :param kwargs: potential unused keyword arguments
@@ -47,7 +47,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
 
 #    param[8] = np.sqrt(np.average((x - np.average(x, weights=y))**2, weights=y))
     if type(config).__name__ == 'NoneType':
-        # Get the list of peaks in the histogram
+        # Get the list of peaks in the Histogram
         threshold = 0.05
         min_dist = param[2] // 2
 
@@ -97,13 +97,13 @@ def p0_func(y, x, *args, config=None, **kwargs):
 def slice_func(y, x, *args, **kwargs):
     """
     returns the slice to take into account in the fit (essentially non 0 bins here)
-    :param y: the histogram values
-    :param x: the histogram bins
+    :param y: the Histogram values
+    :param x: the Histogram bins
     :param args:
     :param kwargs:
-    :return: the index to slice the histogram
+    :return: the index to slice the Histogram
     """
-    # Check that the histogram has none empty values
+    # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] == 0:
         return []
     max_bin = np.where(y != 0)[0][0]

@@ -1,7 +1,7 @@
 from ctapipe import visualization
 import numpy as np
 from matplotlib import pyplot as plt
-from utils.histogram import histogram
+from utils.histogram import Histogram
 from matplotlib.widgets import Button
 
 
@@ -179,7 +179,7 @@ def display_var(hist, geom,title='Gain [ADC/p.e.]', index_var=1, limit_min=0., l
     vis_gain.image = h
     # plt.subplot(1,2,2)
     hh, bin_tmp = np.histogram(h, bins=np.arange(limit_min - bin_width / 2, limit_max + 1.5 * bin_width, bin_width))
-    hh_hist = histogram(data=hh.reshape(1, hh.shape[0]),
+    hh_hist = Histogram(data=hh.reshape(1, hh.shape[0]),
                         bin_centers=np.arange(limit_min, limit_max + bin_width, bin_width), xlabel=title,
                         ylabel='$\mathrm{N_{pixel}/%.2f}$' % bin_width, label='All pixels')
     hh_hist.show(which_hist=(0,), axis=ax[1], show_fit=False)
