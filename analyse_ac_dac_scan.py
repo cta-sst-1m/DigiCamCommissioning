@@ -289,6 +289,7 @@ def display_fitparam_err(hist,param_ind,pix,param_label,range=[0.9,1.1]):
     plt.show()
 
 
+
 def display_led_fit(pixel):
     slicemax = 80
     y = mpes.fit_result[0:slicemax:1, pixel, 0, 0]
