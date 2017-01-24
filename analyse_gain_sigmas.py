@@ -68,7 +68,7 @@ parser.add_option("-d", "--directory", dest="directory",
                   help="input directory", default="/data/datasets/CTA/DATA/20161214/")
 
 parser.add_option("--histo_filename", dest="histo_filename",
-                  help="Histogram SPE file name", default="mpe_scan_0_195_5_200_600_10_max.npz")
+                  help="Histogram SPE file name", default="mpe_0_195_5_200_600_10.npz")
 
 parser.add_option( "--peak_histo_filename", dest="peak_histo_filename",
                   help="name of peak histo file", default='peaks.npz')
@@ -77,7 +77,7 @@ parser.add_option("--output_directory", dest="output_directory",
                   help="directory of histo file", default='/data/datasets/CTA/DarkRun/20161214/')
 
 parser.add_option("--fit_filename", dest="fit_filename",
-                  help="name of fit file with MPE", default='mpe_scan_200_600_10_fit_max.npz')
+                  help="name of fit file with MPE", default='mpe_scan_200_600_10_fit.npz')
 
 parser.add_option("--input_fit_hvoff_filename", dest="input_hvoff_filename",
                   help="Input fit file name", default="adc_hv_off_fit.npz")
@@ -212,14 +212,11 @@ if options.perform_fit_gain :
 if options.verbose:
     print('--|> Recover fit results for G and sigmas from %s' % (options.output_directory + 'full_'+ options.fit_filename))
 file = np.load(options.output_directory+ 'full_' + options.fit_filename)
+mpes_full.fit_result = np.copy(file['full_mpe_fit_result'])
+mpes_full.fit_function = fit_full_mpe.fit_func
 
-mpes_full_fit_result = np.copy(file['full_mpe_fit_result'])
-
-mpes_full_fit_result=mpes_full_fit_result.reshape((1,)+mpes_full_fit_result.shape)
-mpes_full_fit_result = np.repeat(mpes_full_fit_result,mpes.data.shape[0],axis=0)
 
 #del(mpes_full)
-#mpes_full.fit_function = fit_full_mpe.fit_func
 file.close()
 
 # Leave the hand
@@ -232,29 +229,8 @@ display_var(mpes_full, geom, title='$\sigma_e$ [ADC]', index_var=2, limit_min=0.
 display_var(mpes_full, geom, title='$\sigma_i$ [ADC]', index_var=3, limit_min=0.4, limit_max=0.5, bin_width=0.002)
 display_var(mpes_full, geom, title='Gain [ADC/p.e.]' , index_var=1, limit_min=5.1, limit_max=6., bin_width=0.04)
 
-display([mpes_full], geom, fit_full_mpe.slice_func, norm='log',pix_init=485, config=prev_fit_result)
+display([mpes_full], geom, fit_full_mpe.slice_func, norm='linear',pix_init=10, config=prev_fit_result)
 
-
-def show_level(level,hist):
-    fig, ax = plt.subplots(1, 2, figsize=(30, 10))
-    plt.subplot(1, 2, 1)
-    vis_baseline = pickable_visu_mpe([hist], ax[1], fig, fit_low_light.slice_func, level,False, geom, title='', norm='lin',
-                                     cmap='viridis', allow_pick=True)
-    vis_baseline.add_colorbar()
-    vis_baseline.colorbar.set_label('Peak position [4ns]')
-    plt.subplot(1, 2, 1)
-    val = np.mean(hist.data[0],axis=1)
-    val[np.isnan(val)]=0
-    val[val<1.]=1.
-    val[val>10.]=10.
-    vis_baseline.axes.xaxis.get_label().set_ha('right')
-    vis_baseline.axes.xaxis.get_label().set_position((1, 0))
-    vis_baseline.axes.yaxis.get_label().set_ha('right')
-    vis_baseline.axes.yaxis.get_label().set_position((0, 1))
-    vis_baseline.image = val
-    fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
-    vis_baseline.on_pixel_clicked(486)
-    plt.show()
 
 
 
