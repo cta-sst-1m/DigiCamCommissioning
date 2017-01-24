@@ -80,7 +80,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         self.level += 1
         self.extra_plot.cla()
         for i, pickable_data in enumerate(self.pickable_datas):
-            slice = self.slice_func(pickable_data.data[self.level, self.pix_id])
+            slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
                                slice=slice)
         try:
@@ -96,7 +96,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         print('level', self.level)
         self.extra_plot.cla()
         for i, pickable_data in enumerate(self.pickable_datas):
-            slice = self.slice_func(pickable_data.data[self.level, self.pix_id])
+            slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
                                slice=slice)
         try:

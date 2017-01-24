@@ -32,6 +32,7 @@ class histogram :
             self._compute_errors()
 
         self.fit_result = None
+        self.fit_chi2_ndof = None
         self.fit_function = None
         self.fit_axis = None
         self.xlabel = xlabel
@@ -87,8 +88,8 @@ class histogram :
         reduced_bounds = bounds
         reduced_func = func
         #TODO optimize this part
-        if type(fixed_param).__name__ != 'None':
-            def reduced_func(p,x):
+        if type(fixed_param).__name__ != 'NoneType':
+            def reduced_func(p,x,*args,**kwargs):
                 p_new,j=[],0
                 for i,param in enumerate(p0):
                     if not(i in fixed_param[0]):
@@ -98,7 +99,7 @@ class histogram :
                         for k,val in enumerate(fixed_param[0]):
                             if val==i: p_new+=[fixed_param[1][k]]
                 #print('red_func',p_new)
-                return func(p_new,x)
+                return func(p_new,x,*args,**kwargs)
 
             reduced_p0 = []
             for i, param in enumerate(p0):
@@ -109,10 +110,8 @@ class histogram :
             reduced_bounds = [[],[]]
             for i, param in enumerate(p0):
                 if not (i in fixed_param[0]):
-
                     reduced_bounds[0]+=[bounds[0][i]]
                     reduced_bounds[1]+=[bounds[1][i]]
-
             reduced_bounds=tuple(reduced_bounds )
             #print('red_bound',reduced_bounds)
         fit_result = None
@@ -121,8 +120,12 @@ class histogram :
                 or np.any(np.isnan(p0)):
             if verbose: print('Bad inputs')
             fit_result = (np.ones((len(reduced_p0), 2)) * np.nan)
+            ndof = (slice[1]-slice[0])/slice[2]-len(reduced_p0)
+            chi2 = np.nan
         else:
             if not slice: slice = [0, self.bin_centers.shape[0] - 1, 1]
+            ndof = (slice[1]-slice[0])/slice[2]-len(reduced_p0)
+            chi2 = np.nan
             try:
                 ## TODO add the chi2 to the fitresult
                 residual = lambda p, x, y, y_err: self._residual(reduced_func, p, x, y, y_err)
@@ -130,6 +133,7 @@ class histogram :
                     self.bin_centers[slice[0]:slice[1]:slice[2]], self.data[idx][slice[0]:slice[1]:slice[2]],
                     self.errors[idx][slice[0]:slice[1]:slice[2]]), bounds=reduced_bounds)
                 val = out.x
+                chi2 = np.sum(out.fun*out.fun)
                 try:
                     cov = np.sqrt(np.diag(inv(np.dot(out.jac.T, out.jac))))
                     fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
@@ -141,17 +145,16 @@ class histogram :
 
             except Exception as inst:
                 print('failed fit',inst,'index',idx)
-                print(reduced_p0)
-                print(reduced_bounds[0])
-                print(reduced_bounds[1])
-                5./0.
+                print('p0',reduced_p0)
+                print('boundmin',reduced_bounds[0])
+                print('boundmax',reduced_bounds[1])
                 fit_result = (np.ones((len(reduced_p0), 2)) * np.nan)
 
         # restore the fixed_params in the fit_result
-        if type(fixed_param).__name__ == 'ndarray':
+        if type(fixed_param).__name__ != 'NoneType':
             for k,i in enumerate(fixed_param[0]):
                 fit_result=np.insert(fit_result,int(i),[fixed_param[1][k], 0.], axis=0)
-        return fit_result
+        return fit_result,chi2,ndof
 
     def fit(self,func, p0_func, slice_func, bound_func, config = None , limited_indices = None, fixed_param = [],
             force_quiet = False):
@@ -171,12 +174,15 @@ class histogram :
         if limited_indices:
             indices_list = limited_indices
         for indices in indices_list:
-            #print(indices)
             if type(self.fit_result).__name__ != 'ndarray':
                 if type(config).__name__!='ndarray':
-                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=None))-len(fixed_param),2))*np.nan
+                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=None)),2))*np.nan
                 else:
-                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=config[indices]))-len(fixed_param),2))*np.nan
+                    self.fit_result = np.ones(data_shape+(len(p0_func(self.data[indices],self.bin_centers,config=config[indices])),2))*np.nan
+
+            if type(self.fit_chi2_ndof).__name__ != 'ndarray':
+                self.fit_chi2_ndof = np.ones(data_shape+(2,))*np.nan
+
             if not force_quiet : print("Fit Progress {:2.1%}".format(count/np.prod(data_shape)), end="\r")
             count+=1
             fit_res = None
@@ -192,7 +198,7 @@ class histogram :
                         list_fixed_param[1].append(p[1])
 
             if type(config).__name__!='ndarray':
-                fit_res = self._axis_fit( indices , func , p0_func(self.data[indices],self.bin_centers,config=None),
+                fit_res , chi2 , ndof = self._axis_fit( indices , func , p0_func(self.data[indices],self.bin_centers,config=None),
                                           slice=slice_func(self.data[indices],self.bin_centers,config=None),
                                           bounds = bound_func(self.data[indices],self.bin_centers,config=None),
                                           fixed_param=list_fixed_param)
@@ -203,7 +209,7 @@ class histogram :
                 #print('bounds',bound_func(self.data[indices], self.bin_centers,config=config[indices]))
                 #print('fixed_param',list_fixed_param)
 
-                fit_res = self._axis_fit(indices, func_reduced,
+                fit_res , chi2 , ndof  = self._axis_fit(indices, func_reduced,
                                          p0_func(self.data[indices], self.bin_centers, config=config[indices]),
                                          slice=slice_func(self.data[indices], self.bin_centers,
                                                           config=config[indices]),
@@ -226,6 +232,8 @@ class histogram :
                 fit_res = np.append(fit_res,additionnal_columns,axis=-2)
 
             self.fit_result[indices]=fit_res
+            self.fit_chi2_ndof[indices][0]=chi2
+            self.fit_chi2_ndof[indices][1]=ndof
 
 
 
@@ -323,7 +331,7 @@ class histogram :
             # TODO self.fit_text
 
     def _residual(self,function, p , x , y , y_err ):
-        return (y - function(p, x)) / y_err
+        return (y - function(p, x )) / y_err
 
     def show(self, which_hist= None , axis=None ,show_fit=False, slice = None, config = None,scale='linear', color = 'k', setylim = True ):
 

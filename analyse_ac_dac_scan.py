@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+
+from kapteyn import kmpfit
 from cts import cameratestsetup as cts
 from utils.geometry import generate_geometry,generate_geometry_0
 from utils.plots import pickable_visu_mpe,pickable_visu_led_mu
@@ -11,7 +13,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from data_treatement import mpe_hist,synch_hist
 from utils.plots import pickable_visu
-from spectra_fit import fit_low_light,fit_full_mpe
+from spectra_fit import fit_low_light,fit_high_light,fit_full_mpe
 from utils.plots import display, display_var
 
 parser = OptionParser()
@@ -23,6 +25,9 @@ parser.add_option("-q", "--quiet",
 
 parser.add_option("-p", "--perform_fit_mu", dest="perform_fit_mu", action="store_true",
                   help="perform fit of mpe", default=False)
+
+parser.add_option("-a", "--perform_fit_acled", dest="perform_fit_acled", action="store_true",
+                  help="perform fit of led parameter", default=False)
 
 parser.add_option("-l", "--scan_level", dest="scan_level",
                   help="list of scans DC level, separated by ',', if only three argument, min,max,step",
@@ -37,7 +42,6 @@ parser.add_option("-l", "--scan_level", dest="scan_level",
 500, 510, 520, 530, 540, 550, 560, 570, 580, 590, 600
 ''')
 
-
 parser.add_option("-n", "--n_evt_per_batch", dest="n_evt_per_batch",
                   help="number of events per batch", default=1000, type=int)
 
@@ -49,18 +53,20 @@ parser.add_option("-d", "--directory", dest="directory",
                   help="input directory", default="/data/datasets/CTA/DATA/20161214/")
 
 parser.add_option("--histo_filename", dest="histo_filename",
-                  help="Histogram SPE file name", default="mpe_scan_0_195_5_200_600_10_max.npz")
+                  help="Histogram SPE file name", default="mpe_scan_0_195_5_200_600_10.npz")
 
 parser.add_option("--output_directory", dest="output_directory",
                   help="directory of histo file", default='/data/datasets/CTA/DarkRun/20161214/')
 
 parser.add_option("--fit_filename", dest="fit_filename",
-                  help="name of fit file with MPE", default='mpe_scan_200_600_10_fit_max.npz')
+                  help="name of fit file with MPE", default='mpe_scan_0_195_5_200_600_10_fit.npz')
+
+parser.add_option("--led_fit_filename", dest="led_fit_filename",
+                  help="name of fit file with LED parameters", default='led_0_195_5_200_600_10_fit.npz')
 
 
 # Arange the options
 (options, args) = parser.parse_args()
-options.file_list = options.file_list.split(',')
 options.scan_level = [int(level) for level in options.scan_level.split(',')]
 if len(options.scan_level)==3:
     options.scan_level= np.arange(options.scan_level[0],options.scan_level[1]+options.scan_level[2],options.scan_level[2])
@@ -89,22 +95,66 @@ mpes_full_fit_result = np.copy(file['full_mpe_fit_result'])
 mpes_full_fit_result=mpes_full_fit_result.reshape((1,)+mpes_full_fit_result.shape)
 mpes_full_fit_result = np.repeat(mpes_full_fit_result,mpes.data.shape[0],axis=0)
 
+## TODO perform the fit of concatenated with baseline only (need database)
+
 #del(mpes_full)
 #mpes_full.fit_function = fit_full_mpe.fit_func
 file.close()
 
+def std_dev(x,y):
+    avg = np.average(x, weights=y)
+    return np.sqrt(np.average((x - avg ) ** 2,weights=y))
+
 
 ## Now perform the mu and mu_XT fits
 if options.perform_fit_mu:
-    fixed_param = [
-        [2,(1,0)], # gain
-        [3,(0,0)], # baseline
-        [4,(2,0)], # sigma_e
-        [5,(3,0)], # sigma_1
-        [7, 0.]  # offset
-    ]
-    mpes.fit(fit_low_light.fit_func, fit_low_light.p0_func, fit_low_light.slice_func,
-             fit_low_light.bounds_func, config=mpes_full_fit_result,fixed_param=fixed_param)#,limited_indices=[(30, 387)])#(i,4,) for i in range(20)])
+    for pixel in range(mpes.data.shape[1]):
+        force_xt = False
+        if pixel>0: print('\nTreated Pixel #'+str(pixel-1))
+        for level in range(mpes.data.shape[0]):
+            print("Treating Pixel #"+str(pixel)+": Fit Progress {:2.1%}".format(float(level) / mpes.data.shape[0]), end="\r")
+
+            if np.where(mpes.data[level,pixel] != 0)[0][0]==0 and np.where(mpes.data[level,pixel] != 0)[0].shape==(1,):continue
+            if std_dev(mpes.bin_centers,mpes.data[level,pixel])>400: continue
+            if mpes.data[level,pixel,-1]>0.02*np.sum(mpes.data[level,pixel]):continue
+
+            # check if the mu of the previous level is above 5
+            fixed_param = []
+            _fit_spectra = fit_low_light
+            if level> 0 and mpes.fit_result[level-1,pixel,0,0]>30.:
+                fixed_param = [
+                    # in this case assign the cross talk estimation with smallest error
+                    [1,mpes.fit_result[np.argmin(mpes.fit_result[0:level - 1:1, pixel, 1, 1]),pixel,1,0]],
+                    [2,(1,0)], # gain
+                    [3,(0,0)], # baseline
+                    #[4,(2,0)], # sigma_e
+                    [5,(3,0)], # sigma_1
+                    [7, 0.]  # offset
+                ]
+                _fit_spectra = fit_high_light
+            elif (level> 0 and mpes.fit_result[level-1,pixel,0,0]>5.) or force_xt:
+                force_xt = True
+                fixed_param = [
+                    # in this case assign the cross talk estimation with smallest error
+                    [1,mpes.fit_result[np.argmin(mpes.fit_result[0:level - 1:1, pixel, 1, 1]),pixel,1,0]],
+                    [2,(1,0)], # gain
+                    [3,(0,0)], # baseline
+                    [4,(2,0)], # sigma_e
+                    [5,(3,0)], # sigma_1
+                    [7, 0.]  # offset
+                ]
+            else:
+                fixed_param = [
+                    [2,(1,0)], # gain
+                    [3,(0,0)], # baseline
+                    [4,(2,0)], # sigma_e
+                    [5,(3,0)], # sigma_1
+                    [7, 0.]  # offset
+                ]
+            mpes.fit(_fit_spectra.fit_func, _fit_spectra.p0_func, _fit_spectra.slice_func,
+                     _fit_spectra.bounds_func, config=mpes_full_fit_result,fixed_param=fixed_param
+                     ,limited_indices=[(level,pixel,)],force_quiet = True)
+
     np.savez_compressed(options.output_directory + options.fit_filename,mpes_fit_result=mpes.fit_result)
 
 if options.verbose:
@@ -115,24 +165,50 @@ mpes.fit_function = fit_low_light.fit_func
 file.close()
 
 
-5./0
+
+## Now perform the AC LED
+# Leave the hand
+if options.perform_fit_acled:
+    print('--|> Perform the fit for the AC LEDs')
+    parameters = np.ones((mpes.data.shape[1],5,7),dtype = np.float)*np.nan
+
+    for pixel in range(mpes.data.shape[1]):
+        slicemax = 40
+        y = mpes.fit_result[0:slicemax:1, pixel, 0, 0]
+        yerr = mpes.fit_result[0:slicemax:1, pixel, 0, 1]
+        x = np.array(options.scan_level,dtype = np.float)
+        x1 = np.array(options.scan_level,dtype = np.float)
+        x = x[0:slicemax:1]
+        index_keep =~np.isnan(y) * ~np.isnan(yerr)
+        y = y[index_keep]
+        yerr = yerr[index_keep]
+        x = x[index_keep]
+        if x.shape[0]==0:continue
+        deg = int(4)
+        parameters[pixel, :, 0], parameters[pixel, :, 2:7:1] = np.polyfit(x, y, deg=deg, w=1. / yerr, cov=True)
+        parameters[pixel, :, 1] = np.sqrt(np.diag(parameters[pixel, :, 2:7:1]))
+
+    print('--|> Save fit results for LEDs in %s' % (options.output_directory + options.led_fit_filename))
+    np.savez_compressed(options.output_directory + options.led_fit_filename,parameters=parameters)
+
 # Leave the hand
 plt.ion()
+
+if options.verbose:
+    print('--|> Recover fit results for LEDs from %s' % (options.output_directory + options.led_fit_filename))
+file = np.load(options.output_directory + options.led_fit_filename)
+led_parameters = np.copy(file['parameters'])
+file.close()
+
+
 
 # Define Geometry
 geom= generate_geometry_0()
 
-display_var(mpes_full, geom, title='$\sigma_e$ [ADC]', index_var=2, limit_min=0.8, limit_max=1.2, bin_width=0.05)
-display_var(mpes_full, geom, title='$\sigma_i$ [ADC]', index_var=3, limit_min=0.4, limit_max=0.5, bin_width=0.002)
-display_var(mpes_full, geom, title='Gain [ADC/p.e.]' , index_var=1, limit_min=5.1, limit_max=6., bin_width=0.04)
-
-display([mpes_full], geom, fit_full_mpe.slice_func, norm='log',pix_init=485, config=prev_fit_result)
-
-
 def show_level(level,hist):
     fig, ax = plt.subplots(1, 2, figsize=(30, 10))
     plt.subplot(1, 2, 1)
-    vis_baseline = pickable_visu_mpe([hist], ax[1], fig, fit_low_light.slice_func, level,False, geom, title='', norm='lin',
+    vis_baseline = pickable_visu_mpe([hist], ax[1], fig, fit_low_light.slice_func, level,True, geom, title='', norm='lin',
                                      cmap='viridis', allow_pick=True)
     vis_baseline.add_colorbar()
     vis_baseline.colorbar.set_label('Peak position [4ns]')
@@ -147,197 +223,8 @@ def show_level(level,hist):
     vis_baseline.axes.yaxis.get_label().set_position((0, 1))
     vis_baseline.image = val
     fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
-    vis_baseline.on_pixel_clicked(486)
-    plt.show()
-
-
-
-#show_level(10,mpes)
-plt.figure()
-plt.errorbar(peaks.bin_centers,peaks.data[485],yerr=peaks.errors[485],label='485_%d')
-plt.errorbar(peaks.bin_centers,peaks.data[486],yerr=peaks.errors[486],label='486_%d')
-plt.errorbar(peaks.bin_centers,peaks.data[700],yerr=peaks.errors[700],label='700_%d')
-plt.legend()
-plt.figure()
-for v in [55,56,57,58,59,60]:
-    plt.errorbar(mpes.bin_centers,mpes.data[v,485],yerr=mpes.errors[v,485],label='485_%d'%v)
-
-plt.legend()
-
-plt.figure()
-for v in [25,26,27,28,29,30,31,32,33]:
-    plt.errorbar(mpes.bin_centers,mpes.data[v,486],yerr=mpes.errors[v,486],label='486_%d'%v)
-
-plt.legend()
-plt.figure()
-
-for v in [35,36,37,38,39,40]:
-    plt.errorbar(mpes.bin_centers,mpes.data[v,700],yerr=mpes.errors[v,700],label='700_%d'%v)
-
-plt.legend()
-plt.show()
-
-'''
-#display([peaks])
-
-# Fit them
-
-if options.perform_fit:
-    # recover previous fit
-    if options.verbose: print(
-        '--|> Recover fit results from %s' % (options.dark_calibration_directory + options.saved_spe_fit_filename))
-    file = np.load(options.dark_calibration_directory + options.saved_spe_fit_filename)
-    spes_fit_result = np.copy(file['spes_fit_results'])
-    if options.verbose: print(
-        '--|> Recover fit results from %s' % (options.dark_calibration_directory + options.saved_adc_fit_filename))
-    file = np.load(options.dark_calibration_directory + options.saved_adc_fit_filename)
-    adcs_fit_result = np.copy(file['adcs_fit_results'])
-    if options.verbose:
-        print('--|> Recover data from %s' % (options.dark_calibration_directory + options.saved_adc_histo_filename))
-    file = np.load(options.dark_calibration_directory + options.saved_adc_histo_filename)
-    adcs = histogram(data=np.copy(file['adcs']), bin_centers=np.copy(file['adcs_bin_centers']))
-
-
-    prev_fit = np.append( adcs_fit_result.reshape((1,) + adcs_fit_result.shape),
-                          spes_fit_result.reshape((1,) + spes_fit_result.shape),axis=2)
-    # reodred (this will disapear once dark fit is implemented properly)
-    # amp0,baseline,sigma_e, sigma_e,sigma_i,gain,amp1,amp2,amp3,baseline,offset,amp4,amp5
-    prev_fit[...,[0,1,2,3,4,5,6,7,8,9,10,11,12],:] = prev_fit[...,[12,11,5,1,2,4,0,10,3,6,7,8,9],:]
-    prev_fit = np.delete(prev_fit,[8,9,10,11,12],axis=2)
-    # fix the cross talk for now...
-    prev_fit[...,1,:]=[0.08,10.]
-    print(prev_fit.shape)
-    #print(options.scan_level)
-
-    #intialise the fit result
-    tmp_shape = prev_fit.shape
-    tmp_shape=mpes_peaks.data.shape[:1]+tmp_shape[1:]
-    print(tmp_shape)
-    mpes_peaks.fit_result = np.ones(tmp_shape)*np.nan
-
-    for level in range(len(options.scan_level)):
-        if options.verbose: print("################################# Level",level)
-        if level == 0:
-            ## Take from spe fit
-            for pix in range(mpes_peaks.data[level].shape[0]):
-                if np.any(np.isnan(mpes_peaks.data[level, pix])):
-                    if options.verbose: print('----> Pix',pix,'abort')
-                    continue
-                elif abs(np.nanmean(mpes_peaks.data[level, pix]) - np.nanmean(adcs.data[pix])) < 0.1:
-                    if options.verbose: print('----> Pix',pix,'as dark')
-                    ## to be replaced by fit_dark
-                    mpes_peaks.fit_result[level,pix] = [[2., 1.e3], [prev_fit[0, pix, 1]], [prev_fit[0, pix, 2]], [prev_fit[0, pix, 3]],
-                                  [prev_fit[0, pix, 4]], [0.7, 10.], [1000, 1.e8],[prev_fit[0, pix, 7]]]
-                else:
-                    if options.verbose: print('----> Pix',pix,'low light')
-                    mpes_peaks.fit_result[level, pix] = \
-                        mpes_peaks._axis_fit((level,pix,),
-                                                    fit_low_light.fit_func,
-                                                    fit_low_light.p0_func(mpes_peaks.data[level,pix],
-                                                                          mpes_peaks.bin_centers,
-                                                                          config=prev_fit[0,pix]),
-                                                    slice=fit_low_light.slice_func(mpes_peaks.data[level,pix],
-                                                                                   mpes_peaks.bin_centers,
-                                                                                   config=prev_fit[0,pix]),
-                                                    bounds=fit_low_light.bounds_func(mpes_peaks.data[level,pix],
-                                                                                     mpes_peaks.bin_centers,
-                                                                                     config=prev_fit[0,pix]),
-                                                    # mu_xt,baseline,sigma_e,offset
-                                                    fixed_param = np.array([[i for i in [1,3,4,7]],[prev_fit[0, pix, i , 0] for i in [1,3,4,7]]])
-                                                    )
-        else:
-            ## Take from previous
-            for pix in range(mpes_peaks.data[level].shape[0]):
-                if np.any(np.isnan(mpes_peaks.data[level, pix])):
-                    if options.verbose: print('----> Pix',pix,'abort')
-                    continue
-
-                elif abs(np.nanmean(mpes_peaks.data[level, pix]) - np.nanmean(adcs.data[pix])) < 0.1:
-                    if options.verbose: print('----> Pix',pix,'as dark')
-                    ## to be replaced by fit_dark
-                    mpes_peaks.fit_result[level,pix] = [[2., 1.e3], [prev_fit[0, pix, 1]], [prev_fit[0, pix, 2]], [prev_fit[0, pix, 3]],
-                                  [prev_fit[0, pix, 4]], [0.7, 10.], [1000, 1.e8],[prev_fit[0, pix, 7]]]
-
-                elif mpes_peaks.fit_result[level-1,pix,0,0]<10.:
-                    if options.verbose: print('----> Pix',pix,'low light')
-                    mpes_peaks.fit_result[level, pix] = \
-                        mpes_peaks._axis_fit((level,pix,),
-                                                    fit_low_light.fit_func,
-                                                    fit_low_light.p0_func(mpes_peaks.data[level, pix],
-                                                                          mpes_peaks.bin_centers,
-                                                                          config=mpes_peaks.fit_result[level-1, pix]),
-                                                    slice=fit_low_light.slice_func(mpes_peaks.data[level, pix],
-                                                                                   mpes_peaks.bin_centers,
-                                                                                   config=mpes_peaks.fit_result[level-1, pix]),
-                                                    bounds=fit_low_light.bounds_func(mpes_peaks.data[level, pix],
-                                                                                     mpes_peaks.bin_centers,
-                                                                                     config=mpes_peaks.fit_result[level-1, pix]),
-                                                    # mu_xt,baseline,sigma_e,offset
-                                                    fixed_param = np.array([[i for i in [1,3,4,7]],[mpes_peaks.fit_result[level-1, pix, i , 0] for i in [1,3,4,7]]])
-                                                    )
-                else:
-                    if options.verbose: print('----> Pix',pix,'high light')
-                    mpes_peaks.fit_result[level, pix] = \
-                        mpes_peaks._axis_fit((level,pix,),
-                                                    fit_high_light.fit_func,
-                                                    fit_high_light.p0_func(mpes_peaks.data[level, pix],
-                                                                          mpes_peaks.bin_centers,
-                                                                          config=mpes_peaks.fit_result[level - 1, pix]),
-                                                    slice=fit_high_light.slice_func(mpes_peaks.data[level, pix],
-                                                                                   mpes_peaks.bin_centers,
-                                                                                   config=mpes_peaks.fit_result[
-                                                                                       level - 1, pix]),
-                                                    bounds=fit_high_light.bounds_func(mpes_peaks.data[level, pix],
-                                                                                     mpes_peaks.bin_centers,
-                                                                                     config=mpes_peaks.fit_result[
-                                                                                         level - 1, pix]),
-                                                    # fix all but mu and amplitude
-                                                    fixed_param=np.array([[i for i in [1,2,3,4,5,7]],[mpes_peaks.fit_result[level-1, pix, i , 0] for i in [1,2,3,4,5,7]]])
-                                                    )
-
-
-    # Save the parameters
-    if options.verbose: print('--|> Save the fit result in %s' % (options.saved_histo_directory + options.saved_fit_filename))
-    np.savez_compressed(options.saved_histo_directory + options.saved_fit_filename, mpes_fit_results=mpes_peaks.fit_result)
-else :
-    if options.verbose: print('--|> Load the fit result from %s' % (options.saved_histo_directory + options.saved_fit_filename))
-    h = np.load(options.saved_histo_directory + options.saved_fit_filename)
-    mpes_peaks.fit_result = h['mpes_fit_results']
-    mpes_peaks.fit_function = mpe_distribution_general
-
-
-# Plot them
-def slice_fun(x, **kwargs):
-    if np.where(x != 0)[0][0]== np.where(x != 0)[0][-1]:return [0,1,1]
-    return [np.where(x != 0)[0][0], np.where(x != 0)[0][-1], 1]
-
-
-def show_level(level,hist):
-    fig, ax = plt.subplots(1, 2, figsize=(30, 10))
-    plt.subplot(1, 2, 1)
-    vis_baseline = pickable_visu_mpe([hist], ax[1], fig, slice_fun, level,True, geom, title='', norm='lin',
-                                     cmap='viridis', allow_pick=True)
-    vis_baseline.add_colorbar()
-    vis_baseline.colorbar.set_label('Peak position [4ns]')
-    plt.subplot(1, 2, 1)
-    val = hist.fit_result[3,:,2,0]
-    val[np.isnan(val)]=0
-    val[val<1.]=1.
-    val[val>10.]=10.
-    vis_baseline.axes.xaxis.get_label().set_ha('right')
-    vis_baseline.axes.xaxis.get_label().set_position((1, 0))
-    vis_baseline.axes.yaxis.get_label().set_ha('right')
-    vis_baseline.axes.yaxis.get_label().set_position((0, 1))
-    vis_baseline.image = val
-    fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
     vis_baseline.on_pixel_clicked(700)
     plt.show()
-
-
-
-show_level(0,mpes_peaks)
-
-
 
 def show_mu(level,hist):
     fig, ax = plt.subplots(1, 2, figsize=(30, 10))
@@ -357,7 +244,7 @@ def show_mu(level,hist):
     vis_baseline.axes.yaxis.get_label().set_position((0, 1))
     vis_baseline.image = val
     fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
-    vis_baseline.on_pixel_clicked(700)
+    vis_baseline.on_pixel_clicked(10)
     plt.show()
 
 
@@ -375,10 +262,6 @@ def display_fitparam(hist,param_ind,pix,param_label,range=[0.9,1.1]):
     plt.ylim(range)
     plt.ylabel(param_label)
     plt.xlabel('AC LED DAC')
-    #plt.axes().xaxis.get_label().set_ha('right')
-    #plt.axes().xaxis.get_label().set_position((1, 0))
-    #plt.axes().yaxis.get_label().set_ha('right')
-    #plt.axes().yaxis.get_label().set_position((0, 1))
     plt.subplot(1,2,2)
     xaxis = np.repeat(np.arange(50, 260, 10).reshape((1,)+np.arange(50, 260, 10).shape),param.shape[1],axis=0).reshape(np.prod([param_ratio.shape]))
     y_axis = param_ratio.reshape(np.prod([param_ratio.shape]))
@@ -398,10 +281,6 @@ def display_fitparam_err(hist,param_ind,pix,param_label,range=[0.9,1.1]):
     plt.ylim(range)
     plt.ylabel(param_label)
     plt.xlabel('AC LED DAC')
-    #plt.axes().xaxis.get_label().set_ha('right')
-    #plt.axes().xaxis.get_label().set_position((1, 0))
-    #plt.axes().yaxis.get_label().set_ha('right')
-    #plt.axes().yaxis.get_label().set_position((0, 1))
     plt.subplot(1,2,2)
     xaxis = np.repeat(np.arange(50, 260, 10).reshape((1,)+np.arange(50, 260, 10).shape),param.shape[1],axis=0).reshape(np.prod([param_ratio.shape]))
     y_axis = param_ratio.reshape(np.prod([param_ratio.shape]))
@@ -409,5 +288,78 @@ def display_fitparam_err(hist,param_ind,pix,param_label,range=[0.9,1.1]):
     plt.colorbar()
     plt.show()
 
-display_fitparam(mpes_peaks,2,700,'Gain',[0.9,1.1]) #<N(p.e.)>@DAC=x
+
+def display_led_fit(pixel):
+    slicemax = 80
+    y = mpes.fit_result[0:slicemax:1, pixel, 0, 0]
+    yerr = mpes.fit_result[0:slicemax:1, pixel, 0, 1]
+    x = np.array(options.scan_level, dtype=np.float)
+    x1 = np.array(options.scan_level, dtype=np.float)
+    x = x[0:slicemax:1]
+    index_keep = ~np.isnan(y) * ~np.isnan(yerr)
+    y = y[index_keep]
+    yerr = yerr[index_keep]
+    x = x[index_keep]
+    if x.shape[0] == 0: return
+    deg = int(4)
+    param , covariance = led_parameters[pixel, :, 0], led_parameters[pixel, :, 2:7:1]
+    param_err = led_parameters[pixel, :, 1]
+    xx = np.vstack([x1 ** (deg - i) for i in range(deg + 1)]).T
+    yi = np.dot(xx, param)
+    C_yi = np.dot(xx, np.dot(covariance, xx.T))
+    sig_yi = np.sqrt(np.diag(C_yi))
+    y_fit = np.polyval(param, x1)
+    y_fit_max = np.polyval(param + param_err, x1)
+    y_fit_min = np.polyval(param - param_err, x1)
+    ax = plt.subplot(2, 1, 1)
+    ax.cla()
+    plt.errorbar(x, y, yerr=yerr, fmt='ok')
+    ax.set_yscale('log')
+    #plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
+    plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+    ax1 = plt.subplot(2, 1, 2)
+    ax1.cla()
+    ax1.set_yscale('log')
+    #plt.plot(x1, (y_fit_max - y_fit_min) / yi, label='polyfit + 1 $\sigma$')
+    # plt.plot(x1, y_fit_min, label='polyfit - 1 $\sigma$')
+    # plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+    plt.fill_between(x1, 2 * sig_yi / yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+    print('param ', param, ' ± ', param_err)
+    plt.show()
+    input('bla')
+
+
+show_level(44,mpes)
+
+
+plt.subplots(2, 1)
+for i in range(600,701):
+    display_led_fit(i)
+
 '''
+        xx = np.vstack([x1 ** (deg - i) for i in range(deg + 1)]).T
+        yi = np.dot(xx, param)
+        C_yi = np.dot(xx, np.dot(covariance, xx.T))
+        sig_yi = np.sqrt(np.diag(C_yi))
+        y_fit = np.polyval(param, x1)
+        y_fit_max = np.polyval(param + param_err, x1)
+        y_fit_min = np.polyval(param - param_err, x1)
+
+        ax = plt.subplot(2,1,1)
+        ax.cla()
+        plt.errorbar(x, y, yerr=yerr, fmt='ok')
+        ax.set_yscale('log')
+        plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
+        plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+        ax1 = plt.subplot(2,1,2)
+        ax1.cla()
+        plt.plot(x1, (y_fit_max-y_fit_min)/yi, label='polyfit + 1 $\sigma$')
+        #plt.plot(x1, y_fit_min, label='polyfit - 1 $\sigma$')
+        #plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+        plt.fill_between(x1,2* sig_yi/yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+        print('param ', param, ' ± ', param_err)
+        plt.show()
+        input('bla')
+'''
+
+v = input('preskey')
