@@ -1,7 +1,7 @@
 from ctapipe import visualization
 import numpy as np
 from matplotlib import pyplot as plt
-from utils.histogram import histogram
+from utils.histogram import Histogram
 from matplotlib.widgets import Button
 
 
@@ -20,7 +20,7 @@ class pickable_visu(visualization.CameraDisplay):
         self.extra_plot.cla()
         colors = ['k', 'r', 'b']
         for i, pickable_data in enumerate(self.pickable_datas):
-            slice = self.slice_func(pickable_data.data[pix_id],pickable_data.bin_centers) if self.slice_func else [0,
+            slice = self.slice_func(pickable_data.data[pix_id],pickable_data.bin_centers,config=self.config[pix_id]) if self.slice_func else [0,
                                                                                          pickable_data.bin_centers.shape[
                                                                                            0], 1]
             '''
@@ -80,7 +80,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         self.level += 1
         self.extra_plot.cla()
         for i, pickable_data in enumerate(self.pickable_datas):
-            slice = self.slice_func(pickable_data.data[self.level, self.pix_id])
+            slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
                                slice=slice)
         try:
@@ -96,7 +96,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         print('level', self.level)
         self.extra_plot.cla()
         for i, pickable_data in enumerate(self.pickable_datas):
-            slice = self.slice_func(pickable_data.data[self.level, self.pix_id])
+            slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
                                slice=slice)
         try:
@@ -149,10 +149,10 @@ def display(hists, geom,slice_func,pix_init=700,norm='lin',config=None):
     vis_baseline.add_colorbar()
     vis_baseline.colorbar.set_label('Peak position [4ns]')
     plt.subplot(1, 2, 1)
-    peak = hists[0].fit_result[:, 2, 0]
-    peak[np.isnan(peak)] = 2.
-    peak[peak < 0.] = 2.
-    peak[peak > 10.] = 8.
+    peak = hists[0].fit_result[:, 1, 0]
+    peak[np.isnan(peak)] = 3.5
+    peak[peak < 0.] = 3.5
+    peak[peak > 10.] = 6.
 
     vis_baseline.axes.xaxis.get_label().set_ha('right')
     vis_baseline.axes.xaxis.get_label().set_position((1, 0))
@@ -179,7 +179,7 @@ def display_var(hist, geom,title='Gain [ADC/p.e.]', index_var=1, limit_min=0., l
     vis_gain.image = h
     # plt.subplot(1,2,2)
     hh, bin_tmp = np.histogram(h, bins=np.arange(limit_min - bin_width / 2, limit_max + 1.5 * bin_width, bin_width))
-    hh_hist = histogram(data=hh.reshape(1, hh.shape[0]),
+    hh_hist = Histogram(data=hh.reshape(1, hh.shape[0]),
                         bin_centers=np.arange(limit_min, limit_max + bin_width, bin_width), xlabel=title,
                         ylabel='$\mathrm{N_{pixel}/%.2f}$' % bin_width, label='All pixels')
     hh_hist.show(which_hist=(0,), axis=ax[1], show_fit=False)

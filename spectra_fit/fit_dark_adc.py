@@ -1,5 +1,5 @@
 import numpy as np
-from utils.fitting import multi_gaussian_with0
+from utils.pdf import multi_gaussian_with0
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 

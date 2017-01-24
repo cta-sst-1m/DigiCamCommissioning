@@ -71,17 +71,129 @@ Run the fit only on saved histograms:
 Only display the results:
 `./analyse_hvoff.py /my/output/dir --histo_filename ouput_histo_file.npz --fit_filename ouput_fit_file.npz`
 
-### `analyse_hvon.py` script
+### `analyse_dark.py` script
+
+```
+Usage: analyse_dark.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -q, --quiet           don't print status messages to stdout
+  -c, --create_histo    load the ADC with HV ON histograms from file
+  -p, --perform_fit     perform fit of ADC from dark run
+  -f FILE_LIST, --file_list=FILE_LIST
+                        input filenames separated by ','
+  --evt_max=EVT_MAX     maximal number of events
+  -n N_EVT_PER_BATCH, --n_evt_per_batch=N_EVT_PER_BATCH
+                        number of events per batch
+  --file_basename=FILE_BASENAME
+                        file base name
+  -d DIRECTORY, --directory=DIRECTORY
+                        input directory
+  --histo_filename=HISTO_FILENAME
+                        Histogram SPE file name
+  --output_directory=OUTPUT_DIRECTORY
+                        directory of histo file
+  --fit_filename=FIT_FILENAME (NOT IMPLEMENTED)
+                        name of fit file with dark
+```
 
 This script produces ADC distribution out of `zfits` files
- in `DIRECTORY+file_basename+FILE_LIST[:]` taken with HV on. ...fit?
-
+ in `DIRECTORY+file_basename+FILE_LIST[:]` taken with HV on but dark conditions.
  
 Histograms are saved in `output_directory+histo_filename`
 and fit results in `output_directory+fit_filename`
 
+WARNING: No fit is implemented for the moment. This is where we should develop the fit using convolution
+of pdfs for the sliding signal in 4ns.
 
-### `bla` script
+
+
+
+### `analyse_dark_spe.py` script
+
+This script produces ADC distribution out of `zfits` files
+ in `DIRECTORY+file_basename+FILE_LIST[:]` taken with HV on but dark conditions.
+ 
+Histograms are saved in `output_directory+histo_filename`
+and fit results in `output_directory+fit_filename`
+
+Fit takes as input the result of the `analyse_hvoff.py` script.
+
+
+### `analyse_gain_sigmas.py` script
+
+
+```buildoutcfg
+
+Usage: analyse_gain_sigmas.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -q, --quiet           don't print status messages to stdout
+  -c, --create_histo    load the mpe histo from file
+  -t, --create_time_histo
+                        load the mpe histo from file
+  -k, --create_full_histo
+                        load the mpe full histo from file
+  -p, --perform_fit_gain
+                        perform fit of all mpe to get gain, sigma_e, sigma1
+  -f FILE_LIST, --file_list=FILE_LIST
+                        input filenames separated by ','
+  -l SCAN_LEVEL, --scan_level=SCAN_LEVEL
+                        list of scans DC level, separated by ',', if only
+                        three argument, min,max,step
+  -e EVENTS_PER_LEVEL, --events_per_level=EVENTS_PER_LEVEL
+                        number of events per level
+  --evt_max=EVT_MAX     maximal number of events
+  -n N_EVT_PER_BATCH, --n_evt_per_batch=N_EVT_PER_BATCH
+                        number of events per batch
+  --file_basename=FILE_BASENAME
+                        file base name
+  -d DIRECTORY, --directory=DIRECTORY
+                        input directory
+  --histo_filename=HISTO_FILENAME
+                        Histogram SPE file name
+  --peak_histo_filename=PEAK_HISTO_FILENAME
+                        name of peak histo file
+  --output_directory=OUTPUT_DIRECTORY
+                        directory of histo file
+  --fit_filename=FIT_FILENAME
+                        name of fit file with MPE
+  --input_fit_hvoff_filename=INPUT_HVOFF_FILENAME
+                        Input fit file name
+  --input_fit_dark_filename=INPUT_DARK_FILENAME
+                        Input fit file name
+
+```
+
+### `analyse_ac_dac_scan.py` script
+
+```buildoutcfg
+
+Usage: analyse_ac_dac_scan.py [options]
+
+Options:
+  -h, --help            show this help message and exit
+  -q, --quiet           don't print status messages to stdout
+  -p, --perform_fit_mu  perform fit of mpe
+  -l SCAN_LEVEL, --scan_level=SCAN_LEVEL
+                        list of scans DC level, separated by ',', if only
+                        three argument, min,max,step
+  -n N_EVT_PER_BATCH, --n_evt_per_batch=N_EVT_PER_BATCH
+                        number of events per batch
+  --file_basename=FILE_BASENAME
+                        file base name
+  -d DIRECTORY, --directory=DIRECTORY
+                        input directory
+  --histo_filename=HISTO_FILENAME
+                        Histogram SPE file name
+  --output_directory=OUTPUT_DIRECTORY
+                        directory of histo file
+  --fit_filename=FIT_FILENAME
+                        name of fit file with MPE
+
+```
 
 ## Modules
 
