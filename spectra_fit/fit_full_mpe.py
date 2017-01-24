@@ -13,8 +13,8 @@ __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 def p0_func(y, x, *args,n_peaks = 22,config=None, **kwargs):
     """
     return the parameters for a pure gaussian distribution
-    :param y: the histogram values
-    :param x: the histogram bins
+    :param y: the Histogram values
+    :param x: the Histogram bins
     :param args:
     :param kwargs:
     :return: starting points for []
@@ -49,13 +49,13 @@ def p0_func(y, x, *args,n_peaks = 22,config=None, **kwargs):
 def slice_func(y, x, *args,config=None, **kwargs):
     """
     returns the slice to take into account in the fit (essentially non 0 bins here)
-    :param y: the histogram values
-    :param x: the histogram bins
+    :param y: the Histogram values
+    :param x: the Histogram bins
     :param args:
     :param kwargs:
-    :return: the index to slice the histogram
+    :return: the index to slice the Histogram
     """
-    # Check that the histogram has none empty values
+    # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] < 2:
         return [0, 1, 1]
     xmax_hist_for_fit = config[0,0] + 20 * config[1,0] * 1.1

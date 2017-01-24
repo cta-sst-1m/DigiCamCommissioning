@@ -36,3 +36,4 @@ for line in iter(p.stdout.readline, ''):
 
 
 
+# TODO : save the chi2 of the fits, stode in database
