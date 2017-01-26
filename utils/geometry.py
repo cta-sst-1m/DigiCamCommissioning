@@ -4,6 +4,14 @@ from ctapipe.io.camera import find_neighbor_pixels
 from astropy import units as u
 
 
+def generate_geometry_MC(n_pixel):
+    pix_id = np.arange(0, n_pixel, 1)
+    pix_x = [0.]*n_pixel
+    pix_y = [0.]*n_pixel
+    neighbor_pixels = [[]]*n_pixel
+    return CameraGeometry(0, pix_id, pix_x * u.mm, pix_y * u.mm, np.ones(n_pixel) * 400., neighbor_pixels, 'hexagonal')
+
+
 def generate_geometry_0():
     pix_id = np.arange(0, 1296, 1)
     pix_x = [-12.15, -48.6, -24.3, 0.0, 24.3, -85.05, -60.75, -36.45, -12.15, 12.15, 36.45, 60.75, -121.5, -97.2, -72.9,
