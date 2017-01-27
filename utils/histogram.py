@@ -11,8 +11,9 @@ class Histogram:
 
     """
 
-    def __init__(self, data=np.zeros(0), data_shape=(0,), bin_centers=np.zeros(0), bin_center_min=0, bin_center_max=1,
-                 bin_width=1, xlabel='x', ylabel='y', label='hist'):
+    def __init__(self, data: np.array = np.zeros(0), data_shape: tuple = (0,), bin_centers: np.array = np.zeros(0), bin_center_min: int = 0,
+                 bin_center_max: int = 1,
+                 bin_width: int = 1, xlabel: str = 'x', ylabel: str = 'y', label: str = 'hist'):
         """
         Initialise method
 
