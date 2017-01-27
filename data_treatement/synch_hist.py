@@ -1,5 +1,6 @@
 import numpy as np
 from ctapipe.io import zfits
+from utils.toy_reader import ToyReader
 
 
 def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
@@ -9,7 +10,15 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
         if evt_num > max_evt: break
         # read the file
         _url = options.directory + options.file_basename % file
-        inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=100000)
+
+        if not options.toy_test:
+
+            inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=100000)
+
+        else:
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=5000, n_pixel=options.n_pixels)
+
+
         if options.verbose:
             print('--|> Moving to file %s' % _url)
         # Loop over event in this file
