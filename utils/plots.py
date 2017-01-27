@@ -70,7 +70,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
 
             slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
-                               slice=slice)
+                               slice_list=slice)
         try:
             self.figure.canvas.draw()
         except ValueError:
@@ -82,7 +82,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         for i, pickable_data in enumerate(self.pickable_datas):
             slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
-                               slice=slice)
+                               slice_list=slice)
         try:
             self.figure.canvas.draw()
         except ValueError:
@@ -98,7 +98,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         for i, pickable_data in enumerate(self.pickable_datas):
             slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
-                               slice=slice)
+                               slice_list=slice)
         try:
             self.figure.canvas.draw()
         except ValueError:
