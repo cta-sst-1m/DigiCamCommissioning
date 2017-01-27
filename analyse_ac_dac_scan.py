@@ -291,7 +291,7 @@ def display_fitparam_err(hist,param_ind,pix,param_label,range=[0.9,1.1]):
 
 
 def display_led_fit(pixel):
-    slicemax = 80
+    slicemax = 40
     y = mpes.fit_result[0:slicemax:1, pixel, 0, 0]
     yerr = mpes.fit_result[0:slicemax:1, pixel, 0, 1]
     x = np.array(options.scan_level, dtype=np.float)
@@ -312,15 +312,18 @@ def display_led_fit(pixel):
     y_fit = np.polyval(param, x1)
     y_fit_max = np.polyval(param + param_err, x1)
     y_fit_min = np.polyval(param - param_err, x1)
-    ax = plt.subplot(2, 1, 1)
+    ax = plt.subplot(1, 2, 1)
     ax.cla()
     plt.errorbar(x, y, yerr=yerr, fmt='ok')
-    ax.set_yscale('log')
+    #ax.set_yscale('log')
+    ax.set_ylabel('$N_{\gamma}$')
+    ax.set_xlabel('LED DAC')
     #plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
     plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
-    ax1 = plt.subplot(2, 1, 2)
+    ax1 = plt.subplot(1, 2, 2)
     ax1.cla()
-    ax1.set_yscale('log')
+    ax1.set_ylabel('$N_{\gamma}$, $68\%$ C.L. (relative)')
+    ax1.set_xlabel('LED DAC')
     #plt.plot(x1, (y_fit_max - y_fit_min) / yi, label='polyfit + 1 $\sigma$')
     # plt.plot(x1, y_fit_min, label='polyfit - 1 $\sigma$')
     # plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
@@ -333,7 +336,7 @@ def display_led_fit(pixel):
 show_level(44,mpes)
 
 
-plt.subplots(2, 1)
+plt.subplots(1, 2)
 for i in range(600,701):
     display_led_fit(i)
 
