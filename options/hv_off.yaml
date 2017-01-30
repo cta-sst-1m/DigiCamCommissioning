@@ -1,0 +1,24 @@
+# Input files
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+directory     :     /data/datasets/CTA/DATA/20161214/
+file_list     :
+    - 109
+    - 110
+    - 111
+
+# Output files
+output_directory  : /data/datasets/CTA/20161214/FullChain
+histo_filename    : adc_hv_off.npz
+fit_filename      : adc_hv_off_fit.npz
+
+# Event processing
+evt_max           : 20000
+n_evt_per_batch   : 300
+
+# Camera Configuration
+n_pixels          : 1296
+
+# Plot configuration
+adcs_min           : 0
+adcs_max           : 4095
+adcs_binwidth      : 1
