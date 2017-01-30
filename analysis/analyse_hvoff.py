@@ -60,7 +60,7 @@ def perform_analysis(options):
     """
 
     # Load the histogram
-    adcs = histogram.Histogram(options.output_directory + options.histo_filename)
+    adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Fit the baseline and sigma_e of all pixels
     adcs.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func,
@@ -83,7 +83,7 @@ def display_results(options):
     """
 
     # Load the histogram
-    adcs = histogram.Histogram(options.output_directory + options.histo_filename)
+    adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
     geom = geometry.generate_geometry_0()

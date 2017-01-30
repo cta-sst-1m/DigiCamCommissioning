@@ -1,4 +1,17 @@
+# Analysis module
+analysis_module : analyse_hvoff
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20161214
+
 # Input files
+mc            :     False
 file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
 directory     :     /data/datasets/CTA/DATA/20161214/
 file_list     :
@@ -7,7 +20,7 @@ file_list     :
     - 111
 
 # Output files
-output_directory  : /data/datasets/CTA/20161214/FullChain
+output_directory  : /data/datasets/CTA/20161214/FullChain/
 histo_filename    : adc_hv_off.npz
 fit_filename      : adc_hv_off_fit.npz
 
