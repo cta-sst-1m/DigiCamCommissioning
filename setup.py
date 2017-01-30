@@ -8,5 +8,5 @@ setup(
     license='GNU GPL 3.0',
     author='cocov',
     author_email='victor.coco@cern.ch',
-    description='', requires=['numpy', 'ctapipe']
+    description='', requires=['numpy', 'ctapipe', 'yaml']
 )
