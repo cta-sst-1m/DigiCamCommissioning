@@ -53,3 +53,10 @@ def fit_func(p, x):
     :return: G(x)
     """
     return p[0] / p[2] / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x) - p[1]) ** 2 / (2. * p[2] ** 2))
+
+def labels_func(*args, **kwargs):
+    """
+    List of labels for the parameters
+    :return:
+    """
+    return ['Amplitude','Baseline [ADC]','$\sigma_e$ [ADC]']
