@@ -1,8 +1,12 @@
+import logging
+import os
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.optimize
 from numpy.linalg import inv
-import logging,sys,os
+
 
 class Histogram:
     """
@@ -12,10 +16,11 @@ class Histogram:
 
     """
 
-    def __init__(self, data: np.array = np.zeros(0), data_shape: tuple = (0,), bin_centers: np.array = np.zeros(0), bin_center_min: int = 0,
+    def __init__(self, data: np.array = np.zeros(0), data_shape: tuple = (0,), bin_centers: np.array = np.zeros(0),
+                 bin_center_min: int = 0,
                  bin_center_max: int = 1,
                  bin_width: int = 1, xlabel: str = 'x', ylabel: str = 'y', label: str = 'hist',
-                 filename : str = ''):
+                 filename: str = ''):
 
         """
         Initialise method
@@ -38,10 +43,9 @@ class Histogram:
         :param label: the base label for the histograms
         """
         # Initialise the logger
-        self.logger = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
+        self.logger = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
         print(filename)
-        if filename :
-            print('laod')
+        if filename:
             self.load(filename)
             return
 
@@ -68,15 +72,15 @@ class Histogram:
         # Initialisation of data
         if data.shape[0] == 0:
             self.logger.debug('Initialise histogram')
-            self.data      = np.zeros(data_shape + (self.bin_centers.shape[0],))
-            self.underflow = np.zeros(data_shape )
-            self.overflow  = np.zeros(data_shape )
+            self.data = np.zeros(data_shape + (self.bin_centers.shape[0],))
+            self.underflow = np.zeros(data_shape)
+            self.overflow = np.zeros(data_shape)
             self.errors = np.zeros(data_shape + (self.bin_centers.shape[0],))
         else:
             self.logger.debug('Initialise histogram from existing data')
             self.data = data
-            self.underflow = np.zeros(data_shape )
-            self.overflow  = np.zeros(data_shape )
+            self.underflow = np.zeros(data_shape)
+            self.overflow = np.zeros(data_shape)
             self._compute_errors()
 
         # Initialisation of fit results and labels
@@ -97,8 +101,8 @@ class Histogram:
         :param filename: the full path of the saved histogram
         :return:
         """
-        if not os.path.isdir( os.path.dirname(filename) ):
-            self.logger.critical('%s does not exist'%os.path.dirname(filename))
+        if not os.path.isdir(os.path.dirname(filename)):
+            self.logger.critical('%s does not exist' % os.path.dirname(filename))
             raise FileNotFoundError
         try:
             fit_func = 'NoneType' if not self.fit_function else self.fit_function.__name__
@@ -120,7 +124,7 @@ class Histogram:
                                 fit_result_label=self.fit_result_label)
             self.logger.info('Saved histogram in %s' % filename)
         except Exception as inst:
-            self.logger.critical('Could not save in %s'%filename, inst)
+            self.logger.critical('Could not save in %s' % filename, inst)
             raise Exception(inst)
 
     def load(self, filename):
@@ -131,11 +135,11 @@ class Histogram:
         :return:
         """
 
-        if not os.path.isfile( filename ):
-            self.logger.critical('%s does not exist'%filename)
+        if not os.path.isfile(filename):
+            self.logger.critical('%s does not exist' % filename)
             raise FileNotFoundError
 
-        try :
+        try:
             file = np.load(filename)
 
             self.data = np.copy(file['data'])
@@ -147,6 +151,7 @@ class Histogram:
             self.overflow = np.copy(file['overflow'])
             self.fit_result = np.copy(file['fit_result'])
             fit_func = None if file['fit_function_name'][0] == 'NoneType' else np.copy(file['fit_function_name'][0])
+            # noinspection PyAttributeOutsideInit
             self.fit_function_name = fit_func
             self.fit_chi2_ndof = np.copy(file['fit_chi2_ndof'])
             self.fit_axis = np.copy(file['fit_axis'])
@@ -189,6 +194,7 @@ class Histogram:
         else:
             self.data[indices][dim_indices] += 1
 
+    # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):
         """
         A function to transform a batch of data in Histogram and add it to the existing one
@@ -197,7 +203,7 @@ class Histogram:
         :return:
         """
         # noinspection PyUnusedLocal
-        data, underflow, overflow = None,None,None
+        data, underflow, overflow = None, None, None
         if not indices:
             data = self.data
             underflow = self.underflow
@@ -214,12 +220,12 @@ class Histogram:
             # Get the new Histogram
             tmp_hist = np.apply_along_axis(hist, len(data.shape) - 1, batch)
             # Get the overflow and underflow data
-            tmp_underflow = np.sum(~(batch > self.bin_edges[0]), axis = -1)
-            tmp_overflow = np.sum(~(batch < self.bin_edges[1]), axis = -1)
-            # Add it to the existing datas
+            tmp_underflow = np.sum(~(batch > self.bin_edges[0]), axis=-1)
+            tmp_overflow = np.sum(~(batch < self.bin_edges[1]), axis=-1)
+            # Add it to the existing data
             data = np.add(data, tmp_hist)
             underflow = np.add(underflow, tmp_underflow)
-            overflow  = np.add(overflow , tmp_overflow)
+            overflow = np.add(overflow, tmp_overflow)
         else:
             for index in np.ndindex(batch.shape):
                 # Get the new Histogram
@@ -267,7 +273,7 @@ class Histogram:
         self.errors = np.sqrt(self.data)
         self.errors[self.errors == 0.] = 1.
 
-    def _axis_fit(self, idx, func, p0, slice_list=None, bounds=None, fixed_param=None, verbose=False):
+    def _axis_fit(self, idx, func, p0, slice_list=None, bounds=None, fixed_param=None):
         """
         Perform a fit on this specific Histogram
 
@@ -340,7 +346,7 @@ class Histogram:
                     cov = np.sqrt(np.diag(inv(np.dot(out.jac.T, out.jac))))
                     fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
                 except np.linalg.linalg.LinAlgError as inst:
-                    self.logger.warning('Could not compute error in the fit of',idx)
+                    self.logger.warning('Could not compute error in the fit of', idx)
                     self.logger.debug(inst)
                     fit_result = np.append(val.reshape(val.shape + (1,)), np.ones((len(reduced_p0), 1)) * np.nan,
                                            axis=1)
@@ -360,14 +366,15 @@ class Histogram:
         return fit_result, chi2, ndof
 
     # noinspection PyDefaultArgument
-    def fit(self, func, p0_func, slice_func, bound_func, labels_func = None , config=None, limited_indices=None, fixed_param=[],
+    def fit(self, func, p0_func, slice_func, bound_func, labels_func=None, config=None, limited_indices=None,
+            fixed_param=[],
             force_quiet=False):
         """
         An helper to fit Histogram
+        :param labels_func:
         :param p0_func:
         :param slice_func:
         :param bound_func:
-        :param labels:
         :param config:
         :param limited_indices:
         :param fixed_param:
@@ -459,7 +466,7 @@ class Histogram:
 
     def find_bin(self, x):
         """
-        Function to retreive the bin number
+        Function to retrieve the bin number
 
         :param x: value       (float)
         :return: bin number   (int)
@@ -540,18 +547,20 @@ class Histogram:
             if not axis:
                 ax.ylim(0, (np.max(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) +
                             self.errors[
-                    which_hist + (np.argmax(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 1.3)
+                                which_hist + (
+                                    np.argmax(
+                                        self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 1.3)
             else:
                 if scale != 'log':
                     ax.set_ylim(0,
                                 (np.max(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) +
                                  self.errors[
-                                    which_hist + (np.argmax(
-                                        self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 1.3)
+                                     which_hist + (np.argmax(
+                                         self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 1.3)
                 else:
                     ax.set_ylim(1e-1,
                                 (np.max(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) +
                                  self.errors[
-                                    which_hist + (np.argmax(
-                                        self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 10)
+                                     which_hist + (np.argmax(
+                                         self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 10)
         ax.legend(loc='best')
