@@ -1,8 +1,13 @@
+
+import matplotlib
+matplotlib.use('Qt5Agg')
+
 from ctapipe import visualization
 import numpy as np
 from matplotlib import pyplot as plt
 from utils.histogram import Histogram
 from matplotlib.widgets import Button
+
 
 
 class pickable_visu(visualization.CameraDisplay):
@@ -32,8 +37,8 @@ class pickable_visu(visualization.CameraDisplay):
             '''
 
             pickable_data.show(which_hist=(pix_id,), axis=self.extra_plot,
-                               show_fit=self.show_fit[i], slice=slice,
-                               scale=self.axis_scale, color=colors[i], setylim=i == 0, config = self.config)
+                               show_fit=self.show_fit[i], slice_list=slice,
+                               scale=self.axis_scale, color=colors[i], set_ylim=i == 0, config = self.config)
             '''
             if i == 1:
                 pickable_data.fit_function = init_func
@@ -70,7 +75,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
 
             slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
-                               slice=slice)
+                               slice_list=slice)
         try:
             self.figure.canvas.draw()
         except ValueError:
@@ -82,7 +87,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         for i, pickable_data in enumerate(self.pickable_datas):
             slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
-                               slice=slice)
+                               slice_list=slice)
         try:
             self.figure.canvas.draw()
         except ValueError:
@@ -98,7 +103,7 @@ class pickable_visu_mpe(visualization.CameraDisplay):
         for i, pickable_data in enumerate(self.pickable_datas):
             slice = self.slice_func(pickable_data.data[self.level, self.pix_id],pickable_data.bin_centers)
             pickable_data.show(which_hist=(self.level, self.pix_id,), axis=self.extra_plot, show_fit=self.show_fit,
-                               slice=slice)
+                               slice_list=slice)
         try:
             self.figure.canvas.draw()
         except ValueError:
@@ -166,6 +171,11 @@ def display(hists, geom,slice_func,pix_init=700,norm='lin',config=None):
 
 
 def display_var(hist, geom,title='Gain [ADC/p.e.]', index_var=1, limit_min=0., limit_max=10., bin_width=0.2):
+
+    if np.isnan(bin_width):
+
+        bin_width = (limit_max - limit_min)/np.sqrt(hist.fit_result.shape[0])
+
     f, ax = plt.subplots(1, 2, figsize=(20, 7))
     plt.subplot(1, 2, 1)
     vis_gain = visualization.CameraDisplay(geom, title='', norm='lin', cmap='viridis')

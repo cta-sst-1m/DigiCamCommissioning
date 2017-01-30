@@ -8,17 +8,24 @@ from utils.toy_reader import ToyReader
 def run(hists, options, peak_positions=None, data_type='r1'):
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
-    for file in options.file_list:
+    for index_file, file in enumerate(options.file_list):
         if level > len(options.scan_level) - 1:
             break
         # Get the file
         _url = options.directory + options.file_basename % file
+
         if not options.toy_test:
 
             inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=100000)
 
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list = [0], max_events=5000, n_pixel=options.n_pixels)
+            #print (_url)
+            if len(options.weights)!=len(options.file_list):
+
+                raise IndexError('weights and file_list must be of same length, got ', len(options.weights), ' and ' , len(options.file_list))
+            #print (options.weights)
+            weight = options.weights[index_file]/np.sum(options.weights)
+            inputfile_reader = ToyReader(filename=_url, id_list = [0], max_events=5000, n_pixel=options.n_pixels, weights=weight)
 
         if options.verbose:
             print('--|> Moving to file %s' % _url)
@@ -36,10 +43,10 @@ def run(hists, options, peak_positions=None, data_type='r1'):
                     if level > len(options.scan_level) - 1:
                         break
                     if options.verbose:
-                        print('--|> Moving to DAC Level %d' % (options.scan_level[level]))
+                        print('--|> Moving to DAC Level %d' % (options.scan_level[level]), end='\r')
                 if options.verbose and event.r1.event_id % 100 == 0:
                     print("Progress {:2.1%}".format(
-                        (evt_num - level * options.events_per_level) / options.events_per_level), end="\r")
+                        (evt_num - level * options.events_per_level) / options.events_per_level), end='\r')
                 # get the data
                 data = np.array(list(event.r1.tel[telid].adc_samples.values()))
                 # subtract the pedestals

@@ -6,7 +6,7 @@ from utils.toy_reader import ToyReader
 def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
     # Few counters
     evt_num, first_evt, first_evt_num = 0, True, 0
-    for file in options.file_list:
+    for index_file, file in enumerate(options.file_list):
         if evt_num > max_evt: break
         # read the file
         _url = options.directory + options.file_basename % file
@@ -16,7 +16,9 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
             inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=100000)
 
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=5000, n_pixel=options.n_pixels)
+
+            weight = options.weights[index_file] / np.sum(options.weights)
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=5000, n_pixel=options.n_pixels, weights=weight)
 
 
         if options.verbose:

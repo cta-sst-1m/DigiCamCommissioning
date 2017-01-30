@@ -36,13 +36,14 @@ def gaussian_sum(param, x):
     gain = param[1]
     sigma_e = param[2]
     sigma_1 = param[3]
-    amplitudes = param[4:len(param)+1]
+    offset = param[4]
+    amplitudes = param[5:len(param)+1]
 
     n_peaks = len(amplitudes)
 
     for i in range(n_peaks):
         sigma = np.sqrt(sigma_e**2 + i*sigma_1**2)
-        temp += gaussian(x, sigma, baseline + i*gain, amplitude=amplitudes[i])
+        temp += gaussian(x, sigma, baseline + i*gain + (offset if i==0 else 0), amplitude=amplitudes[i])
 
     return temp
 
