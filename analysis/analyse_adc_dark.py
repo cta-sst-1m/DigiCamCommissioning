@@ -6,6 +6,8 @@
 from data_treatement import adc_hist
 from spectra_fit import fit_hv_off
 from utils import display, histogram, geometry
+from analysis import analyse_hvoff
+import logging,sys
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
@@ -31,6 +33,7 @@ def create_histo(options):
 
     :return:
     """
+
     # Define the histograms
     adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                bin_width=options.adcs_binwidth, data_shape=(options.n_pixels,),
@@ -58,20 +61,9 @@ def perform_analysis(options):
 
     :return:
     """
-
-    # Load the histogram
-    adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-
     # Fit the baseline and sigma_e of all pixels
-    adcs.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func,
-             labels_func=fit_hv_off.labels_func)
-
-    # Save the fit
-    adcs.save(options.output_directory + options.histo_filename)
-
-    # Delete the histograms
-    del adcs
-
+    log = logging.getLogger(sys.modules['__main__'].__name__+__name__)
+    log.info('No analysis is implemented for ADC distribution in dark conditions')
 
 def display_results(options):
     """
@@ -89,11 +81,8 @@ def display_results(options):
     geom = geometry.generate_geometry_0()
 
     # Perform some plots
-    display.display_fit_result(adcs, geom, index_var=2, limits=[0.85, 1.25], bin_width=0.04)
-    display.display_fit_result(adcs, geom, index_var=1, limits=[1950., 2075.], bin_width=10.)
+    display.display_hist(adcs, geom, index_default=(700,), param_to_display=-1, limits=[1900., 2100.])
 
-    display.display_hist(adcs,  geom, index_default=(700,),param_to_display=1,limits = [1900.,2100.])
-    # display([adcs], geom, fit_hv_off.slice_func, norm='linear')
     input('press button to quit')
 
     return

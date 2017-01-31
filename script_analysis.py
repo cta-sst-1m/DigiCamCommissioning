@@ -2,10 +2,13 @@
 
 # external modules
 from optparse import OptionParser
-from  yaml import load
+from  yaml import load,dump
+import matplotlib.pyplot as plt
+import logging,sys
 
 #internal modules
 from utils import logger
+
 
 if __name__ == '__main__':
     """
@@ -53,11 +56,12 @@ if __name__ == '__main__':
     for key,val in options_yaml.items():
         if not ((key in options.__dict__.keys()) and (options.__dict__[key])):
             options.__dict__[key]=val
+        else:
+            options_yaml[key]=options.__dict__[key]
 
     __name__ = options.analysis_module
     # Start the loggers
     logger.initialise_logger( options )
-
     # load the analysis module
     analysis_module = __import__('analysis.%s'%options.analysis_module,
                                  locals=None,
@@ -65,17 +69,30 @@ if __name__ == '__main__':
                                  fromlist=[None],
                                  level=0)
 
+    # Some logging
+    log = logging.getLogger(sys.modules['__main__'].__name__)
+    log.info('\t\t----------------------------------------------------------------')
+    log.info('\t\t-|> Will run %s with the following configuration:'%options.analysis_module)
+    for key,val in options_yaml.items():
+        log.info('\t\t |--|> %s : \t %s'%(key,val))
+    log.info('\t\t-|')
+
     # Histogram creation
     if options.create_histo:
         # Call the histogram creation function
+        log.info('\t\t-|> Create the analysis histogram')
         analysis_module.create_histo(options)
 
     # Analysis of the histogram
     if options.perform_analysis:
         # Call the histogram creation function
+        log.info('\t\t-|> Perform the analysis')
         analysis_module.perform_analysis(options)
 
     # Display the results of the analysis
     if options.display_results:
+        # make the plots non blocking
+        plt.ion()
         # Call the histogram creation function
+        log.info('\t\t-|> Display the analysis results')
         analysis_module.display_results(options)
