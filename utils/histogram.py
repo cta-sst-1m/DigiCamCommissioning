@@ -20,7 +20,7 @@ class Histogram:
                  bin_center_min: int = 0,
                  bin_center_max: int = 1,
                  bin_width: int = 1, xlabel: str = 'x', ylabel: str = 'y', label: str = 'hist',
-                 filename: str = ''):
+                 filename: str = '', fit_only : bool = False):
 
         """
         Initialise method
@@ -44,9 +44,11 @@ class Histogram:
         """
         # Initialise the logger
         self.logger = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
-        print(filename)
         if filename:
-            self.load(filename)
+            if fit_only:
+                self.load_fit_results(filename)
+            else:
+                self.load(filename)
             return
 
         # Initialisation of the bin_centers
@@ -159,6 +161,7 @@ class Histogram:
             self.ylabel = np.copy(file['ylabel'][0])
             self.label = np.copy(file['label'][0])
             self.fit_result_label = np.copy(file['fit_result_label'])
+            self.logger.info('Loaded histogram from %s' % filename)
 
             file.close()
 
@@ -167,6 +170,34 @@ class Histogram:
             raise Exception(inst)
 
         return
+
+    def load_fit_results(self, filename):
+        """
+        Save the histogram and its properties in a npz file
+
+        :param filename: the full path of the saved histogram
+        :return:
+        """
+
+        if not os.path.isfile(filename):
+            self.logger.critical('%s does not exist' % filename)
+            raise FileNotFoundError
+        try:
+            file = np.load(filename)
+            self.fit_result = np.copy(file['fit_result'])
+            fit_func = None if file['fit_function_name'][0] == 'NoneType' else np.copy(file['fit_function_name'][0])
+            # noinspection PyAttributeOutsideInit
+            self.fit_function_name = fit_func
+            self.fit_chi2_ndof = np.copy(file['fit_chi2_ndof'])
+            self.fit_axis = np.copy(file['fit_axis'])
+            self.fit_result_label = np.copy(file['fit_result_label'])
+            file.close()
+        except Exception as inst:
+            self.logger.critical('Could not load fit results in %s' % filename, inst)
+            raise Exception(inst)
+
+        return
+
 
     def fill(self, value, indices=None):
         """
@@ -384,11 +415,10 @@ class Histogram:
         """
         # todo COMMENTS and treat the labels
         data_shape = list(self.data.shape)
-        print(self.fit_result.shape)
         data_shape.pop()
         data_shape = tuple(data_shape)
         self.fit_function = func
-        self.fit_result_label = labels_func
+        self.fit_result_label = labels_func()
         # self.fit_result = None
         # perform the fit of the 1D array in the last dimension
         count = 0
@@ -443,9 +473,6 @@ class Histogram:
                                                                        config=config[indices]),
                                                      fixed_param=list_fixed_param)
             # make sure sizes matches
-            print(indices)
-            print(self.fit_result[indices])
-            print(fit_res.shape[-2])
             if self.fit_result[indices].shape[-2] < fit_res.shape[-2]:
                 num_column_to_add = fit_res.shape[-2] - self.fit_result[indices].shape[-2]
                 additional_shape = list(self.fit_result.shape)
