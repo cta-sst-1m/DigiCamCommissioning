@@ -545,6 +545,10 @@ class Histogram:
                 text_fit_result += ' $\pm$ ' + str(np.round(self.fit_result[which_hist + (i, 1,)], precision))
                 text_fit_result += '\n'
 
+            text_fit_result += '$\chi^2$ = ' + str(np.round(self.fit_chi2_ndof[which_hist][0], precision)) + '\n'
+            text_fit_result += 'ndf = ' + str(np.round(self.fit_chi2_ndof[which_hist][1], precision)) + '\n'
+
+
         ax = axis
         if not axis:
             plt.figure()

@@ -1,6 +1,7 @@
 import numpy as np
 from ctapipe.calib.camera import integrators
 from ctapipe.io import zfits
+
 import logging
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
@@ -8,6 +9,7 @@ from utils.toy_reader import ToyReader
 
 # noinspection PyProtectedMember
 def run(hist, options, peak_positions=None):
+
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
