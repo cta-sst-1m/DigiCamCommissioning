@@ -4,6 +4,7 @@ from ctapipe.io import zfits
 import logging
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
+from utils.toy_reader import ToyReader
 
 # noinspection PyProtectedMember
 def run(hist, options, peak_positions=None):
@@ -19,12 +20,11 @@ def run(hist, options, peak_positions=None):
             break
         # Get the file
         _url = options.directory + options.file_basename % file
+        inputfile_reader = None
         if not options.mc:
-
-            inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=100000)
-
+            inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=len(options.scan_level)*options.events_per_level)
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list = [0], max_events=5000, n_pixel=options.n_pixels)
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=len(options.scan_level)*options.events_per_level, n_pixel=options.n_pixels)
 
         if options.verbose:
             log.debug('--|> Moving to file %s' % _url)
