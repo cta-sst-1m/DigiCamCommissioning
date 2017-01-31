@@ -14,12 +14,7 @@ log_file_basename : 20161214
 mc            :     False
 file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
 directory     :     /data/datasets/CTA/DATA/20161214/
-file_list     :
-    - 117
-    - 118
-    - 119
-    - 120
-    - 121
+file_list     :     [117,118,119,120,121]
 
 # Output files
 output_directory  : /data/datasets/CTA/20161214/FullChain/
@@ -28,7 +23,7 @@ hv_off_histo_filename    : adc_hv_off.npz
 
 # Event processing
 evt_max           : 50000
-n_evt_per_batch   : 1000
+n_evt_per_batch   : 500
 
 # Camera Configuration
 n_pixels          : 1296

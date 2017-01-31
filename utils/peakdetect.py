@@ -37,7 +37,7 @@ def cleaning_peaks( datain ,baseline,sigma):
 def spe_peaks_in_event_list( data, baseline,sigma ):
     peaks = []
     for pix in np.ndindex(data.shape[0]):
-        print("Progress {:2.1%}".format(pix[0] / data.shape[0]), end="\r")
+        #print("Progress {:2.1%}".format(pix[0] / data.shape[0]), end="\r")
         peaks.append([])
         for evt in np.ndindex(data.shape[1]):
             peaks[-1]+=cleaning_peaks(data[pix][evt],baseline[pix], sigma[pix])

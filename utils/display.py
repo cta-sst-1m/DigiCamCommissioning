@@ -147,7 +147,7 @@ def display_fit_result(hist, geom = None , index_var=1, limits=[0.,10.], bin_wid
     f.canvas.draw()
 
 
-def display_hist(hist, geom,index_default=(700,), param_to_display = 1, limits=None, draw_fit = False):
+def display_hist(hist, geom,index_default=(700,), param_to_display = -1, limits=None, draw_fit = False):
     """
 
     :return:
@@ -160,11 +160,17 @@ def display_hist(hist, geom,index_default=(700,), param_to_display = 1, limits=N
     vis_baseline.add_colorbar()
     vis_baseline.colorbar.set_label(hist.label)
     plt.subplot(1, 2, 1)
-
-    peak = hist.fit_result[...,param_to_display,0]
-    peak[np.isnan(peak)] = limits[0]
-    peak[peak < limits[0]] = limits[0]
-    peak[peak > limits[1]] = limits[1]
+    if param_to_display<0:
+        _bin_tmp = np.repeat(np.reshape(hist.bin_centers,(1,hist.bin_centers.shape[0])),hist.data.shape[-2],axis=0)
+        peak = np.average(_bin_tmp,axis=-1,weights=hist.data)
+        peak[np.isnan(peak)] = limits[0]
+        peak[peak < limits[0]] = limits[0]
+        peak[peak > limits[1]] = limits[1]
+    else:
+        peak = hist.fit_result[...,param_to_display,0]
+        peak[np.isnan(peak)] = limits[0]
+        peak[peak < limits[0]] = limits[0]
+        peak[peak > limits[1]] = limits[1]
 
     vis_baseline.axes.xaxis.get_label().set_ha('right')
     vis_baseline.axes.xaxis.get_label().set_position((1, 0))
