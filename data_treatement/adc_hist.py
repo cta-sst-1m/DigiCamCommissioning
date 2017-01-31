@@ -22,7 +22,6 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
 
     if not options.mc:
         logger.info('Running on DigiCam data')
-        print(logger)
     else:
         logger.info('Running on MC data')
 
