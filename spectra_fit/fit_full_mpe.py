@@ -19,6 +19,7 @@ def p0_func(y, x, *args,n_peaks = 22,config=None, **kwargs):
     :param kwargs:
     :return: starting points for []
     """
+    # TODO update with auto determination of the peaks
 
     if type(config).__name__=='NoneType' or len(np.where(y != 0)[0])<2:
         gain = baseline = sigma_e = sigma_1 = amplitude = np.nan
@@ -109,3 +110,13 @@ def fit_func(p, x ,*args, **kwargs):
     """
     return gaussian_sum(p, x)
 
+# noinspection PyUnusedLocal,PyUnusedLocal
+def labels_func(*args,n_peaks = 22, **kwargs):
+    """
+    List of labels for the parameters
+    :return:
+    """
+    label = ['Baseline [ADC]', 'Gain [ADC / p.e.]', '$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]']
+    for p in range(n_peaks):
+        label+=['Amplitude_%d'%p]
+    return np.array(label)
