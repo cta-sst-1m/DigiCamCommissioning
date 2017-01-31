@@ -1,5 +1,5 @@
 # Analysis module
-analysis_module : analyse_adc_dark
+analysis_module : analyse_synchro
 
 # Steering
 create_histo      : False
@@ -14,22 +14,20 @@ log_file_basename : 20161214
 mc            :     False
 file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
 directory     :     /data/datasets/CTA/DATA/20161214/
-file_list     :     [117,118,119,120,121]
+file_list     :     [124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149]
 
 # Output files
 output_directory  : /data/datasets/CTA/20161214/FullChain/
-histo_filename    : adc_hv_on.npz
+histo_filename    : peaks.npz
 
 # Event processing
-evt_max           : 50000
-n_evt_per_batch   : 300
+evt_max           : 5000*25
+evt_min   : 5000*10
 
 # Camera Configuration
 n_pixels          : 1296
 
 # Plot configuration
-adcs_min           : 0
-adcs_max           : 4095
-adcs_binwidth      : 1
+sample_max           : 50
 
 

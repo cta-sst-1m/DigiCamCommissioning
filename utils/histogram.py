@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.optimize
 from numpy.linalg import inv
-
+from tqdm import tqdm
+from utils.logger import TqdmToLogger
 
 class Histogram:
     """
@@ -423,8 +424,14 @@ class Histogram:
         # perform the fit of the 1D array in the last dimension
         count = 0
         indices_list = np.ndindex(data_shape)
+        pbar = tqdm(total=np.prod(data_shape))
         if limited_indices:
+            pbar = tqdm(total=len(limited_indices))
             indices_list = limited_indices
+
+        if not force_quiet:
+            tqdm_out = TqdmToLogger(self.logger, level=logging.INFO)
+
         for indices in indices_list:
             if type(self.fit_result).__name__ != 'ndarray' or self.fit_result.shape == ():
                 if type(config).__name__ != 'ndarray':
@@ -436,9 +443,7 @@ class Histogram:
 
             if type(self.fit_chi2_ndof).__name__ != 'ndarray' or self.fit_chi2_ndof.shape == ():
                 self.fit_chi2_ndof = np.ones(data_shape + (2,)) * np.nan
-
-            if not force_quiet:
-                print("Fit Progress {:2.1%}".format(count / np.prod(data_shape)), end="\r")
+            pbar.update(1)
             count += 1
             # noinspection PyUnusedLocal
             fit_res = None
