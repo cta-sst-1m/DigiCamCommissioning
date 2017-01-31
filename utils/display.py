@@ -36,9 +36,13 @@ def display_fit_result(hist, geom = None , index_var=1, limits=[0.,10.], bin_wid
         f, ax = plt.subplots(1, 1, figsize=(10, 7))
         plt.subplot(1, 1, 1)
     # Create the variable histogram
-    hh, bin_tmp = np.histogram(h, bins=np.arange(limits[0] - bin_width / 2, limits[2] + 1.5 * bin_width, bin_width),)
-    plt.step(hh,axis=np.arange(limits[0], limits[1] + bin_width, bin_width),label='All pixels',color='k',lw='1')
-    plt.errorbar(np.arange(limits[0], limits[1] + bin_width, hh, bin_width),yerr = np.sqrt(hh))
+    hh, bin_tmp = np.histogram(h, bins=np.arange(limits[0] - bin_width / 2, limits[1] + 1.5 * bin_width, bin_width),)
+    hh_err = np.sqrt(hh)
+    hh_err[hh==0]=1
+    plt.step(np.arange(limits[0] + bin_width / 2 , limits[1] + 1.5 * bin_width, bin_width),hh,label='All pixels',color='k',lw='1')
+    plt.errorbar(np.arange(limits[0], limits[1] + bin_width,  bin_width),hh,yerr = hh_err ,fmt='ok')
     plt.xlabel(hist.fit_result_label[index_var])
     plt.ylabel('$\mathrm{N_{pixel}/%.2f}$' % bin_width)
+    plt.xlim(limits[0]+bin_width / 2,limits[1]+bin_width / 2)
+    plt.ylim(np.min(hh),np.max(hh[1:-1])*1.25)
     plt.show()

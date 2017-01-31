@@ -67,7 +67,7 @@ def perform_analysis(options):
              labels_func=fit_hv_off.labels_func)
 
     # Save the fit
-    adcs.save(options.output_directory + options.fit_filename)
+    adcs.save(options.output_directory + options.histo_filename)
 
     # Delete the histograms
     del adcs
@@ -89,8 +89,8 @@ def display_results(options):
     geom = geometry.generate_geometry_0()
 
     # Perform some plots
-    display.display_fit_result(adcs, geom, index_var=2, limits=[0., 2.], bin_width=0.05)
-    display.display_fit_result(adcs, geom, index_var=1, limits=[1950., 2050.], bin_width=10.)
+    display.display_fit_result(adcs, geom, index_var=2, limits=[0.85, 1.25], bin_width=0.04)
+    display.display_fit_result(adcs, geom, index_var=1, limits=[1950., 2075.], bin_width=10.)
 
     # display([adcs], geom, fit_hv_off.slice_func, norm='linear')
     input('press button to quit')
