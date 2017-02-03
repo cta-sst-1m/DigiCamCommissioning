@@ -25,7 +25,7 @@ def run(hists, options, peak_positions=None, data_type='r1'):
                 raise IndexError('weights and file_list must be of same length, got ', len(options.weights), ' and ' , len(options.file_list))
             #print (options.weights)
             weight = options.weights[index_file]/np.sum(options.weights)
-            inputfile_reader = ToyReader(filename=_url, id_list = [0], max_events=5000, n_pixel=options.n_pixels, weights=weight)
+            inputfile_reader = ToyReader(filename=_url, id_list = [0], max_events=options.evt_max, n_pixel=options.n_pixels, weights=weight)
 
         if options.verbose:
             print('--|> Moving to file %s' % _url)

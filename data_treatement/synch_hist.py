@@ -18,7 +18,7 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
         else:
 
             weight = options.weights[index_file] / np.sum(options.weights)
-            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=5000, n_pixel=options.n_pixels, weights=weight)
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=options.evt_max, n_pixel=options.n_pixels, weights=weight)
 
 
         if options.verbose:
@@ -38,8 +38,9 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
                 # get the data
                 data = np.array(list(event.r1.tel[telid].adc_samples.values()))
                 # subtract the pedestals
-                data = data
-                hist.fill(np.argmax(data, axis=1))
+                data_max = np.argmax(data, axis=1) #TODO Skip level 0 to avoid biais on position finding
+                #if (data_max-np.argmin(data, axis=1))/data_max>0.2:
+                hist.fill(data_max)
 
     # Update the errors
     # noinspection PyProtectedMember

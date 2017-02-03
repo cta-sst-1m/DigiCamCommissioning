@@ -205,14 +205,17 @@ class Histogram:
                 out = scipy.optimize.least_squares(residual, reduced_p0, args=(
                     self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]],
                     self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]],
-                    self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]]), bounds=reduced_bounds)
+                    self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]]), bounds=reduced_bounds, tr_solver='exact', jac='3-point')
                 # noinspection PyUnresolvedReferences
                 val = out.x
                 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
                 chi2 = np.sum(out.fun * out.fun)
                 try:
                     # noinspection PyUnresolvedReferences,PyUnresolvedReferences
-                    cov = np.sqrt(np.diag(inv(np.dot(out.jac.T, out.jac))))
+
+                    #print(out.jac.shape)
+                    weight_matrix = np.diag(1./self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]])
+                    cov = np.sqrt(np.diag(inv(np.dot(np.dot(out.jac.T, weight_matrix), out.jac))))
                     fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
                 except np.linalg.linalg.LinAlgError as inst:
                     if verbose:
@@ -368,11 +371,12 @@ class Histogram:
         if not axis:
             plt.figure()
             ax = plt
-
         ax.errorbar(self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]],
                     self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]],
                     yerr=self.errors[which_hist][slice_list[0]:slice_list[1]:slice_list[2]],
-                    fmt='o' + color, label=self.label)
+                    fmt='o',
+                    color=color,
+                    label=self.label)
         if show_fit:
             reduced_axis = self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]
             fit_axis = np.arange(reduced_axis[0], reduced_axis[-1], float(reduced_axis[1] - reduced_axis[0]) / 10)

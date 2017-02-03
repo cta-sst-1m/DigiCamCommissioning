@@ -3,6 +3,8 @@ import utils.pdf
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 
+#TODO Find p0, slice, bounds, from args=(y,x) if config==None
+
 
 # noinspection PyUnusedLocal,PyUnusedLocal
 def p0_func(y, x, *args, config=None, **kwargs):
@@ -87,3 +89,7 @@ def fit_func(p, x,*args,**kwargs):
     """
     [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset] = p
     return amplitude * utils.pdf.gaussian(x, sigma_e * gain ,  mu * (1+mu_xt) * gain + baseline)
+
+def jac_func(x, *args, **kwargs):
+
+    return #TODO compute jacobian matrix

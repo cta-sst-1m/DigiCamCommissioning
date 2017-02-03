@@ -8,6 +8,8 @@ import numpy as np
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 
+#TODO Find p0, slice, bounds, from args=(y,x) if config==None
+
 
 # noinspection PyUnusedLocal,PyUnusedLocal,PyTypeChecker,PyTypeChecker
 def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
@@ -30,16 +32,17 @@ def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
         #xmin,xmax =  x[np.where(y != 0)[0][1]], x[np.where(y != 0)[0][-1]]
         xmin,xmax =  x[np.where(y != 0)[0][0]], x[np.where(y != 0)[0][-1]]
         # Get the gain, sigma_e, sigma_1 and baseline
-        param += [10.] #[config[0,0]] #baseline
+        param += [2010.] #[config[0,0]] #baseline
+        #param += [config[0,0]] #baseline
         #param += [config[1,0]*1.05] #gain
         #param += [config[2,0]] #sigma_e
         #param += [config[3,0]] #sigma_1
         param += [5.6] #gain
-        param += [1.12] #[config[2,0]] #sigma_e
-        param += [0.56] #[config[3,0]] #sigma_1
+        param += [0.86] #[config[2,0]] #sigma_e
+        param += [0.48] #[config[3,0]] #sigma_1
         #param += [0.9] #sigma_e
         #param += [0.5] #sigma_1
-        param += [2.24]
+        #param += [2.24]
         # Fit only the first 15 peaks, give 17 gaussian
         amplitudes = [np.sum(y)/n_peaks] * n_peaks
         param += amplitudes
@@ -57,21 +60,22 @@ def slice_func(y, x, *args,config=None, **kwargs):
     :return: the index to slice the Histogram
     """
 
-    if True:
-        return [11, 30, 1] #### ATENTNENT ###
+    #if True:
+    #    return [2000, 2100, 1] #### ATENTNENT ###
 
     # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] < 2:
         return [0, 1, 1]
-    xmax_hist_for_fit = 1000 #config[0,0] + 20 * config[1,0] * 1.1
-    if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
-        return [0, 1, 1]
+    #xmax_hist_for_fit = 1000 #config[0,0] + 20 * config[1,0] * 1.1
+    #if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
+        #return [0, 1, 1]
     #return [np.where(y != 0)[0][1], np.where(x < xmax_hist_for_fit)[0][-1], 1]
-    return [np.where(y != 0)[0][0], np.where(x < xmax_hist_for_fit)[0][-1], 1]
+    #return [np.where(y != 0)[0][0], np.where(x < xmax_hist_for_fit)[0][-1], 1]
+    return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal
-def bounds_func(*args,n_peaks = 22, config=None, **kwargs):
+def bounds_func(y, x, *args,n_peaks = 22, config=None, **kwargs):
     """
     return the boundaries for the parameters (essentially none for a gaussian)
     :param args:
@@ -80,8 +84,8 @@ def bounds_func(*args,n_peaks = 22, config=None, **kwargs):
     """
     bound_min,bound_max = [],[]
 
-    bound_min += [8] #[config[0, 0]-2*config[2, 0]]  # baseline-sigma
-    bound_max += [12]#[config[0, 0]+2*config[2, 0]]  # baseline+sigma
+    bound_min += [2005] #[config[0, 0]-2*config[2, 0]]  # baseline-sigma
+    bound_max += [2020]#[config[0, 0]+2*config[2, 0]]  # baseline+sigma
     '''
     bound_min += [0.9*5.6]  # 0.8*gain
     bound_max += [1.1*5.6]  # 1.2*gain
@@ -101,8 +105,8 @@ def bounds_func(*args,n_peaks = 22, config=None, **kwargs):
     bound_min += [0.1]#[0.2*config[3, 0]]  # 0.2*sigma_1
     bound_max += [2.]#[3.333*config[3, 0]]  # 5.*sigma_1
 
-    bound_min += [0]#offset
-    bound_max += [5.6]#offset
+    #bound_min += [0]#offset
+    #bound_max += [5.6]#offset
 
 
     bound_min += [0.] * n_peaks
@@ -118,4 +122,10 @@ def fit_func(p, x ,*args, **kwargs):
     :return: G(x)
     """
     return gaussian_sum(p, x)
+
+def jac_func(x, *args, **kwargs):
+
+    #TODO Compute jacobian matrix
+
+    return
 

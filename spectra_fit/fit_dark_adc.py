@@ -3,6 +3,7 @@ from utils.pdf import multi_gaussian_with0
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 
+#TODO Find p0, slice, bounds, from args=(y,x) if config==None
 
 # noinspection PyShadowingNames,PyUnusedLocal,PyUnusedLocal
 def p0_func(*args, config=None, **kwargs):

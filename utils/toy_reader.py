@@ -20,7 +20,7 @@ class r1:
         self.tel[telid].eventNumber = evtnum
         self.tel[telid].adc_samples = {i: adcs[i] for i in range(len(adcs))}
 
-class ToyReader:
+class ToyReader: # create a reader as asked
     def __init__(self, filename='../../digicamtoy/data_calibration_cts/toy_data_', id_list = [0], max_events=50000, n_pixel=1296, weights=1., seed=0):
         self.count = 0
         self.event_id = 0
@@ -31,11 +31,8 @@ class ToyReader:
         self.filename = filename
         self.n_pixel = n_pixel
         self.hdf5_file = h5py.File(self.filename, 'r')
-        self.weights = weights / np.sum(weights)
+        self.weights = weights
         self.seed = seed
-
-        print (weights)
-        print (self.weights)
         np.random.seed(seed=self.seed)
 
 
