@@ -21,7 +21,7 @@ def initialise_logger(options):
     ch.setLevel(level= logging.INFO if options.verbose else logging.DEBUG)
     # define format
     formatter_fh = logging.Formatter('%(asctime)s | %(levelname)s | %(name)s : \t %(message)s')
-    formatter_ch = logging.Formatter('%(levelname)s:%(name)s: \t %(message)s')
+    formatter_ch = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
     fh.setFormatter(formatter_fh)
     ch.setFormatter(formatter_ch)
     # add the handlers to the logger

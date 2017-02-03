@@ -26,7 +26,7 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
             inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=max_evt, n_pixel=options.n_pixels)
 
         if options.verbose:
-            print('--|> Moving to file %s' % _url)
+            log.debug('--|> Moving to file %s' % _url)
         # Loop over event in this file
         for event in inputfile_reader:
             if evt_num < min_evt:
@@ -40,9 +40,6 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
             for telid in event.r1.tels_with_data:
                 evt_num += 1
                 if evt_num > max_evt: break
-                if options.verbose and event.r1.event_id % 1000 == 0:
-                    print("Progress {:2.1%}".format(
-                        evt_num / max_evt), end="\r")
                 # get the data
                 data = np.array(list(event.r1.tel[telid].adc_samples.values()))
                 # subtract the pedestals

@@ -60,25 +60,38 @@ def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pi
     # Get the data and assign limits
     h = np.copy(hist.data[index])
     h_err = np.copy(hist.errors[index])
+    print(h_err)
     if not limits:
         limits = [hist.bin_centers[np.where(hist.data[index] != 0)[0][1]],
                   hist.bin_centers[np.where( hist.data[index] != 0)[0][-1]]]
     #h[np.isnan(h_err)] = limits[0]
     #h[h < limits[0]] = limits[0]
     #h[h > limits[1]] = limits[1]
+    h = h[limits[0]:limits[1]:1]
+    h_err = h_err[limits[0]:limits[1]:1]
     slice_list = limits+[1]
     # Plot it on the axis
-    axis.errorbar(hist.bin_centers, h, yerr=h_err, fmt='ok',label=label%index[-1])
+    axis.errorbar(hist.bin_centers[limits[0]:limits[1]:1], h, yerr=h_err, fmt='ok',label=label%index[-1])
     if not draw_fit:
-        axis.step(hist.bin_centers+0.5*hist.bin_width, h, color='k', lw='1')
+        axis.step(hist.bin_centers[limits[0]:limits[1]:1]+0.5*hist.bin_width, h, color='k', lw='1')
     else :
         reduced_axis = hist.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]
         fit_axis = np.arange(reduced_axis[0], reduced_axis[-1], float(reduced_axis[1] - reduced_axis[0]) / 10)
         reduced_func = hist.fit_function
         #if type(config).__name__ == 'ndarray':
         #    reduced_func = lambda p, x: self.fit_function(p, x, config=config[which_hist])
-        #ax.plot(fit_axis, reduced_func(self.fit_result[which_hist][:, 0], fit_axis), label='fit', color='r')
-        #ax.text(x_text, y_text, text_fit_result)
+        axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
+        text_fit_result = '$\chi^{2}/ndf = %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
+
+        for i in range(hist.fit_result.shape[-2]):
+            if (i > hist.fit_result_label.shape[0]-1): continue #TODO log it in debug
+            label = hist.fit_result_label[i]
+            if label.count('Amplitude')>0: continue
+            text_fit_result += str(label) + ' : ' + str(
+                np.round(hist.fit_result[index + (i, 0,)],  int(2)))
+            text_fit_result += ' $\pm$ ' + str(np.round(hist.fit_result[index + (i, 1,)], int(3)))
+            text_fit_result += '\n'
+        axis.text((limits[1]-limits[0])/2 +limits[0] ,  (np.max(h[1:-1]) * 1.25 - np.min(h))/2+np.min(h), text_fit_result)
     # Beautify
     axis.set_xlabel(hist.xlabel)
     axis.set_ylabel(hist.ylabel)
@@ -147,7 +160,7 @@ def display_fit_result(hist, geom = None , index_var=1, limits=[0.,10.], bin_wid
     f.canvas.draw()
 
 
-def display_hist(hist, geom,index_default=(700,), param_to_display = -1, limits=None, draw_fit = False):
+def display_hist(hist, geom,index_default=(700,), param_to_display = -1, limits=None,limitsCam=None, draw_fit = False):
     """
 
     :return:
@@ -155,28 +168,30 @@ def display_hist(hist, geom,index_default=(700,), param_to_display = -1, limits=
     fig, ax = plt.subplots(1, 2, figsize=(30, 10))
     plt.subplot(1, 2, 1)
     pickable_figures = [draw_hist]
-    vis_baseline = pickable_visu(hist, fig, ax[1], pickable_figures, limits
-                                 ,draw_fit , geom, title='', norm='lin')
+    vis_baseline = pickable_visu(hist, fig, ax[1], pickable_figures, limits,draw_fit , geom, title='', norm='lin')
     vis_baseline.add_colorbar()
     vis_baseline.colorbar.set_label(hist.label)
     plt.subplot(1, 2, 1)
+
     if param_to_display<0:
         _bin_tmp = np.repeat(np.reshape(hist.bin_centers,(1,hist.bin_centers.shape[0])),hist.data.shape[-2],axis=0)
+        hist.data[hist.data==0]=1e-10
         peak = np.average(_bin_tmp,axis=-1,weights=hist.data)
-        peak[np.isnan(peak)] = limits[0]
-        peak[peak < limits[0]] = limits[0]
-        peak[peak > limits[1]] = limits[1]
+        peak[np.isnan(peak)] = limitsCam[0]
+        peak[peak < limitsCam[0]] = limitsCam[0]
+        peak[peak > limitsCam[1]] = limitsCam[1]
     else:
-        peak = hist.fit_result[...,param_to_display,0]
-        peak[np.isnan(peak)] = limits[0]
-        peak[peak < limits[0]] = limits[0]
-        peak[peak > limits[1]] = limits[1]
+        peak = np.copy(hist.fit_result[...,param_to_display,0])
+        peak[np.isnan(peak)] = limitsCam[0]
+        peak[peak < limitsCam[0]] = limitsCam[0]
+        peak[peak > limitsCam[1]] = limitsCam[1]
 
     vis_baseline.axes.xaxis.get_label().set_ha('right')
     vis_baseline.axes.xaxis.get_label().set_position((1, 0))
     vis_baseline.axes.yaxis.get_label().set_ha('right')
     vis_baseline.axes.yaxis.get_label().set_position((0, 1))
     vis_baseline.image = peak
+
     # noinspection PyProtectedMember
     fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
     vis_baseline.on_pixel_clicked(index_default[0])

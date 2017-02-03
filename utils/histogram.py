@@ -9,6 +9,7 @@ from numpy.linalg import inv
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 
+
 class Histogram:
     """
     A simple class to hold histograms data, manipulate and fit them
@@ -91,6 +92,8 @@ class Histogram:
         self.fit_result_label = None
         self.fit_chi2_ndof = None
         self.fit_function = None
+        self.fit_function_name = ''
+        self.fit_function_class = ''
         self.fit_axis = None
         self.xlabel = xlabel
         self.ylabel = ylabel
@@ -108,7 +111,6 @@ class Histogram:
             self.logger.critical('%s does not exist' % os.path.dirname(filename))
             raise FileNotFoundError
         try:
-            fit_func = 'NoneType' if not self.fit_function else self.fit_function.__name__
             np.savez_compressed(filename,
                                 data=self.data,
                                 bin_centers=self.bin_centers,
@@ -118,7 +120,7 @@ class Histogram:
                                 underflow=self.underflow,
                                 overflow=self.overflow,
                                 fit_result=self.fit_result,
-                                fit_function_name=np.array([fit_func]),
+                                fit_function_name=np.array([self.fit_function_class,self.fit_function_name]),
                                 fit_chi2_ndof=self.fit_chi2_ndof,
                                 fit_axis=self.fit_axis,
                                 xlabel=np.array([self.xlabel]),
@@ -144,28 +146,34 @@ class Histogram:
 
         try:
             file = np.load(filename)
-
-            self.data = np.copy(file['data'])
-            self.bin_centers = np.copy(file['bin_centers'])
-            self.bin_edges = np.copy(file['bin_edges'])
-            self.bin_width = np.copy(file['bin_width'][0])
-            self.errors = np.copy(file['errors'])
-            self.underflow = np.copy(file['underflow'])
-            self.overflow = np.copy(file['overflow'])
-            self.fit_result = np.copy(file['fit_result'])
-            fit_func = None if file['fit_function_name'][0] == 'NoneType' else np.copy(file['fit_function_name'][0])
-            # noinspection PyAttributeOutsideInit
-            self.fit_function_name = fit_func
-            self.fit_chi2_ndof = np.copy(file['fit_chi2_ndof'])
-            self.fit_axis = np.copy(file['fit_axis'])
-            self.xlabel = np.copy(file['xlabel'][0])
-            self.ylabel = np.copy(file['ylabel'][0])
-            self.label = np.copy(file['label'][0])
-            self.fit_result_label = np.copy(file['fit_result_label'])
+            self.data = file['data']
+            self.bin_centers = file['bin_centers']
+            self.bin_edges = file['bin_edges']
+            self.bin_width = file['bin_width'][0]
+            self.errors = file['errors']
+            self.underflow = file['underflow']
+            self.overflow = file['overflow']
+            self.fit_result = file['fit_result']
+            if file['fit_function_name'].shape[0]<2 :
+                self.fit_function_name = ''
+                self.fit_function_class = ''
+                self.fit_function = None
+            else:
+                self.fit_function_name = file['fit_function_name'][1]
+                self.fit_function_class = file['fit_function_name'][0]
+                if self.fit_function_name != '':
+                    _fit_function = __import__(self.fit_function_class,locals=None,globals=None,fromlist=[None],level=0)
+                    self.fit_function = getattr(_fit_function,self.fit_function_name)
+                else:
+                    self.fit_function = None
+            self.fit_chi2_ndof = file['fit_chi2_ndof']
+            self.fit_axis = file['fit_axis']
+            self.xlabel = file['xlabel'][0]
+            self.ylabel = file['ylabel'][0]
+            self.label = file['label'][0]
+            self.fit_result_label = file['fit_result_label']
             self.logger.info('Loaded histogram from %s' % filename)
-
             file.close()
-
         except Exception as inst:
             self.logger.critical('Could not load %s' % filename, inst)
             raise Exception(inst)
@@ -185,13 +193,25 @@ class Histogram:
             raise FileNotFoundError
         try:
             file = np.load(filename)
-            self.fit_result = np.copy(file['fit_result'])
-            fit_func = None if file['fit_function_name'][0] == 'NoneType' else np.copy(file['fit_function_name'][0])
-            # noinspection PyAttributeOutsideInit
-            self.fit_function_name = fit_func
-            self.fit_chi2_ndof = np.copy(file['fit_chi2_ndof'])
-            self.fit_axis = np.copy(file['fit_axis'])
-            self.fit_result_label = np.copy(file['fit_result_label'])
+            self.fit_result = file['fit_result']
+
+            if file['fit_function_name'].shape[0]<2 :
+                self.fit_function_name = ''
+                self.fit_function_class = ''
+                self.fit_function = None
+            else:
+                self.fit_function_name = file['fit_function_name'][1]
+                self.fit_function_class = file['fit_function_name'][0]
+                if self.fit_function_name != '':
+                    _fit_function = __import__(self.fit_function_class,locals=None,globals=None,fromlist=[None],level=0)
+                    self.fit_function = getattr(_fit_function,self.fit_function_name)
+                else:
+                    self.fit_function = None
+
+            self.fit_chi2_ndof = file['fit_chi2_ndof']
+            self.fit_axis = file['fit_axis']
+            self.fit_result_label = file['fit_result_label']
+            self.logger.info('Loaded fit results only from %s' % filename)
             file.close()
         except Exception as inst:
             self.logger.critical('Could not load fit results in %s' % filename, inst)
@@ -305,7 +325,7 @@ class Histogram:
         self.errors = np.sqrt(self.data)
         self.errors[self.errors == 0.] = 1.
 
-    def _axis_fit(self, idx, func, p0, slice_list=None, bounds=None, fixed_param=None):
+    def _axis_fit(self, idx, func, p0, slice_list=None, bounds=None, fixed_param=None, force_quiet=None):
         """
         Perform a fit on this specific Histogram
 
@@ -361,30 +381,48 @@ class Histogram:
         else:
             if not slice_list:
                 slice_list = [0, self.bin_centers.shape[0] - 1, 1]
-            ndof = (slice_list[1] - slice_list[0]) / slice_list[2] - len(reduced_p0)
+            ndof = self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]\
+                       [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])].shape[0]\
+                   - len(reduced_p0)
             chi2 = np.nan
             try:
                 residual = lambda p, x, y, y_err: self._residual(reduced_func, p, x, y, y_err)
                 out = scipy.optimize.least_squares(residual, reduced_p0, args=(
-                    self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]],
-                    self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]],
-                    self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]]), bounds=reduced_bounds)
+                    self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]\
+                        [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])],
+                    self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]]\
+                        [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])],
+                    self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]] \
+                        [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])]),
+                                                   bounds=reduced_bounds)
                 # noinspection PyUnresolvedReferences
                 val = out.x
                 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
                 chi2 = np.sum(out.fun * out.fun)
                 try:
                     # noinspection PyUnresolvedReferences,PyUnresolvedReferences
+                    weight_matrix = np.diag(1. / self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]] \
+                        [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])])
+
+                    cov = np.sqrt(np.diag(inv(np.dot(np.dot(out.jac.T, weight_matrix), out.jac))))
+                    fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
+
+
+
                     cov = np.sqrt(np.diag(inv(np.dot(out.jac.T, out.jac))))
                     fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
                 except np.linalg.linalg.LinAlgError as inst:
-                    self.logger.warning('Could not compute error in the fit of', idx)
-                    self.logger.debug(inst)
+                    _idx = idx if isinstance(idx,int) else idx[-1]
+                    if force_quiet:
+                        self.logger.debug('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
+                    else:
+                        self.logger.warning('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
+
                     fit_result = np.append(val.reshape(val.shape + (1,)), np.ones((len(reduced_p0), 1)) * np.nan,
                                            axis=1)
 
             except Exception as inst:
-                self.logger.error('Could not fit index', idx)
+                self.logger.error('Could not fit index %s'%idx[-1])
                 self.logger.error(inst)
                 self.logger.debug('p0:', reduced_p0)
                 self.logger.debug('bound min:', reduced_bounds[0])
@@ -414,22 +452,27 @@ class Histogram:
         :param func:
         :return:
         """
+
         # todo COMMENTS and treat the labels
         data_shape = list(self.data.shape)
         data_shape.pop()
         data_shape = tuple(data_shape)
+        self.fit_function_class = func.__module__
+        self.fit_function_name  = func.__name__
         self.fit_function = func
         self.fit_result_label = labels_func()
         # self.fit_result = None
         # perform the fit of the 1D array in the last dimension
         count = 0
         indices_list = np.ndindex(data_shape)
-        pbar = tqdm(total=np.prod(data_shape))
+        pbar = None
         if limited_indices:
-            pbar = tqdm(total=len(limited_indices))
             indices_list = limited_indices
 
         if not force_quiet:
+            pbar = tqdm(total=np.prod(data_shape))
+            if limited_indices:
+                pbar = tqdm(total=len(limited_indices))
             tqdm_out = TqdmToLogger(self.logger, level=logging.INFO)
 
         for indices in indices_list:
@@ -443,7 +486,8 @@ class Histogram:
 
             if type(self.fit_chi2_ndof).__name__ != 'ndarray' or self.fit_chi2_ndof.shape == ():
                 self.fit_chi2_ndof = np.ones(data_shape + (2,)) * np.nan
-            pbar.update(1)
+            if not force_quiet:
+                pbar.update(1)
             count += 1
             # noinspection PyUnusedLocal
             fit_res = None
@@ -460,12 +504,14 @@ class Histogram:
 
             if type(config).__name__ != 'ndarray':
                 fit_res, chi2, ndof = self._axis_fit(indices, func,
-                                                     p0_func(self.data[indices], self.bin_centers, config=None),
-                                                     slice_list=slice_func(self.data[indices], self.bin_centers,
+                                                     p0_func(self.data[indices], self.bin_centers,
+                                                             config=None),
+                                                     slice_list=slice_func(self.data[indices],
+                                                                           self.bin_centers,
                                                                            config=None),
                                                      bounds=bound_func(self.data[indices], self.bin_centers,
                                                                        config=None),
-                                                     fixed_param=list_fixed_param)
+                                                     fixed_param=list_fixed_param,force_quiet=force_quiet)
 
             else:
                 func_reduced = lambda _p, x: func(_p, x, config=config[indices])
@@ -476,7 +522,7 @@ class Histogram:
                                                                            config=config[indices]),
                                                      bounds=bound_func(self.data[indices], self.bin_centers,
                                                                        config=config[indices]),
-                                                     fixed_param=list_fixed_param)
+                                                     fixed_param=list_fixed_param,force_quiet=force_quiet)
             # make sure sizes matches
             if self.fit_result[indices].shape[-2] < fit_res.shape[-2]:
                 num_column_to_add = fit_res.shape[-2] - self.fit_result[indices].shape[-2]
