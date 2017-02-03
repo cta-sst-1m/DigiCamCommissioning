@@ -103,6 +103,7 @@ def perform_analysis(options):
     mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
                   reduced_bounds, config=prev_fit_result, labels_func=fit_full_mpe.labels_func)#,limited_indices=(4,))
 
+
     # get the bad fits
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' +  __name__)
     log.info('\t-|> Try to correct the pixels with wrong fit results')
