@@ -41,6 +41,11 @@ def create_histo(options):
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' +  __name__)
     log.info('\t-|> Get various inputs')
 
+    # recover previous fit
+    spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename,fit_only=True)
+    prev_fit_result = np.copy(spes_fit.fit_result)
+    del spes_fit
+
     # Define the histograms
     mpes = histogram.Histogram(filename = options.output_directory + options.mpes_histo_filename)
 
@@ -59,9 +64,10 @@ def create_histo(options):
             # put the slice or remove empty bins
             s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
             if s[0]==s[1]:continue
-            mpe_tmp = np.copy(mpes.data[i,j, s[0]:s[1]:1])
-            mpe_tmp[mpe_tmp < 1e-6] = 1e-6
-            mean = np.average(mpes.bin_centers[s[0]:s[1]:1],weights=mpe_tmp)
+            mpe_tmp = mpes.data[i,j]
+            mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
+                              weights=mpe_tmp[np.nonzero(mpe_tmp)])-prev_fit_result[j,0,0]
+
             if mean < 5 : continue
             mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
 
