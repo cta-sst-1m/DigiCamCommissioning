@@ -34,7 +34,6 @@ def p0_func(y, x, *args, config=None, **kwargs):
 
 
     if np.isnan(config[1, 0]):
-        #print('mu is nan')
         return param
 
 
@@ -88,7 +87,6 @@ def p0_func(y, x, *args, config=None, **kwargs):
     if not( param[0]<np.inf): param[0]=100.
     if param[0]<0.: param[0]=0.01
     if not(param[2])<np.inf : param[2]=1.
-    #print(param[0])
     return param
 
 
@@ -167,6 +165,14 @@ def fit_func(p, x, *args, **kwargs):
         #temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(x, sigma_n, n * gain + (offset if n!=0 else 0))
 
     return temp * amplitude
+
+def label_func(*args, ** kwargs):
+    """
+    List of labels for the parameters
+    :return:
+    """
+    label = ['#mu', 'P(XT)', 'Gain','Baseline','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]','Amplitude']
+    return np.array(label)
 
 if __name__ == '__main__':
 

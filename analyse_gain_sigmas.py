@@ -5,10 +5,8 @@ from utils.plots import pickable_visu_mpe,pickable_visu_led_mu
 from utils.pdf import mpe_distribution_general,mpe_distribution_general_sh
 from optparse import OptionParser
 from utils.histogram import Histogram
-import peakutils
 from matplotlib import pyplot as plt
 import numpy as np
-from scipy.optimize import curve_fit
 from data_treatement import mpe_hist,synch_hist
 from utils.plots import pickable_visu
 from spectra_fit import fit_low_light,fit_full_mpe
