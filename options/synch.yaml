@@ -21,8 +21,8 @@ output_directory  : /data/datasets/CTA/20161214/FullChain/
 histo_filename    : peaks.npz
 
 # Event processing
-evt_max           : 5000*25
-evt_min   : 5000*10
+evt_max           : 100000
+evt_min   : 50000
 
 # Camera Configuration
 n_pixels          : 1296

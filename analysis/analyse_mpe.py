@@ -41,10 +41,10 @@ def create_histo(options):
 
     # Define the histograms
     mpes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
-                               bin_width=options.adcs_binwidth, data_shape=(options.scan_level.shape,options.n_pixels,),
+                               bin_width=options.adcs_binwidth, data_shape=(len(options.scan_level),options.n_pixels,),
                                label='MPE',xlabel='Peak ADC',ylabel = '$\mathrm{N_{entries}}$')
     # Get the reference sampling time
-    peaks = histogram.Histogram(options.output_directory + options.synch_histo_filename)
+    peaks = histogram.Histogram(filename = options.output_directory + options.synch_histo_filename)
     mpe_hist.run(mpes, options, peak_positions= peaks.data)
 
     # Save the histogram
