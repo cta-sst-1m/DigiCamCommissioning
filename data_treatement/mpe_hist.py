@@ -8,6 +8,7 @@ from utils.toy_reader import ToyReader
 
 # noinspection PyProtectedMember
 def run(hist, options, peak_positions=None):
+
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
