@@ -8,9 +8,11 @@ import numpy as np
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 
+#TODO Find p0, slice, bounds, from args=(y,x) if config==None  ADD Jac
+
 
 # noinspection PyUnusedLocal,PyUnusedLocal,PyTypeChecker,PyTypeChecker
-def p0_func(y, x, *args,n_peaks = 22,config=None, **kwargs):
+def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
     """
     return the parameters for a pure gaussian distribution
     :param y: the Histogram values
@@ -23,8 +25,8 @@ def p0_func(y, x, *args,n_peaks = 22,config=None, **kwargs):
 
     param = []
     if type(config).__name__=='NoneType' or len(np.where(y != 0)[0])<2:
-        gain = baseline = sigma_e = sigma_1 = amplitude = np.nan
-        param = [baseline, gain,  sigma_e, sigma_1, amplitude]
+        gain = baseline = sigma_e = sigma_1 = offset = amplitude = np.nan
+        param = [baseline, gain,  sigma_e, sigma_1, offset,  amplitude]
 
     else:
 
@@ -76,10 +78,13 @@ def slice_func(y, x, *args,n_peaks=22,config=None, **kwargs):
     :param kwargs:
     :return: the index to slice the Histogram
     """
+
+    #if True:
+    #    return [2000, 2100, 1] #### ATENTNENT ###
+
     # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] < 2:
         return [0, 1, 1]
-
     xmax_hist_for_fit = config[0,0] + (n_peaks-2) * config[1,0] * 1.1
     if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
         return [0, 1, 1]
@@ -168,3 +173,4 @@ def labels_func(*args,n_peaks = 22, **kwargs):
     for p in range(n_peaks):
         label+=['Amplitude_%d'%p]
     return np.array(label)
+
