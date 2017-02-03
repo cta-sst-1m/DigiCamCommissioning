@@ -6,6 +6,8 @@
 from data_treatement import adc_hist
 from spectra_fit import fit_full_mpe
 from utils import display, histogram, geometry
+import logging,sys
+import numpy as np
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
@@ -68,10 +70,35 @@ def perform_analysis(options):
     # load previous fit result
     hv_off_fit = histogram.Histogram(filename=options.output_directory + options.hv_off_histo_filename,fit_only=True)
 
+    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' +  __name__)
+    log.warning('\t-|> Fit the SPE distribution')
 
     # Fit the gain and sigma's
-    adcs.fit(fit_full_mpe.fit_func, fit_full_mpe.p0_func, fit_full_mpe.slice_func,
-                fit_full_mpe.bounds_func, config=hv_off_fit.fit_result, labels_func=fit_full_mpe.labels_func)
+    p0_fun = lambda *args, **kwargs : fit_full_mpe.p0_func(*args, n_peaks = 6,**kwargs )
+    bound_fun = lambda *args, **kwargs : fit_full_mpe.bounds_func(*args, n_peaks = 6,**kwargs )
+    adcs.fit(fit_full_mpe.fit_func,p0_fun , fit_full_mpe.slice_func,
+                bound_fun, config=hv_off_fit.fit_result, labels_func=fit_full_mpe.labels_func, force_quiet=True)
+
+    # get the bad fits
+
+    log.info(' |--|>Try to correct the pixels with wrong fit results ')
+    for pix,pix_fit_result in enumerate(adcs.fit_result):
+        if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]):
+            log.debug('Pixel %d refit',pix)
+            i = 5
+            while  np.isnan(adcs.fit_result[pix,0,1]) and i > 1:
+                reduced_bounds = lambda *args, config=None, **kwargs: fit_full_mpe.bounds_func(*args, n_peaks = i ,
+                                                                                             config=config, **kwargs)
+                reduced_p0 = lambda *args, config=None, **kwargs: fit_full_mpe.p0_func(*args, n_peaks = i , config=config,
+                                                                                       **kwargs)
+                adcs.fit(fit_full_mpe.fit_func, reduced_p0, fit_full_mpe.slice_func,
+                              reduced_bounds, config= hv_off_fit.fit_result,
+                         labels_func=fit_full_mpe.labels_func, limited_indices=(pix,),force_quiet=True)
+                i-=1
+
+    for pix,pix_fit_result in enumerate(adcs.fit_result):
+        if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]):
+            log.info('\t |--|> Pixel %d is still badly fitted'%pix)
 
     # Save the fit
     adcs.save(options.output_directory + options.histo_filename)
@@ -96,11 +123,11 @@ def display_results(options):
     geom = geometry.generate_geometry_0()
 
     # Perform some plots
-    display.display_fit_result(adcs, geom, index_var=0, limits=[0., 1.], bin_width=0.05)
-    display.display_fit_result(adcs, geom, index_var=1, limits=[0., 1.], bin_width=0.05)
-    display.display_fit_result(adcs, geom, index_var=2, limits=[4., 6.], bin_width=0.05)
+    display.display_fit_result(adcs, geom, index_var=1, limits=[4., 6.], bin_width=0.05)
+    display.display_fit_result(adcs, geom, index_var=2, limits=[0., 2.], bin_width=0.05)
+    display.display_fit_result(adcs, geom, index_var=3, limits=[0., 2.], bin_width=0.05)
 
-    display.display_hist(adcs,  geom, index_default=(700,),param_to_display=1,limits = [1900.,2100.])
+    display.display_hist(adcs,  geom, index_default=(700,),param_to_display=1,limits = [1950.,2070.],limitsCam = [4.,6.],draw_fit = True)
 
     input('press button to quit')
 

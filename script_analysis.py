@@ -71,11 +71,10 @@ if __name__ == '__main__':
 
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
-    log.info('\t\t----------------------------------------------------------------')
     log.info('\t\t-|> Will run %s with the following configuration:'%options.analysis_module)
     for key,val in options_yaml.items():
         log.info('\t\t |--|> %s : \t %s'%(key,val))
-    log.info('\t\t-|')
+    log.info('-|')
 
     # Histogram creation
     if options.create_histo:
@@ -94,5 +93,5 @@ if __name__ == '__main__':
         # make the plots non blocking
         plt.ion()
         # Call the histogram creation function
-        log.info('\t\t-|> Display the analysis results')
+        log.info('-|> Display the analysis results')
         analysis_module.display_results(options)

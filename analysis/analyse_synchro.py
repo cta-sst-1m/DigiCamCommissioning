@@ -5,6 +5,7 @@
 # internal modules
 from data_treatement import synch_hist
 from utils import display, histogram, geometry
+import logging,sys
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
@@ -78,7 +79,7 @@ def display_results(options):
     geom = geometry.generate_geometry_0()
 
     # Perform some plots
-    display.display_hist(peaks,  geom, index_default=(700,),param_to_display=1,limits = [0.,51.])
+    display.display_hist(peaks,  geom, index_default=(700,),param_to_display=-1,limits = [0.,51.],limitsCam = [0.,51.])
 
     input('press button to quit')
 

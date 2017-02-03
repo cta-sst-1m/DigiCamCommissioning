@@ -1,7 +1,7 @@
 import numpy as np
 from ctapipe.calib.camera import integrators
 from ctapipe.io import zfits
-import logging
+import logging,sys
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
