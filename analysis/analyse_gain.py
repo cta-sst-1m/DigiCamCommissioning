@@ -68,7 +68,7 @@ def create_histo(options):
             mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
                               weights=mpe_tmp[np.nonzero(mpe_tmp)])-prev_fit_result[j,0,0]
 
-            if mean < 5 : continue
+            if mean < 10 : continue
             mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
 
     mpes_full._compute_errors()
