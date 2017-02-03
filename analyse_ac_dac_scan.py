@@ -256,7 +256,6 @@ def display_fitparam(hist,param_ind,pix,param_label,range=[0.9,1.1]):
     param_err = hist.fit_result[:, :, param_ind, 1]
     param_ratio = np.divide(param, param_err[0])
     param_ratio[np.isnan(param_ratio)]=0.
-    print(param_ratio.shape)
     plt.subplot(1,2,1)
     plt.errorbar(np.arange(50, 260, 10), param_ratio[:,pix], yerr=param_err[:,pix], fmt='ok')
     plt.ylim(range)

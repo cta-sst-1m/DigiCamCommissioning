@@ -33,14 +33,11 @@ def p0_func(y, x, *args, config=None, **kwargs):
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
 
 
-    #print(x)
     param[0] = np.average(x-param[3], weights=y) / param[2]
-    #print(param[0])
     param[4] = np.sqrt(np.average((x - np.average(x, weights=y))**2, weights=y))/ param[2]
     param[5] = param[4]
     param[6] = np.sum(y)
 
-    #print(param)
 
     return param
 
@@ -73,7 +70,6 @@ def bounds_func(*args, config=None, **kwargs):
     param_min = [0., 0., 0., -np.inf, 0., 0., 0., -np.inf]
     param_max = [np.inf, 1, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf]
 
-    #print(param_min, param_max)
 
     return param_min, param_max
 
@@ -87,3 +83,11 @@ def fit_func(p, x,*args,**kwargs):
     """
     [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset] = p
     return amplitude * utils.pdf.gaussian(x, sigma_e * gain ,  mu * (1+mu_xt) * gain + baseline)
+
+def label_func(*args, ** kwargs):
+    """
+    List of labels for the parameters
+    :return:
+    """
+    label = ['#mu', 'P(XT)', 'Gain','Baseline','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]','Amplitude']
+    return np.array(label)
