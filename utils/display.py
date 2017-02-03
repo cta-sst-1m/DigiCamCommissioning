@@ -60,29 +60,19 @@ def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pi
     # Get the data and assign limits
     h = np.copy(hist.data[index])
     h_err = np.copy(hist.errors[index])
-    print(h_err)
     if not limits:
-        limits = [hist.bin_centers[np.where(hist.data[index] != 0)[0][1]],
-                  hist.bin_centers[np.where( hist.data[index] != 0)[0][-1]]]
-    #h[np.isnan(h_err)] = limits[0]
-    #h[h < limits[0]] = limits[0]
-    #h[h > limits[1]] = limits[1]
+        limits = hist.fit_slices[index].astype(dtype = int)
     h = h[limits[0]:limits[1]:1]
     h_err = h_err[limits[0]:limits[1]:1]
-    slice_list = limits+[1]
-    # Plot it on the axis
     axis.errorbar(hist.bin_centers[limits[0]:limits[1]:1], h, yerr=h_err, fmt='ok',label=label%index[-1])
     if not draw_fit:
         axis.step(hist.bin_centers[limits[0]:limits[1]:1]+0.5*hist.bin_width, h, color='k', lw='1')
     else :
-        reduced_axis = hist.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]
+        reduced_axis = hist.bin_centers[limits[0]:limits[1]:1]
         fit_axis = np.arange(reduced_axis[0], reduced_axis[-1], float(reduced_axis[1] - reduced_axis[0]) / 10)
         reduced_func = hist.fit_function
-        #if type(config).__name__ == 'ndarray':
-        #    reduced_func = lambda p, x: self.fit_function(p, x, config=config[which_hist])
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
         text_fit_result = '$\chi^{2}/ndf = %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
-
         for i in range(hist.fit_result.shape[-2]):
             if (i > hist.fit_result_label.shape[0]-1): continue #TODO log it in debug
             label = hist.fit_result_label[i]
