@@ -92,6 +92,7 @@ class Histogram:
         self.fit_result_label = None
         self.fit_chi2_ndof = None
         self.fit_function = None
+        self.fit_slices = None
         self.fit_function_name = ''
         self.fit_function_class = ''
         self.fit_axis = None
@@ -121,6 +122,7 @@ class Histogram:
                                 overflow=self.overflow,
                                 fit_result=self.fit_result,
                                 fit_function_name=np.array([self.fit_function_class,self.fit_function_name]),
+                                fit_slices = self.fit_slices,
                                 fit_chi2_ndof=self.fit_chi2_ndof,
                                 fit_axis=self.fit_axis,
                                 xlabel=np.array([self.xlabel]),
@@ -153,6 +155,7 @@ class Histogram:
             self.errors = file['errors']
             self.underflow = file['underflow']
             self.overflow = file['overflow']
+            self.fit_slices = file['fit_slices'] if 'fit_slices' in file.keys() else None
             self.fit_result = file['fit_result']
             if file['fit_function_name'].shape[0]<2 :
                 self.fit_function_name = ''
@@ -209,6 +212,7 @@ class Histogram:
                     self.fit_function = None
 
             self.fit_chi2_ndof = file['fit_chi2_ndof']
+            self.fit_slices = file['fit_slices'] if 'fit_slices' in file.keys() else None
             self.fit_axis = file['fit_axis']
             self.fit_result_label = file['fit_result_label']
             self.logger.info('Loaded fit results only from %s' % filename)
@@ -483,9 +487,11 @@ class Histogram:
                 else:
                     self.fit_result = np.ones(data_shape + (len(p0_func(self.data[indices], self.bin_centers,
                                                                         config=config[indices])), 2)) * np.nan
-
             if type(self.fit_chi2_ndof).__name__ != 'ndarray' or self.fit_chi2_ndof.shape == ():
                 self.fit_chi2_ndof = np.ones(data_shape + (2,)) * np.nan
+            if type(self.fit_slices).__name__ != 'ndarray' or self.fit_slices.shape == ():
+                self.fit_slices = np.ones(data_shape + (2,))
+                self.fit_slices[:1]=-1
             if not force_quiet:
                 pbar.update(1)
             count += 1
@@ -503,23 +509,26 @@ class Histogram:
                         list_fixed_param[1].append(p[1])
 
             if type(config).__name__ != 'ndarray':
+                _slice = slice_func(self.data[indices], self.bin_centers,config=None)
+                self.fit_slices[indices][0]= _slice[0]
+                self.fit_slices[indices][1]= _slice[1]
                 fit_res, chi2, ndof = self._axis_fit(indices, func,
                                                      p0_func(self.data[indices], self.bin_centers,
                                                              config=None),
-                                                     slice_list=slice_func(self.data[indices],
-                                                                           self.bin_centers,
-                                                                           config=None),
+                                                     slice_list= _slice ,
                                                      bounds=bound_func(self.data[indices], self.bin_centers,
                                                                        config=None),
                                                      fixed_param=list_fixed_param,force_quiet=force_quiet)
 
             else:
                 func_reduced = lambda _p, x: func(_p, x, config=config[indices])
+                _slice = slice_func(self.data[indices], self.bin_centers,config=config[indices])
+                self.fit_slices[indices][0]= _slice[0]
+                self.fit_slices[indices][1]= _slice[1]
                 fit_res, chi2, ndof = self._axis_fit(indices, func_reduced,
                                                      p0_func(self.data[indices], self.bin_centers,
                                                              config=config[indices]),
-                                                     slice_list=slice_func(self.data[indices], self.bin_centers,
-                                                                           config=config[indices]),
+                                                     slice_list=_slice,
                                                      bounds=bound_func(self.data[indices], self.bin_centers,
                                                                        config=config[indices]),
                                                      fixed_param=list_fixed_param,force_quiet=force_quiet)

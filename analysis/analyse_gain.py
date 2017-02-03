@@ -41,6 +41,11 @@ def create_histo(options):
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' +  __name__)
     log.info('\t-|> Get various inputs')
 
+    # recover previous fit
+    spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename,fit_only=True)
+    prev_fit_result = np.copy(spes_fit.fit_result)
+    del spes_fit
+
     # Define the histograms
     mpes = histogram.Histogram(filename = options.output_directory + options.mpes_histo_filename)
 
@@ -59,10 +64,11 @@ def create_histo(options):
             # put the slice or remove empty bins
             s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
             if s[0]==s[1]:continue
-            mpe_tmp = np.copy(mpes.data[i,j, s[0]:s[1]:1])
-            mpe_tmp[mpe_tmp < 1e-6] = 1e-6
-            mean = np.average(mpes.bin_centers[s[0]:s[1]:1],weights=mpe_tmp)
-            if mean < 5 : continue
+            mpe_tmp = mpes.data[i,j]
+            mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
+                              weights=mpe_tmp[np.nonzero(mpe_tmp)])-prev_fit_result[j,0,0]
+
+            if mean < 10 : continue
             mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
 
     mpes_full._compute_errors()
@@ -160,7 +166,7 @@ def display_results(options):
     geom = geometry.generate_geometry_0()
 
     # Perform some plots
-    display.display_hist(adcs, geom, index_default=(700,), param_to_display=1,limitsCam=[4.,6.],draw_fit = True)
+    display.display_hist(adcs, geom, index_default=(4,), param_to_display=1,limitsCam=[4.,6.],draw_fit = True)
 
     input('press button to quit')
 

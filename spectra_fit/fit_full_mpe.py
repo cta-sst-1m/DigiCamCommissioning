@@ -83,8 +83,7 @@ def slice_func(y, x, *args,n_peaks=22,config=None, **kwargs):
     xmax_hist_for_fit = config[0,0] + (n_peaks-2) * config[1,0] * 1.1
     if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
         return [0, 1, 1]
-    #print('############### ',np.where(y != 0))
-    #print(xmax_hist_for_fit,np.where(x < xmax_hist_for_fit)[0])
+    #TODO: sometimes np.where(x <xmax_hist_for_fit)[0].shape[0] <2  through an error
     return [np.where(y != 0)[0][0],np.where(x < xmax_hist_for_fit)[0][-1],1]# np.where( y != 0)[0][-1], 1]
 
 
