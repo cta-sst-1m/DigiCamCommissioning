@@ -68,11 +68,16 @@ def perform_analysis(options):
     :return:
     """
     # Fit the baseline and sigma_e of all pixels
-    mpes = histogram.Histogram(options.output_directory + options.histo_filename)
-    mpes_full_fit_result = histogram.Histogram(options.output_directory + options.full_histo_filename, fit_only= True)
+    mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    nlevel = mpes.data.shape[0]
+    mpes_full = histogram.Histogram(filename=options.output_directory + options.full_histo_filename, fit_only= True)
+    mpes_full_fit_result = np.copy(mpes_full.fit_result)
+    del mpes_full
+    mpes_full_fit_result = mpes_full_fit_result.reshape((1,) + mpes_full_fit_result.shape)
+    mpes_full_fit_result = np.repeat(mpes_full_fit_result, nlevel, axis=0)
 
     log = logging.getLogger(sys.modules['__main__'].__name__+__name__)
-    pbar = tqdm(total=mpes.data.shape[0])
+    pbar = tqdm(total=mpes.data.shape[0]*mpes.data.shape[1])
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     def std_dev(x, y):
@@ -85,11 +90,8 @@ def perform_analysis(options):
         if pixel > 0: log.debug('Pixel #' + str(pixel - 1)+' treated')
         for level in range(mpes.data.shape[0]):
             pbar.update(1)
-            #print("Treating Pixel #" + str(pixel) + ": Fit Progress {:2.1%}".format(
-            #    float(level) / mpes.data.shape[0]), end="\r")
-
-            if np.where(mpes.data[level, pixel] != 0)[0][0] == 0 and np.where(mpes.data[level, pixel] != 0)[
-                0].shape == (1,): continue
+            if np.isnan(mpes_full_fit_result[0,pixel,0,0]): continue
+            if np.nonzero(mpes.data[level, pixel])[0].shape[0] == 1: continue
             if std_dev(mpes.bin_centers, mpes.data[level, pixel]) > 400: continue
             if mpes.data[level, pixel, -1] > 0.02 * np.sum(mpes.data[level, pixel]): continue
 
@@ -128,7 +130,7 @@ def perform_analysis(options):
                 ]
             mpes.fit(_fit_spectra.fit_func, _fit_spectra.p0_func, _fit_spectra.slice_func,
                      _fit_spectra.bounds_func, config=mpes_full_fit_result, fixed_param=fixed_param
-                     , limited_indices=[(level, pixel,)], force_quiet=True)
+                     , limited_indices=[(level, pixel,)], force_quiet=True, labels_func=_fit_spectra.label_func)
 
     mpes.save(options.output_directory + options.fit_filename)
 

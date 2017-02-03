@@ -166,7 +166,7 @@ def display_results(options):
     geom = geometry.generate_geometry_0()
 
     # Perform some plots
-    display.display_hist(adcs, geom, index_default=(700,), param_to_display=1,limitsCam=[4.,6.],draw_fit = True)
+    display.display_hist(adcs, geom, index_default=(4,), param_to_display=1,limitsCam=[4.,6.],draw_fit = True)
 
     input('press button to quit')
 
