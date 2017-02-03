@@ -52,7 +52,7 @@ def create_histo(options):
 
     # Delete the histograms
     del mpes,peaks
-    
+
 
     return
 
