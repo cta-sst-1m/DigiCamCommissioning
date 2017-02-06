@@ -1,36 +1,24 @@
-import sqlite3
-import os
+import pymysql
+import os,sys
 import logging
 
-def create_main_database(dbname, dblocation,logger):
-    """
-    Create a new database
-    :param dbname: the name of the database (str)
-    :param dblocation: the path to its location
-    :return:
-    """
+# ssh -f cocov@dpnc.unige.ch -L 3307:localhost:3306 -N
 
-    if os.path.isfile( dblocation + dbname ):
-        answer = input('--|> A database already exist under this name. Do you really want to delete it (yes|no)?')
-        if answer != 'yes':
-            logger.debug('User did not wanted to delete the %s database'%(dblocation + dbname))
-            return
-        else:
-            logger.warning('User overwrote the %s database'%(dblocation + dbname))
-
-    conn = sqlite3.connect(dblocation+dbname)
-    logger.info('%s database created' % (dblocation + dbname))
-    conn.close()
-    return
-
-def create_table():
-    # Create table
-    c.execute('''CREATE TABLE
-                 (date text, trans text, symbol text, qty real, price real)''')
+try:
+    from IPython import embed
+except ImportError:
+    import code
 
 
-def initialise_log(logname , filename):
-    logger = logging.getLogger(logname)
+    def embed():
+        vars = globals()
+        vars.update(locals())
+        shell = code.InteractiveConsole(vars)
+        shell.interact()
+
+
+def initialise_log( filename):
+    logger = logging.getLogger(sys.modules['__main__'].__name__)
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(filename)
     fh.setLevel(logging.DEBUG)
@@ -44,6 +32,24 @@ def initialise_log(logname , filename):
     logger.addHandler(ch)
     return logger
 
+def connect_db(logname):
+    logging.getLogger(sys.modules['__main__'].__name__)
+    logging.info('Connect to CTA_SST1M_UNIGE_DB')
+    return pymysql.connect(host='localhost', user='ctaunige', passwd='ctaUniGe_SST1M',
+                                 db='CTA_SST1M_UNIGE_DB',port=3307)
+
+
+def add_pixel():
+
+
 if __name__ == '__main__':
-    logger = initialise_log('database_log','database.log')
-    create_main_database('test.db','/data/software/DigiCamCommissioning/',logger)
+    logger = initialise_log('database.log')
+    connection = connect_db()
+    cursor = connection.cursor()
+    try:
+        embed()
+    finally:
+        cursor.close()
+        connection.close()
+        sys.exit()
+

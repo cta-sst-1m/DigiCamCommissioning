@@ -132,7 +132,7 @@ def perform_analysis(options):
                      _fit_spectra.bounds_func, config=mpes_full_fit_result, fixed_param=fixed_param
                      , limited_indices=[(level, pixel,)], force_quiet=True, labels_func=_fit_spectra.label_func)
 
-    mpes.save(options.output_directory + options.fit_filename)
+    mpes.save(options.output_directory + options.histo_filename)
 
 
 def display_results(options):

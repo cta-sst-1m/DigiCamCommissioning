@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     # Update with interactive options
     for key,val in options_yaml.items():
-        if not ((key in options.__dict__.keys()) and (options.__dict__[key])):
+        if not (key in options.__dict__.keys()): # and (options.__dict__[key])):
             options.__dict__[key]=val
         else:
             options_yaml[key]=options.__dict__[key]

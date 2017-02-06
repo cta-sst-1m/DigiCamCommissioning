@@ -145,7 +145,12 @@ def display_fit_result(hist, geom = None , index_var=1, limits=[0.,10.], bin_wid
         f, ax = plt.subplots(1, 1, figsize=(10, 7))
         plt.subplot(1, 1, 1)
     # Create the variable histogram
-    h = draw_fit_result(ax[1], hist, index=index_var, limits=limits, bin_width=bin_width)
+    print(type(ax))
+    axis = ax
+    #TODO proper subplotting
+    if isinstance(ax,np.ndarray):
+        axis = ax[1]
+    h = draw_fit_result(axis, hist, index=index_var, limits=limits, bin_width=bin_width)
     vis_gain.image = h
     f.canvas.draw()
 
