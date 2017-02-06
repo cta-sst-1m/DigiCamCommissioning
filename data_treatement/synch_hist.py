@@ -24,7 +24,7 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
             inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=max_evt)
 
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=max_evt, n_pixel=options.n_pixels)
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=options.evt_max, n_pixel=options.n_pixels, events_per_level=options.evt_max/2, level_start=9)
         if options.verbose:
             log.debug('--|> Moving to file %s' % _url)
         # Loop over event in this file

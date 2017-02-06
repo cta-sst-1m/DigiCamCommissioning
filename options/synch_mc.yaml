@@ -1,0 +1,33 @@
+# Analysis module
+analysis_module : analyse_synchro
+
+# Steering
+create_histo      : True
+perform_analysis  : True
+display_results   : True
+
+# Logging
+verbose           : True
+log_file_basename : log
+
+# Input files
+mc            :     True
+file_basename :     xt_0_dark_0_seed_%s_2bins.hdf5
+directory     :     ../digicamtoy/data_calibration_cts/
+file_list     :     [0]
+
+# Output files
+output_directory  : data/fit_biais/
+histo_filename    : peaks.npz
+
+# Event processing
+evt_max           : 1000
+evt_min   : 0 # should be ZERO
+
+# Camera Configuration
+n_pixels          : 10
+
+# Plot configuration
+sample_max           : 50
+
+

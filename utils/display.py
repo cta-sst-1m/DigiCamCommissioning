@@ -6,7 +6,7 @@ from matplotlib.widgets import Button
 
 
 
-def draw_fit_result(axis, hist, index=1, limits=None, bin_width=0.2,**kwargs):
+def draw_fit_result(axis, hist, index=1, limits=None, bin_width=None,**kwargs):
     """
     A function to display the histogram of a variable from fit_results
 
@@ -21,23 +21,23 @@ def draw_fit_result(axis, hist, index=1, limits=None, bin_width=0.2,**kwargs):
     # Get the data and assign limits
     h = np.copy(hist.fit_result[:, index, 0])
     h_err = np.copy(hist.fit_result[:, index, 1])
-    if not limits:
-        limits = [np.min(h), np.max(h)]
-    h[np.isnan(h_err)] = limits[0]
-    h[h < limits[0]] = limits[0]
-    h[h > limits[1]] = limits[1]
-    hh, bin_tmp = np.histogram(h, bins=np.arange(limits[0] - bin_width / 2, limits[1] + 1.5 * bin_width, bin_width), )
-    hh_err = np.sqrt(hh)
-    hh_err[hh == 0] = 1
-    # Plot it on the axis
-    axis.step(np.arange(limits[0] + bin_width / 2, limits[1] + 1.5 * bin_width, bin_width), hh, label='All pixels',
-              color='k', lw='1')
-    axis.errorbar(np.arange(limits[0], limits[1] + bin_width, bin_width), hh, yerr=hh_err, fmt='ok')
+
+    mask = (~np.isnan(h)) * (~np.isnan(h_err))
+    h = h[mask]
+    h_err = h_err[mask]
+
+    histo = axis.hist(h, bins=h.shape[0], histtype='step', align='left', label='All pixels', color='k', linewidth=1)
+
+    bin_edges = histo[1][0:-1]
+    bin_width = bin_edges[1] - bin_edges[0]
+    histo = histo[0]
+
+    #axis.step(np.arange(limits[0] + bin_width / 2, limits[1] + 1.5 * bin_width, bin_width), hh, label='All pixels',
+    #          color='k', lw='1')
+    axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok')
     # Beautify
     axis.set_xlabel(hist.fit_result_label[index])
     axis.set_ylabel('$\mathrm{N_{pixel}/%.2f}$' % bin_width)
-    axis.set_xlim(limits[0] + bin_width / 2, limits[1] + bin_width / 2)
-    axis.set_ylim(np.min(hh), np.max(hh[1:-1]) * 1.25)
     axis.xaxis.get_label().set_ha('right')
     axis.xaxis.get_label().set_position((1, 0))
     axis.yaxis.get_label().set_ha('right')
@@ -119,7 +119,7 @@ class pickable_visu(visualization.CameraDisplay):
             print('some issue to plot')
 
 
-def display_fit_result(hist, geom = None , index_var=1, limits=[0.,10.], bin_width=0.2):
+def display_fit_result(hist, geom = None , index_var=1, limits=None, bin_width=None):
     """
     A function to display a vaiable both as an histogram and as a camera view
 
@@ -132,25 +132,29 @@ def display_fit_result(hist, geom = None , index_var=1, limits=[0.,10.], bin_wid
     :return:
     """
 
+
     # Set the limits
-    f, ax = None,None
-    if geom:
-        f, ax = plt.subplots(1, 2, figsize=(20, 7))
-        plt.subplot(1, 2, 1)
-        vis_gain = visualization.CameraDisplay(geom, title='', norm='lin', cmap='viridis')
+    if geom: #TODO correct colobar on right instead of left
+        fig = plt.figure(figsize=(20, 7))
+        ax_left = fig.add_subplot(1,2,1)
+        ax_right = fig.add_subplot(1,2,2)
+        vis_gain = visualization.CameraDisplay(geom, ax=ax_left, title='', norm='lin', cmap='viridis')
         vis_gain.add_colorbar()
         vis_gain.colorbar.set_label(hist.fit_result_label[index_var])
-        plt.subplot(1, 2, 2)
-    else:
-        f, ax = plt.subplots(1, 1, figsize=(10, 7))
-        plt.subplot(1, 1, 1)
+        h = draw_fit_result(ax_right, hist, index=index_var, limits=limits, bin_width=bin_width)
+        vis_gain.image = h
+    else: # TODO check this case
+        figure = plt.figure(figsize=(10, 7))
+        ax = fig.add_subplot(1, 1, 1)
+        h = draw_fit_result(ax, hist, index=index_var, limits=limits, bin_width=bin_width)
+
     # Create the variable histogram
-    h = draw_fit_result(ax[1], hist, index=index_var, limits=limits, bin_width=bin_width)
+    #h = draw_fit_result(ax[1], hist, index=index_var, limits=limits, bin_width=bin_width)
     vis_gain.image = h
-    f.canvas.draw()
+    fig.canvas.draw()
 
 
-def display_hist(hist, geom,index_default=(700,), param_to_display = -1, limits=None,limitsCam=None, draw_fit = False):
+def display_hist(hist, geom,index_default=(0,), param_to_display = -1, limits=None,limitsCam=None, draw_fit = False): #TODO check default pixel=700 better zero to avoid conflict with mc
     """
 
     :return:

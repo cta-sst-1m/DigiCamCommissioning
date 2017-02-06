@@ -76,10 +76,19 @@ def display_results(options):
     peaks = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0()
+    geom = geometry.generate_geometry_0(options.n_pixels)
 
     # Perform some plots
-    display.display_hist(peaks,  geom, index_default=(700,),param_to_display=-1,limits = [0.,51.],limitsCam = [0.,51.])
+
+    if options.mc:
+
+        index_default = (0, )
+
+    else:
+
+        index_default = (700, )
+
+    display.display_hist(peaks,  geom, index_default=index_default, param_to_display=-1,limits = [0.,51.],limitsCam = [0.,51.])
 
     input('press button to quit')
 

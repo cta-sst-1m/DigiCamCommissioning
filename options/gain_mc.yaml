@@ -1,0 +1,27 @@
+# Analysis module
+analysis_module : analyse_gain
+
+# Steering
+create_histo      : True #False
+perform_analysis  : True #False
+display_results   : True #False
+
+# Logging
+verbose           : True #False
+log_file_basename : 20161214
+
+# Input files
+mc            :     True #False
+file_basename :     xt_0_dark_0_seed_0_2bins.hdf5
+directory     :     ../digicamtoy/data_calibration_cts/
+scan_level    :     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+
+# Output files
+output_directory      : data/fit_biais/
+histo_filename        : full_mpe.npz
+input_dark_filename   : spe.npz
+input_hvoff_filename  : adc_hv_off.npz
+mpes_histo_filename   : mpe.npz
+
+# Camera Configuration
+n_pixels          : 10
