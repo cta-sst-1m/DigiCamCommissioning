@@ -69,12 +69,14 @@ class ToyReader: # create a reader as asked
 
             i = 0
 
-
+            data = self.hdf5_file['level_%d' % self.level]['trace']
+            random_sample = np.random.randint(low=0, high=self.n_traces_tot, size=self.n_pixel)
             while i<self.n_pixel:
 
-                random_sample = np.random.randint(low=0, high=self.n_traces_tot)
-                adcs.append(self.hdf5_file['level_%d'%self.level]['trace'][random_sample])
+                adcs.append(data[random_sample[i]])
                 i = i + 1
+
+
 
             adcs = np.array(adcs).reshape(self.n_pixel, self.n_samples)
 

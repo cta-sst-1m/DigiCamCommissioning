@@ -190,7 +190,6 @@ def display_results(options, param_to_display=1):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0(options.n_pixels)
 
     if options.mc:
 
@@ -200,10 +199,30 @@ def display_results(options, param_to_display=1):
 
         index_default = (4,)
 
+    geom = geometry.generate_geometry_0(options.n_pixels)
 
     # Perform some plots
-    display.display_hist(adcs, geom, index_default=index_default, param_to_display=param_to_display,limitsCam=[4.,6.], draw_fit = True)
-    display.display_fit_result(adcs, geom, index_var=1)
+    fig_hist = display.display_hist(adcs, geom, index_default=index_default, param_to_display=param_to_display,limitsCam=[4.,6.], draw_fit = True)
+    fig_hist.savefig(options.output_directory + 'figures/hist.png')
+
+    geom = None
+
+    display_fit = True
+    fig_chi2 = display.display_chi2(adcs, geom, display_fit=display_fit)
+    fig_chi2.savefig(options.output_directory + 'figures/chi2.png')
+
+    param_names = ['baseline', 'gain', 'sigma_e','sigma_1']
+
+    for i in range(len(param_names)):
+        fig_result = display.display_fit_result(adcs, geom, index_var=i, display_fit=display_fit)
+        fig_result.savefig(options.output_directory + 'figures/%s.png' % (param_names[i]))
+
+        if options.mc:
+
+            param_true = {'baseline': 2010, 'gain': 5.6, 'sigma_e': 0.86, 'sigma_1': 0.48}
+
+            fig_pull = display.display_fit_pull(adcs, geom, index_var=i, true_value = param_true[param_names[i]], display_fit=display_fit)
+            fig_pull.savefig(options.output_directory + 'figures/%s_pull.png' % (param_names[i]))
 
     input('press button to quit')
 
