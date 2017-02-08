@@ -152,7 +152,6 @@ def display_results(options):
 
     # Perform some plots
     display.display_hist(adcs, geom, index_default=(700,), param_to_display=-1, limits=[1900., 2100.])
-
     input('press button to quit')
 
     return

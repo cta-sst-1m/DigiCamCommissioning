@@ -27,3 +27,6 @@ histo_filename        : full_mpe.npz
 input_dark_filename   : spe.npz
 input_hvoff_filename  : adc_hv_off.npz
 mpes_histo_filename   : mpe.npz
+
+# Camera Configuration
+n_pixels          : 10

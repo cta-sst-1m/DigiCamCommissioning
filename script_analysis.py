@@ -5,7 +5,7 @@ from optparse import OptionParser
 from  yaml import load,dump
 import matplotlib.pyplot as plt
 import logging,sys
-
+from utils.geometry import generate_geometry_0
 #internal modules
 from utils import logger
 
@@ -94,4 +94,5 @@ if __name__ == '__main__':
         plt.ion()
         # Call the histogram creation function
         log.info('-|> Display the analysis results')
+
         analysis_module.display_results(options)

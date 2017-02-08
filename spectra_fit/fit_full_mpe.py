@@ -24,10 +24,12 @@ def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
     # TODO update with auto determination of the peaks
 
     param = []
-    if type(config).__name__=='NoneType' or len(np.where(y != 0)[0])<2:
-        gain = baseline = sigma_e = sigma_1 = offset = amplitude = np.nan
-        param = [baseline, gain,  sigma_e, sigma_1, offset,  amplitude]
-
+    if (config is None) or (len(np.where(y != 0)[0])<2):
+        param += [2010]
+        param += [5.6]
+        param += [0.8]
+        param += [0.4]
+        param += [np.sum(y)]*n_peaks
     else:
 
         if config.shape[-2] == 3:
@@ -85,7 +87,15 @@ def slice_func(y, x, *args,n_peaks=22,config=None, **kwargs):
     # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] < 2:
         return [0, 1, 1]
-    xmax_hist_for_fit = config[0,0] + (n_peaks-2) * config[1,0] * 1.1
+
+    if config is None:
+
+        return [np.where(y != 0)[0][0], np.where( y!= 0)[0][-1], 1]  # np.where( y != 0)[0][-1], 1]
+
+    else:
+
+        xmax_hist_for_fit = config[0,0] + (n_peaks-2) * config[1,0] * 1.1
+
     if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
         return [0, 1, 1]
     #TODO: sometimes np.where(x <xmax_hist_for_fit)[0].shape[0] <2  through an error
@@ -101,56 +111,76 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
     :return:
     """
     bound_min,bound_max = [],[]
-    if config.shape[-2] == 3:
 
-        bound_min += [config[1, 0] - 2* config[2, 0]]  # baseline-sigma
-        bound_max += [config[1, 0] + 2* config[2, 0]]  # baseline+sigma
-        '''
-        bound_min += [0.9*5.6]  # 0.8*gain
-        bound_max += [1.1*5.6]  # 1.2*gain
+    if config is None:
 
-        bound_min += [0.7]  # 0.2*sigma_e
-        bound_max += [1.3]  # 5.*sigma_e
+        bound_min += [2008]  # baseline-sigma
+        bound_max += [2012]  # baseline+sigma
 
-        bound_min += [0.4]  # 0.2*sigma_1
-        bound_max += [1.3]  # 5.*sigma_1
-        '''
         bound_min += [0.7 * 5.6]  # 0.8*gain
         bound_max += [2. * 5.6]  # 1.2*gain
 
-        bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
-        bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e
+        bound_min += [0.2 * 0.86 ]   # 0.2*sigma_e
+        bound_max += [3.333 * 0.86]  # 5.*sigma_e
 
-        bound_min += [0.2 * 0.5 * config[2, 0]]  # 0.2*sigma_1
-        bound_max += [3.333 * 0.5 * config[2, 0]]  # 5.*sigma_1
+        bound_min += [0.2 *0.48]  # 0.2*sigma_1
+        bound_max += [3.333 * 0.48]  # 5.*sigma_1
 
         bound_min += [0.] * n_peaks
         bound_max += [np.sum(y)] * n_peaks
+
     else:
 
-        bound_min += [config[0, 0] - 2 * config[2, 0]]  # baseline-sigma
-        bound_max += [config[0, 0] + 2 * config[2, 0]]  # baseline+sigma
-        '''
-        bound_min += [0.9*5.6]  # 0.8*gain
-        bound_max += [1.1*5.6]  # 1.2*gain
+        if config.shape[-2] == 3:
 
-        bound_min += [0.7]  # 0.2*sigma_e
-        bound_max += [1.3]  # 5.*sigma_e
+            bound_min += [config[1, 0] - 2* config[2, 0]]  # baseline-sigma
+            bound_max += [config[1, 0] + 2* config[2, 0]]  # baseline+sigma
+            '''
+            bound_min += [0.9*5.6]  # 0.8*gain
+            bound_max += [1.1*5.6]  # 1.2*gain
 
-        bound_min += [0.4]  # 0.2*sigma_1
-        bound_max += [1.3]  # 5.*sigma_1
-        '''
-        bound_min += [0.7 * 5.6]  # 0.8*gain
-        bound_max += [2. * 5.6]  # 1.2*gain
+            bound_min += [0.7]  # 0.2*sigma_e
+            bound_max += [1.3]  # 5.*sigma_e
 
-        bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
-        bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e
+            bound_min += [0.4]  # 0.2*sigma_1
+            bound_max += [1.3]  # 5.*sigma_1
+            '''
+            bound_min += [0.7 * 5.6]  # 0.8*gain
+            bound_max += [2. * 5.6]  # 1.2*gain
 
-        bound_min += [0.2 * config[3, 0]]  # 0.2*sigma_1
-        bound_max += [3.333 * config[3, 0]]  # 5.*sigma_1
+            bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
+            bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e
 
-        bound_min += [0.] * n_peaks
-        bound_max += [np.inf] * n_peaks
+            bound_min += [0.2 * 0.5 * config[2, 0]]  # 0.2*sigma_1
+            bound_max += [3.333 * 0.5 * config[2, 0]]  # 5.*sigma_1
+
+            bound_min += [0.] * n_peaks
+            bound_max += [np.sum(y)] * n_peaks
+        else:
+
+            bound_min += [config[0, 0] - 2 * config[2, 0]]  # baseline-sigma
+            bound_max += [config[0, 0] + 2 * config[2, 0]]  # baseline+sigma
+            '''
+            bound_min += [0.9*5.6]  # 0.8*gain
+            bound_max += [1.1*5.6]  # 1.2*gain
+
+            bound_min += [0.7]  # 0.2*sigma_e
+            bound_max += [1.3]  # 5.*sigma_e
+
+            bound_min += [0.4]  # 0.2*sigma_1
+            bound_max += [1.3]  # 5.*sigma_1
+            '''
+            bound_min += [0.7 * 5.6]  # 0.8*gain
+            bound_max += [2. * 5.6]  # 1.2*gain
+
+            bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
+            bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e
+
+            bound_min += [0.2 * config[3, 0]]  # 0.2*sigma_1
+            bound_max += [3.333 * config[3, 0]]  # 5.*sigma_1
+
+            bound_min += [0.] * n_peaks
+            bound_max += [np.inf] * n_peaks
     return bound_min,bound_max
 
 

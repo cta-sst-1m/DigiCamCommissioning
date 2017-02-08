@@ -409,7 +409,7 @@ class Histogram:
 
                     weight_matrix = np.diag(1. / self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]] \
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])])
-
+                    weight_matrix = 1. #TODO changed to one since pull study showed previous config is fine
                     cov = np.sqrt(np.diag(inv(np.dot(np.dot(out.jac.T, weight_matrix), out.jac))))
 
                     fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)

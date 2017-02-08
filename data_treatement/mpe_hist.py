@@ -26,7 +26,9 @@ def run(hist, options, peak_positions=None):
         if not options.mc:
             inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=len(options.scan_level)*options.events_per_level)
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=len(options.scan_level)*options.events_per_level, n_pixel=options.n_pixels)
+
+            seed = 0
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], seed=seed, max_events=len(options.scan_level)*options.events_per_level, n_pixel=options.n_pixels, events_per_level=options.events_per_level, level_start=options.scan_level[0])
 
 
         if options.verbose:
