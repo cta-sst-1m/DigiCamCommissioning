@@ -49,8 +49,8 @@ def run(hist, options, peak_positions=None):
                     if options.verbose:
 
                         log.debug('--|> Moving to DAC Level %d' % (options.scan_level[level]))
-                if evt_num % int(options.events_per_level/1000)== 0:
-                    pbar.update(int(options.events_per_level/1000))
+                #if evt_num % int(options.events_per_level/1000)== 0:
+                pbar.update(1)
 
                 # get the data
                 data = np.array(list(event.r1.tel[telid].adc_samples.values()))

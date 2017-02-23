@@ -50,7 +50,7 @@ def gaussian_sum(param, x):
     n_peaks = len(amplitudes)
 
     for i in range(n_peaks):
-        sigma = np.sqrt(sigma_e**2 + i*sigma_1**2)
+        sigma = np.sqrt(sigma_e**2 + i*sigma_1**2 + 1./12.)
         #temp += gaussian(x, sigma, baseline + i*gain + (offset if i==0 else 0), amplitude=amplitudes[i])
 
         param = [sigma, baseline + i*gain, amplitudes[i]]
@@ -108,7 +108,7 @@ def mpe_distribution_general(p, x, config=None):
     x = x - offset
     n_peak = 40
     for n in range(0, n_peak, 1):
-        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2) * gain
+        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2)
 
         temp += generalized_poisson(n, mu, mu_xt) * gaussian(x, sigma_n, n * gain)
 
