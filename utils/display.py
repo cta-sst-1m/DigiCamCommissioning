@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from utils.histogram import Histogram
 from matplotlib.widgets import Button
 import scipy.stats
+from spectra_fit import fit_low_light
 
 
 
@@ -175,23 +176,27 @@ def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pi
     h = h[limits[0]:limits[1]:1]
     h_err = h_err[limits[0]:limits[1]:1]
     axis.errorbar(hist.bin_centers[limits[0]:limits[1]:1], h, yerr=h_err, fmt='ok',label=label%index[-1])
+    text_fit_result = ''
     if not draw_fit:
         axis.step(hist.bin_centers[limits[0]:limits[1]:1]+0.5*hist.bin_width, h, color='k', lw='1')
     else :
         reduced_axis = hist.bin_centers[limits[0]:limits[1]:1]
-        fit_axis = np.arange(reduced_axis[0], reduced_axis[-1], float(reduced_axis[1] - reduced_axis[0]) / 10)
+        fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1], 10*reduced_axis.shape[0])
         reduced_func = hist.fit_function
+        print (hist.fit_result.shape)
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
-        text_fit_result = '$\chi^{2}/ndf = %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
+        text_fit_result += '$\chi^{2}/ndf = %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
         for i in range(hist.fit_result.shape[-2]):
             if (i > hist.fit_result_label.shape[0]-1): continue #TODO log it in debug
-            label = hist.fit_result_label[i]
-            if label.count('Amplitude')>0: continue
-            text_fit_result += str(label) + ' : ' + str(
-                np.round(hist.fit_result[index + (i, 0,)],  int(2)))
-            text_fit_result += ' $\pm$ ' + str(np.round(hist.fit_result[index + (i, 1,)], int(3)))
+            if 'Amplitude' in hist.fit_result_label[i]: continue
+            text_fit_result += hist.fit_result_label[i] + ' : %0.2f $\pm$ %0.2f' % (hist.fit_result[index][i, 0], hist.fit_result[index][i, 1])
             text_fit_result += '\n'
-        axis.text((limits[1]-limits[0])/2 +limits[0] ,  (np.max(h[1:-1]) * 1.25 - np.min(h))/2+np.min(h), text_fit_result)
+        axis.text(0.7, 0.7, text_fit_result, horizontalalignment='left', verticalalignment='center',
+                      transform=axis.transAxes, fontsize=10)
+
+            #axis.text((limits[1]-limits[0])/2 +limits[0] ,  (np.max(h[1:-1]) * 1.25 - np.min(h))/2+np.min(h), text_fit_result)
+        #axis.text((limits[1]-limits[0])/2 +limits[0] ,  (np.max(h[1:-1]) * 1.25 - np.min(h))/2+np.min(h), text_fit_result)
+
     # Beautify
     axis.set_xlabel(hist.xlabel)
     axis.set_ylabel(hist.ylabel)
@@ -202,6 +207,7 @@ def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pi
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
     axis.legend()
+
 
     return
 
@@ -222,7 +228,7 @@ class pickable_visu(visualization.CameraDisplay):
     def on_pixel_clicked(self, pix_id):
         self.axis.cla()
         for i, pickable_figure in enumerate(self.pickable_figures):
-            pickable_figure(self.axis,self.hist,index = (pix_id,),limits = self.limits, draw_fit = self.draw_fit)
+            pickable_figure(self.axis,self.hist,index = pix_id,limits = self.limits, draw_fit = self.draw_fit)
         try:
             self.figure.canvas.draw()
         except ValueError:
@@ -353,20 +359,21 @@ def display_hist(hist, geom,index_default=(0,), param_to_display = -1, limits=No
         peak[peak < limitsCam[0]] = limitsCam[0]
         peak[peak > limitsCam[1]] = limitsCam[1]
     else:
-        peak = np.copy(hist.fit_result[...,param_to_display,0])
-        peak[np.isnan(peak)] = limitsCam[0]
-        peak[peak < limitsCam[0]] = limitsCam[0]
-        peak[peak > limitsCam[1]] = limitsCam[1]
+        pass
+        #peak = np.copy(hist.fit_result[...,param_to_display,0])
+        #peak[np.isnan(peak)] = limitsCam[0]
+        #peak[peak < limitsCam[0]] = limitsCam[0]
+        #peak[peak > limitsCam[1]] = limitsCam[1]
 
     vis_baseline.axes.xaxis.get_label().set_ha('right')
     vis_baseline.axes.xaxis.get_label().set_position((1, 0))
     vis_baseline.axes.yaxis.get_label().set_ha('right')
     vis_baseline.axes.yaxis.get_label().set_position((0, 1))
-    vis_baseline.image = peak
+    #vis_baseline.image = peak
 
     # noinspection PyProtectedMember
     fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
-    vis_baseline.on_pixel_clicked(index_default[0])
+    vis_baseline.on_pixel_clicked(index_default)
 
     fig.canvas.draw()
 

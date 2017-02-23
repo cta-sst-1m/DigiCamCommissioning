@@ -37,6 +37,9 @@ def create_histo(options):
     synch_hist.run(peaks, options,min_evt = options.evt_min , max_evt=options.evt_max)
 
     # Save the histogram
+
+    print(options.output_directory + options.histo_filename)
+
     peaks.save(options.output_directory + options.histo_filename)
 
     # Delete the histograms

@@ -2,9 +2,9 @@
 analysis_module : analyse_mpe
 
 # Steering
-create_histo      : True
-perform_analysis  : False
-display_results   : False
+create_histo      : False
+perform_analysis  : True
+display_results   : True
 
 # Logging
 verbose           : True
@@ -12,25 +12,25 @@ log_file_basename : log
 
 # Input files
 mc            :     True
-file_basename :     xt_0_dark_0-003_time_0_seed_%s.hdf5
+file_basename :     xt_0-06_dark_0_mpe_time_0_seed_%s.hdf5
 directory     :     ../digicamtoy/data_calibration_cts/
-file_list     :     [0]#[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-scan_level    :     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+file_list     :     [0]#[0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # in case of MC this is the seed number
+scan_level    :     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
 
 
 # Output files
-output_directory      : data/fit_biais_dark/
+output_directory      : data/fit_mpe_biais_xt_dark/
 histo_filename        : mpe.npz
 full_histo_filename   : full_mpe.npz
 synch_histo_filename  : peaks.npz
 
 # Event processing
 n_evt_per_batch   : 1000
-events_per_level  : 5000
-evt_max           : 75000 ### !!! TODO improve that evt_max == events_per_level * len(scan_level)
+events_per_level  : 10000
+evt_max           : 210000 ### !!! TODO improve that evt_max == events_per_level * len(scan_level)
 
 # Camera Configuration
-n_pixels          : 200
+n_pixels          : 10
 
 # Plot configuration
 adcs_min           : 0

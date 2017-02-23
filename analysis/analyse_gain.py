@@ -128,8 +128,13 @@ def perform_analysis(options):
         prev_fit_result = np.copy(spes_fit.fit_result)
         del spes_fit
 
+    if options.mc:
 
-    n_peak = 15
+        n_peak = int(len(options.scan_level) * (1 + 0.06)) #TODO auto detect number of peaks (XT might produce more peaks)
+
+    else:
+
+        n_peak = 15
     reduced_bounds = lambda *args,config=None, **kwargs: fit_full_mpe.bounds_func(*args,n_peaks = n_peak, config=config, **kwargs)
     reduced_p0 = lambda *args,config=None, **kwargs: fit_full_mpe.p0_func(*args,n_peaks = n_peak, config=config, **kwargs)
     reduced_slice = lambda *args, config=None, **kwargs: fit_full_mpe.slice_func(*args, n_peaks=n_peak, config=config, **kwargs)

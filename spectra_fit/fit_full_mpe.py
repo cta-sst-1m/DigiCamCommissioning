@@ -120,7 +120,7 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
         bound_min += [0.7 * 5.6]  # 0.8*gain
         bound_max += [2. * 5.6]  # 1.2*gain
 
-        bound_min += [0.2 * 0.86 ]   # 0.2*sigma_e
+        bound_min += [0.2 * 0.86]   # 0.2*sigma_e
         bound_max += [3.333 * 0.86]  # 5.*sigma_e
 
         bound_min += [0.2 *0.48]  # 0.2*sigma_1
@@ -201,6 +201,6 @@ def labels_func(*args,n_peaks = 22, **kwargs):
     """
     label = ['Baseline [ADC]', 'Gain [ADC / p.e.]', '$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]']
     for p in range(n_peaks):
-        label+=['Amplitude_%d'%p]
+        label += ['Amplitude_' + str(p)]
     return np.array(label)
 

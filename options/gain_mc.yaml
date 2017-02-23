@@ -12,16 +12,16 @@ log_file_basename : 20161214
 
 # Input files
 mc            :     True #False
-file_basename :     xt_0_dark_0-003_time_0_seed_%s.hdf5
+file_basename :     xt_0-06_dark_0_mpe_time_0_seed_%s.hdf5
 directory     :     ../digicamtoy/data_calibration_cts/
-scan_level    :     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+scan_level    :     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
 
 # Output files
-output_directory      : data/fit_biais_dark/
+output_directory      : data/fit_mpe_biais_xt/
 histo_filename        : full_mpe.npz
 input_dark_filename   : spe.npz
 input_hvoff_filename  : adc_hv_off.npz
 mpes_histo_filename   : mpe.npz
 
 # Camera Configuration
-n_pixels          : 200
+n_pixels          : 10
