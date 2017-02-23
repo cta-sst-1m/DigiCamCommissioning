@@ -14,6 +14,7 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
     pbar = tqdm(total=max_evt-min_evt)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
     for file in options.file_list:
+
         if evt_num > max_evt: break
         # read the file
         _url = options.directory + options.file_basename % file
@@ -23,8 +24,7 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
             inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=max_evt)
 
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=max_evt, n_pixel=options.n_pixels)
-
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=options.evt_max, n_pixel=options.n_pixels, events_per_level=options.evt_max/2, level_start=7)
         if options.verbose:
             log.debug('--|> Moving to file %s' % _url)
         # Loop over event in this file
@@ -34,8 +34,8 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
                 continue
             else:
                 # progress bar logging
-                if evt_num % int((max_evt-min_evt)/1000)==0:
-                    pbar.update(int((max_evt-min_evt)/1000))
+                #if evt_num % int((max_evt-min_evt)/1000)==0: #TODO make this work properly
+                pbar.update(1)
             if evt_num > max_evt: break
             for telid in event.r1.tels_with_data:
                 evt_num += 1
@@ -43,11 +43,12 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
                 # get the data
                 data = np.array(list(event.r1.tel[telid].adc_samples.values()))
                 # subtract the pedestals
-                data = data
-                hist.fill(np.argmax(data, axis=1))
+                data_max = np.argmax(data, axis=1) #TODO Skip level 0 to avoid biais on position finding
+                #if (data_max-np.argmin(data, axis=1))/data_max>0.2:
+                hist.fill(data_max)
 
     # Update the errors
     # noinspection PyProtectedMember
     hist._compute_errors()
     # Save the histo in a file
-    hist.save(options.output_directory + options.histo_filename)
+    hist.save(options.output_directory + options.histo_filename) #TODO check for double saving

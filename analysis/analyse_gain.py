@@ -42,9 +42,15 @@ def create_histo(options):
     log.info('\t-|> Get various inputs')
 
     # recover previous fit
-    spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename,fit_only=True)
-    prev_fit_result = np.copy(spes_fit.fit_result)
-    del spes_fit
+    if options.mc:
+
+        prev_fit_result = np.ones((options.n_pixels, 8, 2))
+
+    else:
+
+        spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename, fit_only=True)
+        prev_fit_result = np.copy(spes_fit.fit_result)
+        del spes_fit
 
     # Define the histograms
     mpes = histogram.Histogram(filename = options.output_directory + options.mpes_histo_filename)
@@ -55,21 +61,34 @@ def create_histo(options):
     # Add an Histogram corresponding to the sum of all other only if the mu is above a certain threshold
 
     pbar = tqdm(total=mpes.data.shape[0]*mpes.data.shape[1])
+    #print(pbar.total)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     log.info('\t-|> Summing the MPEs:')
     for i in range(mpes.data.shape[0]):
         for j in range(mpes.data.shape[1]):
-            if (i*mpes.data.shape[1]+j) %int(pbar.total/1000)==0:pbar.update(int(pbar.total/1000))
-            # put the slice or remove empty bins
-            s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
-            if s[0]==s[1]:continue
-            mpe_tmp = mpes.data[i,j]
-            mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
-                              weights=mpe_tmp[np.nonzero(mpe_tmp)])-prev_fit_result[j,0,0]
 
-            if mean < 10 : continue
-            mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
+            if pbar.total<=1000:
+                pbar.update(1)
+            else:
+                if (i*mpes.data.shape[1]+j) %int(pbar.total/1000)==0: pbar.update(pbar.total/1000)
+            # put the slice or remove empty bins
+
+            if not options.mc:
+
+                s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
+                if s[0]==s[1]:continue
+                mpe_tmp = mpes.data[i,j]
+                mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
+                                  weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,0,0]
+
+                if mean < 10 : continue
+                mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
+
+            else:
+
+                mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
+
 
     mpes_full._compute_errors()
 
@@ -94,15 +113,28 @@ def perform_analysis(options):
     :return:
     """
     # Fit the baseline and sigma_e of all pixels
+
+    # recover previous fit
     mpes_full = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    # recover previous fit
+    if options.mc:
 
-    # recover previous fit
-    spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename,fit_only=True)
-    prev_fit_result = np.copy(spes_fit.fit_result)
-    del spes_fit
-    n_peak = 30
+        prev_fit_result = None
+
+     # recover previous fit
+    else:
+
+        spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename,fit_only=True)
+        prev_fit_result = np.copy(spes_fit.fit_result)
+        del spes_fit
+
+    if options.mc:
+
+        n_peak = int(len(options.scan_level) * (1 + 0.06)) #TODO auto detect number of peaks (XT might produce more peaks)
+
+    else:
+
+        n_peak = 15
     reduced_bounds = lambda *args,config=None, **kwargs: fit_full_mpe.bounds_func(*args,n_peaks = n_peak, config=config, **kwargs)
     reduced_p0 = lambda *args,config=None, **kwargs: fit_full_mpe.p0_func(*args,n_peaks = n_peak, config=config, **kwargs)
     reduced_slice = lambda *args, config=None, **kwargs: fit_full_mpe.slice_func(*args, n_peaks=n_peak, config=config, **kwargs)
@@ -150,7 +182,7 @@ def perform_analysis(options):
     mpes_full.save(options.output_directory + options.histo_filename)
 
 
-def display_results(options):
+def display_results(options, param_to_display=1):
     """
     Display the analysis results
 
@@ -163,10 +195,39 @@ def display_results(options):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0()
+
+    if options.mc:
+
+        index_default = (0,)
+
+    else:
+
+        index_default = (4,)
+
+    geom = geometry.generate_geometry_0(options.n_pixels)
 
     # Perform some plots
-    display.display_hist(adcs, geom, index_default=(4,), param_to_display=1,limitsCam=[4.,6.],draw_fit = True)
+    fig_hist = display.display_hist(adcs, geom, index_default=index_default, param_to_display=param_to_display,limitsCam=[4.,6.], draw_fit = True)
+    fig_hist.savefig(options.output_directory + 'figures/hist.png')
+
+    geom = None
+
+    display_fit = True
+    fig_chi2 = display.display_chi2(adcs, geom, display_fit=display_fit)
+    fig_chi2.savefig(options.output_directory + 'figures/chi2.png')
+
+    param_names = ['baseline', 'gain', 'sigma_e','sigma_1']
+
+    for i in range(len(param_names)):
+        fig_result = display.display_fit_result(adcs, geom, index_var=i, display_fit=display_fit)
+        fig_result.savefig(options.output_directory + 'figures/%s.png' % (param_names[i]))
+
+        if options.mc:
+
+            param_true = {'baseline': 2010, 'gain': 5.6, 'sigma_e': 0.86, 'sigma_1': 0.48}
+
+            fig_pull = display.display_fit_pull(adcs, geom, index_var=i, true_value = param_true[param_names[i]], display_fit=display_fit)
+            fig_pull.savefig(options.output_directory + 'figures/%s_pull.png' % (param_names[i]))
 
     input('press button to quit')
 

@@ -101,7 +101,7 @@ def perform_analysis(options):
             if level > 0 and mpes.fit_result[level - 1, pixel, 0, 0] > 30.:
                 fixed_param = [
                     # in this case assign the cross talk estimation with smallest error
-                    [1, mpes.fit_result[np.argmin(mpes.fit_result[0:level - 1:1, pixel, 1, 1]), pixel, 1, 0]],
+                    [1, mpes.fit_result[np.argmin(mpes.fit_result[5:level:1, pixel, 1, 1]), pixel, 1, 0]], # start from level 5 to avoid taking dark or hv off
                     [2, (1, 0)],  # gain
                     [3, (0, 0)],  # baseline
                     # [4,(2,0)], # sigma_e
@@ -109,11 +109,11 @@ def perform_analysis(options):
                     [7, 0.]  # offset
                 ]
                 _fit_spectra = fit_high_light
-            elif (level > 0 and mpes.fit_result[level - 1, pixel, 0, 0] > 5.) or force_xt:
-                force_xt = True
+            elif (level > 0 and mpes.fit_result[level - 1, pixel, 0, 0] > 10.) or force_xt: #TODO Sometimes mu_xt error min is for mu_xt =0. (dark/hv off)
+                fixed_xt = mpes.fit_result[np.argmin(mpes.fit_result[5:level:1, pixel, 1, 1]), pixel, 1, 0] # start from level 5 to avoid taking dark or hv off
                 fixed_param = [
                     # in this case assign the cross talk estimation with smallest error
-                    [1, mpes.fit_result[np.argmin(mpes.fit_result[0:level - 1:1, pixel, 1, 1]), pixel, 1, 0]],
+                    [1, fixed_xt],
                     [2, (1, 0)],  # gain
                     [3, (0, 0)],  # baseline
                     [4, (2, 0)],  # sigma_e
@@ -150,9 +150,63 @@ def display_results(options):
     # Define Geometry
     geom = geometry.generate_geometry_0()
 
-    # Perform some plots
-    display.display_hist(adcs, geom, index_default=(700,), param_to_display=-1, limits=[1900., 2100.])
+    import matplotlib.pyplot as plt
 
+
+
+    # Perform some plots
+    if options.mc:
+
+        for level in options.scan_level:
+
+            fig = plt.figure()
+            axis = fig.add_subplot(111)
+            display.draw_hist(axis, adcs, index=(level, int(options.n_pixels-1),), limits=[2005, 2150], draw_fit=True, label='Pixel %s')
+
+        x = np.array(options.scan_level)*5.
+        y = adcs.fit_result[:,int(options.n_pixels-1),0,0]
+        yerr = adcs.fit_result[:,int(options.n_pixels-1),0,1]
+        mask = np.isfinite(x)*np.isfinite(y)*np.isfinite(yerr)
+
+        param = np.polyfit(x[mask], y[mask], 4, w=1./yerr[mask])
+        text_param = ''
+        for i in range(len(param)):
+            text_param += 'p_%d = %0.9f  \n' %(i, param[i])
+
+        true_param = np.array([11 * 1E-8, 0., 0., 0., 0.])
+
+        fig = plt.figure()
+        ax_up = plt.subplot2grid((4,4), (0,0), colspan=4, rowspan=3)
+        ax_down = plt.subplot2grid((4,4), (3,0), colspan=4, sharex=ax_up)
+        #ax_down_2 = plt.subplot2grid((4,4), (3,0), colspan=4, sharex=ax_up)
+        ax_up.plot(x, np.polyval(param, x), label='MC observed best fit p_0 = %0.4f [p.e.]' %param[-1])
+        ax_up.plot(x, np.polyval(true_param, x), label='MC generated')
+        ax_up.errorbar(x[mask], y[mask], yerr=yerr[mask], label='MC observed', linestyle='None', barsabove=True, markersize=12, marker='o')
+        ax_down.plot(x[mask], np.abs(np.polyval(param, x[mask])-np.polyval(true_param, x[mask]))/np.polyval(param, x[mask]), label='bias polynomial')
+        ax_down.plot(x[mask], np.abs(y[mask]-np.polyval(true_param, x[mask]))/y[mask], label='bias measurements')
+        #ax_down_2.plot(x[mask], np.abs(y[mask]-np.polyval(true_param, x[mask]))/yerr[mask], label='pull')
+        #ax_up.text(x[-3], y[-3], text_param)
+        ax_down.set_xlabel('DAC')
+        ax_up.set_ylabel('$\mu$ [p.e.]')
+        #ax_down.set_ylabel('$\\frac{\mu_{t}- \mu_{m}}{\sigma_{m}}$')
+        fig.subplots_adjust(hspace=0.1)
+        plt.setp(ax_up.get_xticklabels(), visible=False)
+        #plt.setp(ax_down.get_xticklabels(), visible=False)
+        ax_up.set_yscale('log')
+        ax_down.set_yscale('log')
+        #ax_down_2.set_yscale('log')
+        ax_up.legend()
+        ax_down.legend()
+        #ax_down_2.legend()
+
+
+    else:
+
+        fig = plt.figure()
+        axis = fig.add_subplot(111)
+        display.draw_hist(axis, adcs, index=(15,700,), limits=[2005, 2150], draw_fit=True, label='Pixel %s')
+
+    #display.display_hist(adcs, geom=geom, index_default=(20,700,), param_to_display=1, limits=[1900., 2100.], draw_fit=True)
     input('press button to quit')
 
     return

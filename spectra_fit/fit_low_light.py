@@ -17,12 +17,9 @@ def p0_func(y, x, *args, config=None, **kwargs):
     :param kwargs: potential unused keyword arguments
     :return: starting points for []
     """
-    if type(config).__name__=='NoneType':
-        mu = mu_xt = gain = baseline = sigma_e = sigma_1 = amplitude = offset = np.nan
-        param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
-    else:
+    if config is not None:
         mu = 0.001
-        mu_xt = 0.08 #config[1, 0]
+        mu_xt = 0.0 #config[1, 0]
         gain = config[1, 0]
         baseline = config[0, 0]
         sigma_e = config[2, 0]
@@ -91,6 +88,8 @@ def p0_func(y, x, *args, config=None, **kwargs):
 
 
 
+
+
 # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
 def slice_func(y, x, *args, **kwargs):
     """
@@ -119,14 +118,13 @@ def bounds_func(*args, config=None, **kwargs):
     """
 
 
-    if True:
+    if False:
 
         param_min = [1.e-3, 1.e-4, 0., -np.inf, 0., 0., 0.,-np.inf]
         param_max = [2000., 1, np.inf, np.inf, np.inf, np.inf, np.inf,np.inf]
 
 
     else:
-
         mu = config[0]
         mu_xt = config[1]
         gain = config[2]
@@ -136,7 +134,7 @@ def bounds_func(*args, config=None, **kwargs):
         amplitude = config[6]
         offset = config[7]
 
-        param_min = [0.    , 0., 0                   , -np.inf                  , 0.                       , 0.     ,0.    ,-np.inf]
+        param_min = [0.    , 0., 0                   , 0.                , 0.                       , 0.     ,0.    ,-np.inf]
         param_max = [np.inf, 1 , gain[0] + 10*gain[1], baseline[0]+5*baseline[1], sigma_e[0] + 5*sigma_e[1], np.inf ,np.inf, np.inf]
 
     return param_min, param_max
@@ -152,16 +150,17 @@ def fit_func(p, x, *args, **kwargs):
     #mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset, variance = p
     mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset = p
     temp = np.zeros(x.shape)
-    n_peak=10
+    n_peak=40
     n_peakmin = 0
     if len(x)>0:
         n_peak = int(float(x[-1] - baseline) / gain * 1.5)
-        n_peakmin = int(float(x[0] - baseline) / gain * 0.7)
+        n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
 
     x = x - baseline
-    for n in range(n_peakmin,n_peak):
-        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2) # * gain
-        temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(x , sigma_n, n * gain)
+    for n in range(n_peak):
+        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + 1./12.) # * gain
+        param_gauss = [sigma_n, n*gain, 1.]
+        temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(param_gauss, x)
         #temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(x, sigma_n, n * gain + (offset if n!=0 else 0))
 
     return temp * amplitude
@@ -171,7 +170,7 @@ def label_func(*args, ** kwargs):
     List of labels for the parameters
     :return:
     """
-    label = ['#mu', 'P(XT)', 'Gain','Baseline','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]','Amplitude']
+    label = ['$\mu$ [p.e.]', '$\mu_{XT}$ [p.e.]', 'Gain [ADC/p.e.]','Baseline [ADC]','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]', 'Amplitude']
     return np.array(label)
 
 if __name__ == '__main__':

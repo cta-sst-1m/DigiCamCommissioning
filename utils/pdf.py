@@ -2,13 +2,21 @@ import math
 from scipy.special import factorial
 import matplotlib.pyplot as plt
 import numpy as np
-
+import scipy.stats
 
 def poisson(k, mu):
     return mu ** k * np.exp(-mu) / math.factorial(k)
 
 
-def gaussian(x, sigma, mean, amplitude=1):
+def gaussian(p, x, amplitude=1.):
+
+    sigma = p[0]
+    mean = p[1]
+    amplitude = p[2]
+
+    if amplitude==1.:
+        amplitude = 1.
+
     return amplitude / np.sqrt(2 * sigma ** 2 * math.pi) * np.exp(-(x - mean) ** 2 / (2 * sigma ** 2))
 
 def generalized_poisson(k, mu, mu_xt, amplitude=1):
@@ -36,15 +44,27 @@ def gaussian_sum(param, x):
     gain = param[1]
     sigma_e = param[2]
     sigma_1 = param[3]
+    #offset = param[4]
     amplitudes = param[4:len(param)+1]
 
     n_peaks = len(amplitudes)
 
     for i in range(n_peaks):
-        sigma = np.sqrt(sigma_e**2 + i*sigma_1**2)
-        temp += gaussian(x, sigma, baseline + i*gain, amplitude=amplitudes[i])
+        sigma = np.sqrt(sigma_e**2 + i*sigma_1**2 + 1./12.)
+        #temp += gaussian(x, sigma, baseline + i*gain + (offset if i==0 else 0), amplitude=amplitudes[i])
+
+        param = [sigma, baseline + i*gain, amplitudes[i]]
+        temp += gaussian(param, x, amplitude=amplitudes[i])
 
     return temp
+
+def chi2(param, x):
+
+    ndf = param[0]
+
+    return scipy.stats.chi2.pdf(x, ndf)
+
+
 
 def erlang_compound(x, mu, mu_xt):
     temp = 0
@@ -88,7 +108,7 @@ def mpe_distribution_general(p, x, config=None):
     x = x - offset
     n_peak = 40
     for n in range(0, n_peak, 1):
-        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2) * gain
+        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2)
 
         temp += generalized_poisson(n, mu, mu_xt) * gaussian(x, sigma_n, n * gain)
 

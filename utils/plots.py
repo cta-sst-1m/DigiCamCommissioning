@@ -1,8 +1,16 @@
+
+import matplotlib
+matplotlib.use('Qt5Agg')
+from copy import deepcopy, copy
+
 from ctapipe import visualization
 import numpy as np
 from matplotlib import pyplot as plt
 from utils.histogram import Histogram
+import spectra_fit.fit_gaussian
+import spectra_fit.fit_chi2
 from matplotlib.widgets import Button
+
 
 
 class pickable_visu(visualization.CameraDisplay):
@@ -32,8 +40,8 @@ class pickable_visu(visualization.CameraDisplay):
             '''
 
             pickable_data.show(which_hist=(pix_id,), axis=self.extra_plot,
-                               show_fit=self.show_fit[i], slice=slice,
-                               scale=self.axis_scale, color=colors[i], setylim=i == 0, config = self.config)
+                               show_fit=self.show_fit[i], slice_list=slice,
+                               scale=self.axis_scale, color=colors[i], set_ylim=i == 0, config = self.config)
             '''
             if i == 1:
                 pickable_data.fit_function = init_func
@@ -165,7 +173,23 @@ def display(hists, geom,slice_func,pix_init=700,norm='lin',config=None):
     plt.show()
 
 
-def display_var(hist, geom,title='Gain [ADC/p.e.]', index_var=1, limit_min=0., limit_max=10., bin_width=0.2):
+def display_var(hist, geom,title='Gain [ADC/p.e.]', index_var=1, show_fit=False):
+
+
+    if  hist.fit_result.shape[0]==1: #TODO correctly treat cases when hist.fit_result.shape[0]==1
+
+        limit_min = hist.fit_result[:, index_var, 0]
+        limit_max = 4. * hist.fit_result[:, index_var, 0]
+        bin_width = (limit_max - limit_min)/3.
+
+        print ('hello')
+
+    else:
+
+        limit_min = np.min(hist.fit_result[:, index_var, 0])
+        limit_max = np.max(hist.fit_result[:, index_var, 0])
+        bin_width = (limit_max - limit_min) / np.sqrt(hist.fit_result.shape[0])
+
     f, ax = plt.subplots(1, 2, figsize=(20, 7))
     plt.subplot(1, 2, 1)
     vis_gain = visualization.CameraDisplay(geom, title='', norm='lin', cmap='viridis')
@@ -181,6 +205,55 @@ def display_var(hist, geom,title='Gain [ADC/p.e.]', index_var=1, limit_min=0., l
     hh, bin_tmp = np.histogram(h, bins=np.arange(limit_min - bin_width / 2, limit_max + 1.5 * bin_width, bin_width))
     hh_hist = Histogram(data=hh.reshape(1, hh.shape[0]),
                         bin_centers=np.arange(limit_min, limit_max + bin_width, bin_width), xlabel=title,
+                       ylabel='$\mathrm{N_{pixel}/%.2f}$' % bin_width, label='All pixels')
+    if show_fit:
+
+        hh_hist.fit(func=spectra_fit.fit_gaussian.fit_func, p0_func=spectra_fit.fit_gaussian.p0_func, slice_func=spectra_fit.fit_gaussian.slice_func, bound_func=spectra_fit.fit_gaussian.bounds_func)
+
+    hh_hist.show(which_hist=(0,), axis=ax[1], show_fit=show_fit)
+    plt.show()
+
+
+def display_var_biais(hist, geom,title='Gain [ADC/p.e.]', index_var=1, true_param=None, show_fit=False):
+
+    title += ' Bias'
+    shifted_hist = deepcopy(hist)
+    shifted_hist.fit_result[:, index_var, 0] = (true_param - shifted_hist.fit_result[:, index_var, 0])/ shifted_hist.fit_result[:, index_var, 1]
+    shifted_hist.fit_result[:, index_var, 1] = 1.
+
+    display_var(hist=shifted_hist, geom=geom, title=title, index_var=index_var, show_fit=show_fit)
+
+    return
+
+def display_chi2(hist, geom, show_fit=False):
+
+    title = '$\chi^2$ / ndf'
+
+    f, ax = plt.subplots(1, 2, figsize=(20, 7))
+    plt.subplot(1, 2, 1)
+    vis_gain = visualization.CameraDisplay(geom, title='', norm='lin', cmap='viridis')
+    vis_gain.add_colorbar()
+    vis_gain.colorbar.set_label(title)
+    h = hist.fit_chi2_ndof[:,0] / hist.fit_chi2_ndof[:,1]
+
+    if hist.fit_chi2_ndof.shape[0]==1:
+
+        limit_min = h
+        limit_max = h + 0.1
+        bin_width = (limit_max - limit_min) / 2.
+
+    else:
+        limit_min = np.min(h)
+        limit_max = np.max(h)
+        bin_width = (limit_max - limit_min) / np.sqrt(hist.fit_chi2_ndof.shape[0])
+
+    vis_gain.image = h
+    # plt.subplot(1,2,2)
+
+    hh, bin_tmp = np.histogram(h, bins=np.arange(limit_min - bin_width / 2, limit_max + 1.5 * bin_width, bin_width))
+    hh_hist = Histogram(data=hh.reshape(1, hh.shape[0]),
+                        bin_centers=np.arange(limit_min, limit_max + bin_width, bin_width), xlabel=title,
                         ylabel='$\mathrm{N_{pixel}/%.2f}$' % bin_width, label='All pixels')
-    hh_hist.show(which_hist=(0,), axis=ax[1], show_fit=False)
+    hh_hist.fit(func=spectra_fit.fit_chi2.fit_func, p0_func=spectra_fit.fit_chi2.p0_func, slice_func=spectra_fit.fit_chi2.slice_func, bound_func=spectra_fit.fit_chi2.bounds_func)
+    hh_hist.show(which_hist=(0,), axis=ax[1], show_fit=show_fit)
     plt.show()

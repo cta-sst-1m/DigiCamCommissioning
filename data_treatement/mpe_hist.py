@@ -12,6 +12,7 @@ def run(hist, options, peak_positions=None):
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
+
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=len(options.scan_level)*options.events_per_level)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
@@ -25,7 +26,10 @@ def run(hist, options, peak_positions=None):
         if not options.mc:
             inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=len(options.scan_level)*options.events_per_level)
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=len(options.scan_level)*options.events_per_level, n_pixel=options.n_pixels)
+
+            seed = 0
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], seed=seed, max_events=len(options.scan_level)*options.events_per_level, n_pixel=options.n_pixels, events_per_level=options.events_per_level, level_start=options.scan_level[0])
+
 
         if options.verbose:
             log.debug('--|> Moving to file %s' % _url)
@@ -43,9 +47,11 @@ def run(hist, options, peak_positions=None):
                     if level > len(options.scan_level) - 1:
                         break
                     if options.verbose:
+
                         log.debug('--|> Moving to DAC Level %d' % (options.scan_level[level]))
-                if evt_num % int(options.events_per_level/1000)== 0:
-                    pbar.update(int(options.events_per_level/1000))
+                #if evt_num % int(options.events_per_level/1000)== 0:
+                pbar.update(1)
+
                 # get the data
                 data = np.array(list(event.r1.tel[telid].adc_samples.values()))
                 # subtract the pedestals
