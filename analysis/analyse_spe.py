@@ -124,8 +124,12 @@ def display_results(options):
 
     # Perform some plots
     display.display_fit_result(adcs, geom, index_var=1, limits=[4., 6.], bin_width=0.05)
-    display.display_fit_result(adcs, geom, index_var=2, limits=[0., 2.], bin_width=0.05)
-    display.display_fit_result(adcs, geom, index_var=3, limits=[0., 2.], bin_width=0.05)
+    display.display_fit_result(adcs,index_var=2, limits=[0., 2.], bin_width=0.05)
+    display.display_fit_result(adcs, index_var=3, limits=[0., 2.], bin_width=0.05)
+
+    #display.display_fit_result(adcs, geom , index_var=1, limits=[4., 6.], bin_width=0.05)
+    #display.display_fit_result(adcs, geom, index_var=2, limits=[0., 2.], bin_width=0.05)
+    #display.display_fit_result(adcs, geom, index_var=3, limits=[0., 2.], bin_width=0.05)
 
     display.display_hist(adcs,  geom, index_default=(700,),param_to_display=1,limits = [1950.,2070.],limitsCam = [4.,6.],draw_fit = True)
 

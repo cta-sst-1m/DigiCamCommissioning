@@ -336,6 +336,7 @@ def display_chi2(hist, geom = None, display_fit=False):
     #h = draw_fit_result(ax[1], hist, index=index_var, limits=limits, bin_width=bin_width)
     fig.canvas.draw()
 
+
     return fig
 
 def display_hist(hist, geom,index_default=(0,), param_to_display = -1, limits=None,limitsCam=None, draw_fit = False): #TODO check default pixel=700 better zero to avoid conflict with mc
