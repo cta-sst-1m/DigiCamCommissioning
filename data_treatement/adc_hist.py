@@ -36,7 +36,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
         # Open the file
         _url = options.directory + options.file_basename % file
         if not options.mc:
-            inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=100000)
+            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=100000) #TODO data_type arg does not exist anymore
         else:
             inputfile_reader = ToyReader(filename=_url, id_list=[0],
                                          max_events=options.evt_max,
