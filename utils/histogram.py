@@ -250,6 +250,9 @@ class Histogram:
         else:
             self.data[indices][dim_indices] += 1
 
+        self._compute_errors()
+
+
     # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):
         """

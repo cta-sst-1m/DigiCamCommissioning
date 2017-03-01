@@ -17,7 +17,7 @@ def p0_func(y, x, *args, **kwargs):
     if np.sum(y)==0 : return [np.nan, np.nan, np.nan]
     if np.average(x, weights=y) == 0 and np.average((x - np.average(x, weights=y)) ** 2, weights=y) == 0:
         return [np.nan, np.nan, np.nan]
-    return [np.sum(y), np.average(x, weights=y), np.average((x - np.average(x, weights=y)) ** 2, weights=y)]
+    return [np.sum(y), np.average(x, weights=y), np.sqrt(np.average((x - np.average(x, weights=y) - 1./12.) ** 2, weights=y))]
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
@@ -33,7 +33,7 @@ def slice_func(y, x, *args, **kwargs):
     # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] < 2:
         return [0, 1, 1]
-    return [np.where(y != 0)[0][1], np.where(y != 0)[0][-1], 1]
+    return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal
@@ -44,7 +44,7 @@ def bounds_func(*args, **kwargs):
     :param kwargs:
     :return:
     """
-    return [-np.inf, -np.inf, -np.inf], [np.inf, np.inf, np.inf]
+    return [0, 0., 0], [np.inf, np.inf, np.inf]
 
 
 def fit_func(p, x):
@@ -54,6 +54,9 @@ def fit_func(p, x):
     :param x: x
     :return: G(x)
     """
+
+    p[2] = np.sqrt(p[2]**2 + 1./12.)
+
     return p[0] / p[2] / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x) - p[1]) ** 2 / (2. * p[2] ** 2))
 
 

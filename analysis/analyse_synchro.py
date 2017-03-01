@@ -6,6 +6,7 @@
 from data_treatement import synch_hist
 from utils import display, histogram, geometry
 import logging,sys
+import numpy as np
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
@@ -37,8 +38,6 @@ def create_histo(options):
     synch_hist.run(peaks, options,min_evt = options.evt_min , max_evt=options.evt_max)
 
     # Save the histogram
-
-    print(options.output_directory + options.histo_filename)
 
     peaks.save(options.output_directory + options.histo_filename)
 
@@ -86,10 +85,10 @@ def display_results(options):
     if options.mc:
 
         index_default = (0, )
-
     else:
 
-        index_default = (700, )
+        index_default = (660,)
+
 
     display.display_hist(peaks,  geom, index_default=index_default, param_to_display=-1,limits = [0.,51.],limitsCam = [0.,51.])
 

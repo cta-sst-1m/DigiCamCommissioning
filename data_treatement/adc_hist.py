@@ -51,7 +51,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
             if (n_evt % int(max_evt/1000) ==0):
                 pbar.update(max_evt/1000)
 
-            for telid in event.r1.tels_with_data:
+            for telid in event.dl0.tels_with_data:
                 if n_evt % n_batch == 0:
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
                     # Update adc histo
@@ -65,7 +65,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                     batch_num += 1
                     log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
                 # Get the data
-                data = np.array(list(event.r1.tel[telid].adc_samples.values()))
+                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 # Append the data to the batch
                 if type(batch).__name__ != 'ndarray':
                     batch = data.reshape(data.shape[0], 1, data.shape[1])

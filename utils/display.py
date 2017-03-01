@@ -7,8 +7,7 @@ import scipy.stats
 from spectra_fit import fit_low_light
 
 
-
-def draw_fit_result(axis, hist, index=1, limits=None, bin_width=None, display_fit=False, **kwargs):
+def draw_fit_result(axis, hist, index=1, display_fit=False):
     """
     A function to display the histogram of a variable from fit_results
 
@@ -24,16 +23,22 @@ def draw_fit_result(axis, hist, index=1, limits=None, bin_width=None, display_fi
     h = np.copy(hist.fit_result[:, index, 0])
     h_err = np.copy(hist.fit_result[:, index, 1])
 
-    mask = (~np.isnan(h)) * (~np.isnan(h_err))
-    h = h[mask]
-    h_err = h_err[mask]
+    h_to_return = h
 
+    ### Avoid NANs
+    mask = (~np.isnan(h)) * (~np.isnan(h_err) * (h>0))
+    h = h[mask]
+
+<<<<<<< HEAD
     if limits:
         h[h<limits[0]]=limits[0]
         h[h>limits[1]]=limits[1]
 
 
     histo = axis.hist(h, bins='auto', histtype='step', align='left', label='All pixels', color='k', linewidth=1)
+=======
+    histo = axis.hist(h, bins='auto', histtype='step', align='left', label='all pixels', color='k', linewidth=1)
+>>>>>>> d9bd0605ed92cd07f6a0c491af92ddb13722aaac
 
     bin_edges = histo[1][0:-1]
     bin_width = bin_edges[1] - bin_edges[0]
@@ -45,12 +50,11 @@ def draw_fit_result(axis, hist, index=1, limits=None, bin_width=None, display_fi
         fit_param = gaussian.fit(h)
         gaussian_fit = gaussian(fit_param[0], fit_param[1])
         x = np.linspace(min(bin_edges), max(bin_edges), 100)
-        axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*bin_width, label='fit', color='r')
-        text_fit_result = '$\mu$ = %0.2f \n $\sigma$ = %0.2f' % (fit_param[0], fit_param[1])
+        axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*(bin_width), label='fit', color='r')
+        text_fit_result = '$\mu$ = %0.2f \n $\sigma$ = %0.2f \n entries = %d' % (fit_param[0], fit_param[1], h_to_return.shape[0])
         axis.text(bin_edges[-2], max(histo), text_fit_result)
 
-    #axis.step(np.arange(limits[0] + bin_width / 2, limits[1] + 1.5 * bin_width, bin_width), hh, label='All pixels',
-    #          color='k', lw='1')
+
     axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok')
     # Beautify
     axis.set_xlabel(hist.fit_result_label[index])
@@ -60,7 +64,8 @@ def draw_fit_result(axis, hist, index=1, limits=None, bin_width=None, display_fi
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
     axis.legend()
-    return h
+
+    return h_to_return
 
 def draw_fit_pull(axis, hist, index=1, true_value=5.6, limits=None, bin_width=None, display_fit=False, **kwargs):
     """
@@ -161,7 +166,7 @@ def draw_chi2(axis, hist, display_fit):
     axis.yaxis.get_label().set_position((0, 1))
     axis.legend()
 
-def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pixel %s',**kwargs):
+def draw_hist(axis, hist, index, draw_fit=False):
     """
     A function to display the histogram of a variable from fit_results
 
@@ -175,19 +180,22 @@ def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pi
     # Get the data and assign limits
     h = np.copy(hist.data[index])
     h_err = np.copy(hist.errors[index])
-    if not limits:
-        limits = hist.fit_slices[index].astype(dtype = int)
-    h = h[limits[0]:limits[1]:1]
-    h_err = h_err[limits[0]:limits[1]:1]
-    axis.errorbar(hist.bin_centers[limits[0]:limits[1]:1], h, yerr=h_err, fmt='ok',label=label%index[-1])
+    h_to_return = h
+
+    ### Avoid NANs
+    mask = (~np.isnan(h)) * (~np.isnan(h_err) * (h > 0))
+    h = h[mask]
+    h_err = h_err[mask]
+    x = hist.bin_centers[mask]
+
+    axis.step(x, h, color='k', where='mid')
+    axis.errorbar(x, h, yerr=h_err, fmt='ok', label='pixel %s' % (index, ))
     text_fit_result = ''
-    if not draw_fit:
-        axis.step(hist.bin_centers[limits[0]:limits[1]:1]+0.5*hist.bin_width, h, color='k', lw='1')
-    else :
-        reduced_axis = hist.bin_centers[limits[0]:limits[1]:1]
+
+    if draw_fit:
+        reduced_axis = x
         fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1], 10*reduced_axis.shape[0])
         reduced_func = hist.fit_function
-        print (hist.fit_result.shape)
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
         text_fit_result += '$\chi^{2}/ndf = %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
         for i in range(hist.fit_result.shape[-2]):
@@ -198,48 +206,20 @@ def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pi
         axis.text(0.7, 0.7, text_fit_result, horizontalalignment='left', verticalalignment='center',
                       transform=axis.transAxes, fontsize=10)
 
-            #axis.text((limits[1]-limits[0])/2 +limits[0] ,  (np.max(h[1:-1]) * 1.25 - np.min(h))/2+np.min(h), text_fit_result)
-        #axis.text((limits[1]-limits[0])/2 +limits[0] ,  (np.max(h[1:-1]) * 1.25 - np.min(h))/2+np.min(h), text_fit_result)
-
-    # Beautify
     axis.set_xlabel(hist.xlabel)
     axis.set_ylabel(hist.ylabel)
-    axis.set_xlim(limits[0] + hist.bin_width / 2, limits[1] + hist.bin_width / 2)
-    axis.set_ylim(np.min(h), np.max(h[1:-1]) * 1.25)
     axis.xaxis.get_label().set_ha('right')
     axis.xaxis.get_label().set_position((1, 0))
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
-    axis.legend()
+    axis.set_yscale('log', nonposy='clip')
+    axis.legend(loc='best')
 
 
-    return
+    return h_to_return
 
 
-class pickable_visu(visualization.CameraDisplay):
-    """
-    A class to allow displaying an figure when clicking on a pixel
-    """
-    def __init__(self, hist, figure , visu_axis , pickable_figures, limits = None, draw_fit = False,  *args, **kwargs):# extra_plot, figure, slice_func, show_fit, axis_scale,config, *args, **kwargs):
-        super(pickable_visu, self).__init__(*args, **kwargs)
-        self.figure = figure
-        self.hist = hist
-        self.axis = visu_axis
-        self.pickable_figures = pickable_figures
-        self.draw_fit = draw_fit
-        self.limits = limits
-
-    def on_pixel_clicked(self, pix_id):
-        self.axis.cla()
-        for i, pickable_figure in enumerate(self.pickable_figures):
-            pickable_figure(self.axis,self.hist,index = pix_id,limits = self.limits, draw_fit = self.draw_fit)
-        try:
-            self.figure.canvas.draw()
-        except ValueError:
-            print('some issue to plot')
-
-
-def display_fit_result(hist, geom = None , index_var=1, limits=None, bin_width=None, display_fit=False):
+def display_fit_result(hist, geom = None , index_var=1, limits=[0,4095], bin_width=None, display_fit=False):
     """
     A function to display a vaiable both as an histogram and as a camera view
 
@@ -259,14 +239,24 @@ def display_fit_result(hist, geom = None , index_var=1, limits=None, bin_width=N
         ax_left = fig.add_subplot(1,2,1)
         ax_right = fig.add_subplot(1,2,2)
         vis_gain = visualization.CameraDisplay(geom, ax=ax_left, title='', norm='lin', cmap='viridis')
+        h = draw_fit_result(ax_right, hist, index=index_var, limits=limits, bin_width=bin_width, display_fit=display_fit)
+<<<<<<< HEAD
+        #vis_gain.image = h
+=======
+
+        h[np.isnan(h)*~np.isfinite(h)] = limits[1]
+        h[h<limits[0]] = limits[0]
+        h[h>limits[1]] = limits[1]
+
+        vis_gain.image = h
         vis_gain.add_colorbar()
         vis_gain.colorbar.set_label(hist.fit_result_label[index_var])
-        h = draw_fit_result(ax_right, hist, index=index_var, limits=limits, bin_width=bin_width, display_fit=display_fit)
-        #vis_gain.image = h
+
+>>>>>>> d9bd0605ed92cd07f6a0c491af92ddb13722aaac
     else: # TODO check this case
         fig = plt.figure(figsize=(10, 7))
         ax = fig.add_subplot(1, 1, 1)
-        h = draw_fit_result(ax, hist, index=index_var, limits=limits, bin_width=bin_width, display_fit=display_fit)
+        draw_fit_result(ax, hist, index=index_var, limits=limits, bin_width=bin_width, display_fit=display_fit)
 
     fig.canvas.draw()
 
@@ -343,43 +333,50 @@ def display_chi2(hist, geom = None, display_fit=False):
 
     return fig
 
-def display_hist(hist, geom,index_default=(0,), param_to_display = -1, limits=None,limitsCam=None, draw_fit = False): #TODO check default pixel=700 better zero to avoid conflict with mc
+def display_hist(hist, index, geom=None, param_to_display=None, draw_fit = False): #TODO check default pixel=700 better zero to avoid conflict with mc
     """
 
     :return:
     """
-    fig, ax = plt.subplots(1, 2, figsize=(30, 10))
-    plt.subplot(1, 2, 1)
-    pickable_figures = [draw_hist]
-    vis_baseline = pickable_visu(hist, fig, ax[1], pickable_figures, limits,draw_fit , geom, title='', norm='lin')
-    vis_baseline.add_colorbar()
-    vis_baseline.colorbar.set_label(hist.label)
-    plt.subplot(1, 2, 1)
 
-    if param_to_display<0:
-        _bin_tmp = np.repeat(np.reshape(hist.bin_centers,(1,hist.bin_centers.shape[0])),hist.data.shape[-2],axis=0)
-        hist.data[hist.data==0]=1e-10
-        peak = np.average(_bin_tmp,axis=-1,weights=hist.data)
-        peak[np.isnan(peak)] = limitsCam[0]
-        peak[peak < limitsCam[0]] = limitsCam[0]
-        peak[peak > limitsCam[1]] = limitsCam[1]
-    else:
-        pass
-        #peak = np.copy(hist.fit_result[...,param_to_display,0])
-        #peak[np.isnan(peak)] = limitsCam[0]
-        #peak[peak < limitsCam[0]] = limitsCam[0]
-        #peak[peak > limitsCam[1]] = limitsCam[1]
+    fig = plt.figure(figsize=(20, 20))
 
-    vis_baseline.axes.xaxis.get_label().set_ha('right')
-    vis_baseline.axes.xaxis.get_label().set_position((1, 0))
-    vis_baseline.axes.yaxis.get_label().set_ha('right')
-    vis_baseline.axes.yaxis.get_label().set_position((0, 1))
-    #vis_baseline.image = peak
+    if geom is None and param_to_display is None:
 
-    # noinspection PyProtectedMember
-    fig.canvas.mpl_connect('pick_event', vis_baseline._on_pick)
-    vis_baseline.on_pixel_clicked(index_default)
+        axis_histogram = fig.add_subplot(111)
+        draw_hist(axis_histogram, hist, index=index, draw_fit=draw_fit)
 
-    fig.canvas.draw()
+    elif geom is not None and param_to_display is None:
+
+        axis_histogram = fig.add_subplot(121)
+        axis_camera = fig.add_subplot(122)
+        camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
+        camera_visu.axes.set_xlabel('x [mm]')
+        camera_visu.axes.set_ylabel('y [mm]')
+        draw_hist(axis_histogram, hist, index=index, draw_fit=draw_fit)
+
+        pixels_value = np.zeros(hist.data.shape[0])
+        for i in range(hist.data.shape[0]):
+            pixels_value[i] = np.average(hist.bin_centers, weights=hist.data[i])
+
+        camera_visu.image = pixels_value
+
+        camera_visu.add_colorbar(ticks=np.linspace(np.min(pixels_value), np.max(pixels_value), 10))
+        camera_visu.colorbar.set_label('mean ADC')
+
+    elif geom is not None and param_to_display is not None:
+
+        axis_param = fig.add_subplot(221)
+        axis_histogram = fig.add_subplot(212)
+        axis_camera = fig.add_subplot(222)
+
+        camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
+        draw_hist(axis_histogram, hist, index=index, draw_fit=draw_fit)
+        camera_visu.axes.set_xlabel('x [mm]')
+        camera_visu.axes.set_ylabel('y [mm]')
+        fit_result =  draw_fit_result(axis_param, hist, index=param_to_display, display_fit=True)
+        camera_visu.image = fit_result
+        camera_visu.add_colorbar(ticks=np.linspace(0., np.max(fit_result[fit_result>0]), 10))
+        camera_visu.colorbar.set_label(hist.fit_result_label[param_to_display])
 
     return fig
