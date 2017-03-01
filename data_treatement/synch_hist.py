@@ -21,7 +21,7 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
 
         inputfile_reader = None
         if not options.mc:
-            inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=max_evt)
+            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=max_evt)
 
         else:
             inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=options.evt_max, n_pixel=options.n_pixels, events_per_level=options.evt_max/2, level_start=7)
@@ -37,11 +37,11 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
                 #if evt_num % int((max_evt-min_evt)/1000)==0: #TODO make this work properly
                 pbar.update(1)
             if evt_num > max_evt: break
-            for telid in event.r1.tels_with_data:
+            for telid in event.dl0.tels_with_data:
                 evt_num += 1
                 if evt_num > max_evt: break
                 # get the data
-                data = np.array(list(event.r1.tel[telid].adc_samples.values()))
+                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 # subtract the pedestals
                 data_max = np.argmax(data, axis=1) #TODO Skip level 0 to avoid biais on position finding
                 #if (data_max-np.argmin(data, axis=1))/data_max>0.2:

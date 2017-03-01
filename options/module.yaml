@@ -1,0 +1,35 @@
+# Analysis module
+analysis_module : analyse_module
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : analyse
+
+# Input files
+mc            :     False
+file_basename :     dark.%s.fits.fz
+directory     :     data_test/
+file_list     :     [0]
+
+# Output files
+output_directory  : data_test/
+histo_filename    : %s.npz
+
+# Event processing
+max_event           : 10000
+hist_type           : 'raw'
+
+# Camera Configuration
+n_pixels          : 1296
+pixel_list        : [698, 662, 626, 590, 697, 661, 625, 589, 660, 624, 588, 552]
+dead_pixel        : [527]
+
+# Plot configuration
+adcs_min           : 0
+adcs_max           : 4095
+adcs_binwidth      : 1

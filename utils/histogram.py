@@ -250,6 +250,9 @@ class Histogram:
         else:
             self.data[indices][dim_indices] += 1
 
+        self._compute_errors()
+
+
     # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):
         """
@@ -398,7 +401,7 @@ class Histogram:
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])],
                     self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]] \
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])]),
-                                                   bounds=reduced_bounds, jac='3-point', method='trf', loss='arctan') # could improve with true jac
+                                                   bounds=reduced_bounds)#, jac='3-point', method='trf', loss='arctan') # could improve with true jac
 
                 # noinspection PyUnresolvedReferences
                 val = out.x
