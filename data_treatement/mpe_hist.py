@@ -1,5 +1,5 @@
 import numpy as np
-from ctapipe.calib.camera import integrators
+#from ctapipe.calib.camera import integrators fix import with updated cta
 from ctapipe.io import zfits
 import logging,sys
 from tqdm import tqdm
@@ -24,7 +24,7 @@ def run(hist, options, peak_positions=None):
         _url = options.directory + options.file_basename % file
         inputfile_reader = None
         if not options.mc:
-            inputfile_reader = zfits.zfits_event_source(url=_url, data_type='r1', max_events=len(options.scan_level)*options.events_per_level)
+            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=len(options.scan_level)*options.events_per_level)
         else:
 
             seed = 0
@@ -37,11 +37,11 @@ def run(hist, options, peak_positions=None):
         for event in inputfile_reader:
             if level > len(options.scan_level) - 1:
                 break
-            for telid in event.r1.tels_with_data:
+            for telid in event.dl0.tels_with_data:
                 if first_evt:
-                    first_evt_num = event.r1.tel[telid].eventNumber
+                    first_evt_num = event.dl0.tel[telid].event_number
                     first_evt = False
-                evt_num = event.r1.tel[telid].eventNumber - first_evt_num
+                evt_num = event.dl0.tel[telid].event_number - first_evt_num
                 if evt_num % options.events_per_level == 0:
                     level = int(evt_num / options.events_per_level)
                     if level > len(options.scan_level) - 1:
@@ -53,7 +53,8 @@ def run(hist, options, peak_positions=None):
                 pbar.update(1)
 
                 # get the data
-                data = np.array(list(event.r1.tel[telid].adc_samples.values()))
+                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                #print(np.sum(data))
                 # subtract the pedestals
                 data = data
                 # put in proper format
@@ -65,6 +66,7 @@ def run(hist, options, peak_positions=None):
                 #integration, window, peakpos = integrators.simple_integration(data, params)
                 # try with the max instead
                 peak = np.argmax(data[0], axis=1)
+                # TODO check why this was deleted
                 if type(peak_positions).__name__ == 'ndarray' :
                     peak = np.argmax(peak_positions,axis=1)
 

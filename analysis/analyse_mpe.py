@@ -81,11 +81,16 @@ def perform_analysis(options):
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     def std_dev(x, y):
+        if np.sum(y)<=0: return 0.
         avg = np.average(x, weights=y)
         return np.sqrt(np.average((x - avg) ** 2, weights=y))
 
     ## Now perform the mu and mu_XT fits
     for pixel in range(mpes.data.shape[1]):
+
+        if hasattr(options,'pixel_list') and pixel not in options.pixel_list:
+            continue
+
         force_xt = False
         if pixel > 0: log.debug('Pixel #' + str(pixel - 1)+' treated')
         for level in range(mpes.data.shape[0]):
@@ -110,7 +115,7 @@ def perform_analysis(options):
                 ]
                 _fit_spectra = fit_high_light
             elif (level > 0 and mpes.fit_result[level - 1, pixel, 0, 0] > 10.) or force_xt: #TODO Sometimes mu_xt error min is for mu_xt =0. (dark/hv off)
-                fixed_xt = mpes.fit_result[np.argmin(mpes.fit_result[5:level:1, pixel, 1, 1]), pixel, 1, 0] # start from level 5 to avoid taking dark or hv off
+                fixed_xt = mpes.fit_result[np.argmin(mpes.fit_result[0:level:1, pixel, 1, 1]), pixel, 1, 0] # start from level 5 to avoid taking dark or hv off
                 fixed_param = [
                     # in this case assign the cross talk estimation with smallest error
                     [1, fixed_xt],
@@ -152,7 +157,7 @@ def display_results(options):
 
     import matplotlib.pyplot as plt
 
-
+    pixel_start = options.pixel_list[2]
 
     # Perform some plots
     if options.mc:
@@ -201,11 +206,25 @@ def display_results(options):
 
 
     else:
-
         fig = plt.figure()
         axis = fig.add_subplot(111)
-        display.draw_hist(axis, adcs, index=(15,700,), limits=[2005, 2150], draw_fit=True, label='Pixel %s')
+        display.draw_hist(axis, adcs, index=(15, 700,), limits=[2005, 2150], draw_fit=True, label='Pixel %s')
+        '''
+        for level in options.scan_level:
+            fig = plt.figure()
+            axis = fig.add_subplot(111)
 
+            try:
+
+                display.draw_hist(axis, adcs, index=(level, pixel_start,), limits=[2005, 2150], draw_fit=True,
+                                label='Pixel %s')
+            except:
+
+
+                continue
+
+         #display.draw_hist(axis, adcs, index=index, limits=[2005, 2150], draw_fit=True, label='Pixel %s')
+         '''
     #display.display_hist(adcs, geom=geom, index_default=(20,700,), param_to_display=1, limits=[1900., 2100.], draw_fit=True)
     input('press button to quit')
 

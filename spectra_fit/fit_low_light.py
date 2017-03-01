@@ -41,7 +41,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
     # Get a primary amplitude to consider
     param[6] = np.sum(y)
 
-#    param[8] = np.sqrt(np.average((x - np.average(x, weights=y))**2, weights=y))
+    #param[8] = np.sqrt(np.average((x - np.average(x, weights=y))**2, weights=y))
     if type(config).__name__ == 'NoneType':
         # Get the list of peaks in the Histogram
         threshold = 0.05

@@ -29,4 +29,4 @@ input_hvoff_filename  : adc_hv_off.npz
 mpes_histo_filename   : mpe.npz
 
 # Camera Configuration
-n_pixels          : 10
+n_pixels          : 1296

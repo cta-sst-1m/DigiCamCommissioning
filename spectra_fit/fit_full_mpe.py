@@ -81,8 +81,9 @@ def slice_func(y, x, *args,n_peaks=22,config=None, **kwargs):
     :return: the index to slice the Histogram
     """
 
-    #if True:
-    #    return [2000, 2100, 1] #### ATENTNENT ###
+    if True:
+        return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
+        #return [2030, 2100, 1] #### ATENTNENT ###
 
     # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] < 2:
@@ -146,7 +147,7 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
             bound_max += [1.3]  # 5.*sigma_1
             '''
             bound_min += [0.7 * 5.6]  # 0.8*gain
-            bound_max += [2. * 5.6]  # 1.2*gain
+            bound_max += [1.5 * 5.6]  # 1.2*gain
 
             bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
             bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e
@@ -171,7 +172,7 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
             bound_max += [1.3]  # 5.*sigma_1
             '''
             bound_min += [0.7 * 5.6]  # 0.8*gain
-            bound_max += [2. * 5.6]  # 1.2*gain
+            bound_max += [1.5 * 5.6]  # 1.2*gain
 
             bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
             bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e

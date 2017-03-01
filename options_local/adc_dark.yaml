@@ -1,0 +1,51 @@
+# Analysis module
+analysis_module : analyse_adc_dark
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170123
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170123/
+file_list     :     [0.run_660]
+
+# Output files
+output_directory  : /data/datasets/CTA/DATA/20170123/
+histo_filename    : adc_hv_on.npz
+
+# Event processing
+evt_max           : 10000
+n_evt_per_batch   : 300
+
+# Camera Configuration
+n_pixels          : 1296
+
+# Plot configuration
+adcs_min           : 0
+adcs_max           : 4095
+adcs_binwidth      : 1
+
+
+
+verbose           : False
+log_file_basename : 20170123
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170123/
+file_list     :
+    - 0.run_660
+
+# Output files
+output_directory  : /data/datasets/CTA/DATA/20170123/
+histo_filename    : adc_hv_off.npz
+
+
