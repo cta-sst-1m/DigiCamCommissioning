@@ -330,6 +330,7 @@ class Histogram:
         self.errors[self.errors == 0.] = 1.
 
     def _axis_fit(self, idx, func, p0, slice_list=None, bounds=None, fixed_param=None, force_quiet=None):
+        #TODO pout the full jacobian in option
         """
         Perform a fit on this specific Histogram
 
@@ -398,7 +399,7 @@ class Histogram:
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])],
                     self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]] \
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])]),
-                                                   bounds=reduced_bounds, jac='3-point', method='trf', loss='arctan') # could improve with true jac
+                                                   bounds=reduced_bounds)#, jac='3-point', method='trf', loss='arctan') # could improve with true jac
 
                 # noinspection PyUnresolvedReferences
                 val = out.x

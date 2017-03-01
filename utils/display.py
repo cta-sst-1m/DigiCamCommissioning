@@ -28,6 +28,11 @@ def draw_fit_result(axis, hist, index=1, limits=None, bin_width=None, display_fi
     h = h[mask]
     h_err = h_err[mask]
 
+    if limits:
+        h[h<limits[0]]=limits[0]
+        h[h>limits[1]]=limits[1]
+
+
     histo = axis.hist(h, bins='auto', histtype='step', align='left', label='All pixels', color='k', linewidth=1)
 
     bin_edges = histo[1][0:-1]
@@ -155,7 +160,6 @@ def draw_chi2(axis, hist, display_fit):
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
     axis.legend()
-    return h
 
 def draw_hist(axis, hist, index=(0,), limits=None, draw_fit = False, label = 'Pixel %s',**kwargs):
     """
@@ -258,7 +262,7 @@ def display_fit_result(hist, geom = None , index_var=1, limits=None, bin_width=N
         vis_gain.add_colorbar()
         vis_gain.colorbar.set_label(hist.fit_result_label[index_var])
         h = draw_fit_result(ax_right, hist, index=index_var, limits=limits, bin_width=bin_width, display_fit=display_fit)
-        vis_gain.image = h
+        #vis_gain.image = h
     else: # TODO check this case
         fig = plt.figure(figsize=(10, 7))
         ax = fig.add_subplot(1, 1, 1)
