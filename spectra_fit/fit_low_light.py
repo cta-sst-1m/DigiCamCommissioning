@@ -34,10 +34,10 @@ def p0_func(y, x, *args, config=None, **kwargs):
         return param
 
 
-    #max_bin = np.where(y != 0)[0][0]
-    #if x[max_bin]== 4095: max_bin-=1
-    #slice = [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
-    #param[0] = np.average(x[slice[0]:slice[1]:slice[2]], weights=y[slice[0]:slice[1]:slice[2]])
+    max_bin = np.where(y != 0)[0][0]
+    if x[max_bin]== 4095: max_bin-=1
+    slice = [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
+    param[0] = np.average(x[slice[0]:slice[1]:slice[2]], weights=y[slice[0]:slice[1]:slice[2]])
     # Get a primary amplitude to consider
     param[6] = np.sum(y)
 
@@ -101,14 +101,7 @@ def slice_func(y, x, *args, **kwargs):
     :return: the index to slice the Histogram
     """
     # Check that the Histogram has none empty values
-
-    if True:
-
-        return [0, -1, 1]
-
     if np.where(y != 0)[0].shape[0] == 0:
-
-        #print ('hello')
         return []
     max_bin = np.where(y != 0)[0][0]
     if x[max_bin]== 4095: max_bin-=1
@@ -159,9 +152,9 @@ def fit_func(p, x, *args, **kwargs):
     temp = np.zeros(x.shape)
     n_peak=40
     n_peakmin = 0
-    #if len(x)>0:
-    #    n_peak = int(float(x[-1] - baseline) / gain * 1.5)
-    #    n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
+    if len(x)>0:
+        n_peak = int(float(x[-1] - baseline) / gain * 1.5)
+        n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
 
     x = x - baseline
     for n in range(n_peak):

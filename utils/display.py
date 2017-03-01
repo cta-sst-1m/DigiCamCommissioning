@@ -29,16 +29,11 @@ def draw_fit_result(axis, hist, index=1, display_fit=False):
     mask = (~np.isnan(h)) * (~np.isnan(h_err) * (h>0))
     h = h[mask]
 
-<<<<<<< HEAD
     if limits:
         h[h<limits[0]]=limits[0]
         h[h>limits[1]]=limits[1]
 
-
-    histo = axis.hist(h, bins='auto', histtype='step', align='left', label='All pixels', color='k', linewidth=1)
-=======
     histo = axis.hist(h, bins='auto', histtype='step', align='left', label='all pixels', color='k', linewidth=1)
->>>>>>> d9bd0605ed92cd07f6a0c491af92ddb13722aaac
 
     bin_edges = histo[1][0:-1]
     bin_width = bin_edges[1] - bin_edges[0]
@@ -165,6 +160,7 @@ def draw_chi2(axis, hist, display_fit):
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
     axis.legend()
+    return h
 
 def draw_hist(axis, hist, index, draw_fit=False):
     """
@@ -240,9 +236,6 @@ def display_fit_result(hist, geom = None , index_var=1, limits=[0,4095], bin_wid
         ax_right = fig.add_subplot(1,2,2)
         vis_gain = visualization.CameraDisplay(geom, ax=ax_left, title='', norm='lin', cmap='viridis')
         h = draw_fit_result(ax_right, hist, index=index_var, limits=limits, bin_width=bin_width, display_fit=display_fit)
-<<<<<<< HEAD
-        #vis_gain.image = h
-=======
 
         h[np.isnan(h)*~np.isfinite(h)] = limits[1]
         h[h<limits[0]] = limits[0]
@@ -252,7 +245,6 @@ def display_fit_result(hist, geom = None , index_var=1, limits=[0,4095], bin_wid
         vis_gain.add_colorbar()
         vis_gain.colorbar.set_label(hist.fit_result_label[index_var])
 
->>>>>>> d9bd0605ed92cd07f6a0c491af92ddb13722aaac
     else: # TODO check this case
         fig = plt.figure(figsize=(10, 7))
         ax = fig.add_subplot(1, 1, 1)

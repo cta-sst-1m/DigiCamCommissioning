@@ -12,12 +12,12 @@ log_file_basename : 20161214
 
 # Input files
 mc            :     False
-file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.low_light.fits.fz
-directory     :     /home/alispach/data/digicam_commissioning/20170224/module_test_setup/
-file_list     :     [2]
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+directory     :     /data/datasets/CTA/DATA/20161214/
+file_list     :     [117,118,119,120,121]
 
 # Output files
-output_directory  : /home/alispach/data/digicam_commissioning/20170224/module_test_setup/
+output_directory  : /data/datasets/CTA/20161214/FullChain/
 histo_filename    : spe.npz
 hv_off_histo_filename    : adc_hv_off.npz
 
@@ -27,8 +27,6 @@ n_evt_per_batch   : 500
 
 # Camera Configuration
 n_pixels          : 1296
-pixel_list        : [698,	662, 626, 590, 697, 661, 625, 589, 660, 624, 588, 552]
-
 
 # Plot configuration
 adcs_min           : 0

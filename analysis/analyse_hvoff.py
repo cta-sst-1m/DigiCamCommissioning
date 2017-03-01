@@ -63,9 +63,8 @@ def perform_analysis(options):
     # Load the histogram
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    print(adcs.data.shape)
-
     # Fit the baseline and sigma_e of all pixels
+    #TODO include the limited indicie
     adcs.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func,
              labels_func=fit_hv_off.labels_func)#, limited_indices=tuple(options.pixel_list))
 

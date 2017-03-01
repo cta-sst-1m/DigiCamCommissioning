@@ -249,9 +249,7 @@ class Histogram:
             self.data[dim_indices] += 1
         else:
             self.data[indices][dim_indices] += 1
-
-        self._compute_errors()
-
+        self._compute_errors() # TODO... can it be done somewhere else... this is slow
 
     # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):

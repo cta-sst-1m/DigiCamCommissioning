@@ -36,11 +36,8 @@ def run(hist, options, peak_positions=None):
         # Loop over event in this file
         for event in inputfile_reader:
             if level > len(options.scan_level) - 1:
-
                 break
-
-
-            for telid in event.dl0.tels_with_data: #TODO WAS R1 before change in MCToy
+            for telid in event.dl0.tels_with_data:
                 if first_evt:
                     first_evt_num = event.dl0.tel[telid].event_number
                     first_evt = False
@@ -69,11 +66,9 @@ def run(hist, options, peak_positions=None):
                 #integration, window, peakpos = integrators.simple_integration(data, params)
                 # try with the max instead
                 peak = np.argmax(data[0], axis=1)
-                #print(len(peak[peak>0]))
-                #if type(peak_positions).__name__ == 'ndarray' :
-                    #print (peak_positions)
-                    #peak = np.argmax(peak_positions,axis=1)
-                    #print(peak[peak>0])
+                # TODO check why this was deleted
+                if type(peak_positions).__name__ == 'ndarray' :
+                    peak = np.argmax(peak_positions,axis=1)
 
                 index_max = (np.arange(0, data[0].shape[0]), peak,)
                 '''
