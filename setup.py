@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='DigiCamCommissioning',
     version='v0.0.1',
-    packages=['utils', 'spectra_fit','data_treatement'],
+    packages=['utils', 'spectra_fit','data_treatement','pulse_template'],
     url='https://github.com/cocov/DigiCamCommissioning',
     license='GNU GPL 3.0',
     author='cocov',

@@ -1,21 +1,28 @@
 import numpy as np
 #from ctapipe.calib.camera import integrators fix import with updated cta
 from ctapipe.io import zfits
+from ctapipe.calib.camera.charge_extractors import SimpleIntegrator
 import logging,sys
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
 
 # noinspection PyProtectedMember
-def run(hist, options, peak_positions=None):
+def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
 
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
-
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=len(options.scan_level)*options.events_per_level)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
+
+    if charge_extraction == 'integration':
+        integrator = SimpleIntegrator({'window_width':5,'window_start':2}, None)
+
+    peak = None
+    if type(peak_positions).__name__ == 'ndarray':
+        peak = np.argmax(peak_positions, axis=1)
 
     for file in options.file_list:
         if level > len(options.scan_level) - 1:
@@ -59,37 +66,16 @@ def run(hist, options, peak_positions=None):
                 data = data
                 # put in proper format
                 data = data.reshape((1,) + data.shape)
-                # integration parameter
-                params = {"integrator": "nb_peak_integration", "integration_window": [8, 4],
-                          "integration_sigamp": [2, 4], "integration_lwt": 0}
-                # now integrate
-                #integration, window, peakpos = integrators.simple_integration(data, params)
-                # try with the max instead
-                peak = np.argmax(data[0], axis=1)
-                # TODO check why this was deleted
-                if type(peak_positions).__name__ == 'ndarray' :
-                    peak = np.argmax(peak_positions,axis=1)
-
-                index_max = (np.arange(0, data[0].shape[0]), peak,)
-                '''
-                peak_m1 =  peak - 1
-                peak_m1[peak_m1<0]=0
-                peak_p1 =  peak + 1
-                peak_p1[peak_p1>49]=49
-
-                index_max_m1 = (np.arange(0, data[0].shape[0]), peak_m1,)
-                index_max_p1 = (np.arange(0, data[0].shape[0]), peak_p1,)
-                h = np.append(data[0][index_max].reshape(data[0][index_max].shape+(1,)),
-                              data[0][index_max_m1].reshape(data[0][index_max_m1].shape+(1,)),axis=1)
-                h = np.append(h,
-                              data[0][index_max_p1].reshape(data[0][index_max_p1].shape + (1,)),axis=1)
-
-                max_value = np.max(h,axis=1)
-                '''
-                hist.fill(data[0][index_max], indices=(level,))
-                # and fill the histos
-                #if hists[0] : hists[0].fill(integration[0], indices=(level,))
-                #if hists[1]: hists[1].fill(max_value, indices=(level,))
+                # charge extraction type
+                if charge_extraction == 'amplitude':
+                    if isinstance(peak,None):
+                        peak = np.argmax(data[0], axis=1)
+                    index_max = (np.arange(0, data[0].shape[0]), peak,)
+                    hist.fill(data[0][index_max], indices=(level,))
+                elif charge_extraction == 'integration':
+                    if not isinstance(peak,None):
+                        integrator.window_start = np.mean(peak,axis=0)[0] - 2
+                        hist.fill(integrator.extract_charge(data[0])/5, indices=(level,))
 
     # Update the errors
     hist._compute_errors()
