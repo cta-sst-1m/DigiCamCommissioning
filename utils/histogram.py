@@ -231,12 +231,7 @@ class Histogram:
         :param indices:
         :return: void
         """
-        # TODO: Speed this up, it is really crap
-        '''
-        inds = np.digitize(value, self.bin_centers)
-        inds[inds==self.bin_centers[-1]+self.bin_width]=self.bin_centers[-1]
-        self.data[...,inds]+=1
-        '''
+        # TODO deal with underflow and overflow and do the doc + optimize the function
 
         # change the value array to an array of Histogram index to be modified
         hist_indices = ((value - self.bin_edges[0]) // self.bin_width).astype(int)
@@ -254,8 +249,6 @@ class Histogram:
             self.data[dim_indices] += 1
         else:
             self.data[indices][dim_indices] += 1
-        #self._compute_errors() # TODO... can it be done somewhere else... this is slow
-
 
     # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):
@@ -566,99 +559,3 @@ class Histogram:
         """
         return (x - self.bin_edges[0]) // self.bin_width
 
-    def show(self, which_hist=None, axis=None, show_fit=False, slice_list=None, config=None, scale='linear', color='k',
-             set_ylim=True):
-        """
-        Generic display function
-
-        :param which_hist:
-        :param axis:
-        :param show_fit:
-        :param slice_list:
-        :param config:
-        :param scale:
-        :param color:
-        :param set_ylim:
-        :return:
-        """
-
-        if not which_hist:
-            which_hist = (0,) * len(self.data[..., 0].shape)
-        if not slice_list:
-            slice_list = [0, self.bin_centers.shape[0], 1]
-        if scale == 'log':
-            x_text = np.min(self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]) + 0.5
-            y_text = 0.1 * (np.min(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) + self.errors[
-                which_hist + (np.argmax(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)])
-
-        else:
-            x_text = np.min(self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]])
-            y_text = 0.8 * (np.max(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) + self.errors[
-                which_hist + (np.argmax(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)])
-
-        text_fit_result = ''
-        precision = int(3)
-
-        if show_fit:
-            for i in range(self.fit_result[which_hist].shape[-2]):
-                text_fit_result += 'p' + str(i) + ' : ' + str(
-                    np.round(self.fit_result[which_hist + (i, 0,)], precision))
-                text_fit_result += ' $\pm$ ' + str(np.round(self.fit_result[which_hist + (i, 1,)], precision))
-                text_fit_result += '\n'
-
-            text_fit_result += '$\chi^2$ = ' + str(np.round(self.fit_chi2_ndof[which_hist][0], precision)) + '\n'
-            text_fit_result += 'ndf = ' + str(np.round(self.fit_chi2_ndof[which_hist][1], precision)) + '\n'
-
-
-        ax = axis
-        if not axis:
-            plt.figure()
-            ax = plt
-        ax.errorbar(self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]],
-                    self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]],
-                    yerr=self.errors[which_hist][slice_list[0]:slice_list[1]:slice_list[2]],
-                    fmt='o',
-                    color=color,
-                    label=self.label)
-        if show_fit:
-            reduced_axis = self.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]
-            fit_axis = np.arange(reduced_axis[0], reduced_axis[-1], float(reduced_axis[1] - reduced_axis[0]) / 10)
-            # ax.plot(fit_axis, self.fit_function(self.fit_result[which_hist][:,0], fit_axis), label='fit',color=color)
-            reduced_func = self.fit_function
-            if type(config).__name__ == 'ndarray':
-                reduced_func = lambda p, x: self.fit_function(p, x, config=config[which_hist])
-            ax.plot(fit_axis, reduced_func(self.fit_result[which_hist][:, 0], fit_axis), label='fit', color='r')
-            ax.text(x_text, y_text, text_fit_result)
-        if not axis:
-            ax.xlabel(self.xlabel)
-            ax.ylabel(self.ylabel)
-        else:
-            ax.set_yscale(scale)
-            ax.set_xlabel(self.xlabel)
-            ax.set_ylabel(self.ylabel)
-            ax.xaxis.get_label().set_ha('right')
-            ax.xaxis.get_label().set_position((1, 0))
-            ax.yaxis.get_label().set_ha('right')
-            ax.yaxis.get_label().set_position((0, 1))
-
-        if set_ylim:
-            if not axis:
-                ax.ylim(0, (np.max(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) +
-                            self.errors[
-                                which_hist + (
-                                    np.argmax(
-                                        self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 1.3)
-            else:
-                if scale != 'log':
-                    ax.set_ylim(0,
-                                (np.max(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) +
-                                 self.errors[
-                                     which_hist + (np.argmax(
-                                         self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 1.3)
-                else:
-                    ax.set_ylim(1e-1,
-                                (np.max(self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]) +
-                                 self.errors[
-                                     which_hist + (np.argmax(
-                                         self.data[which_hist][slice_list[0]:slice_list[1]:slice_list[2]]),)]) * 10)
-        ax.legend(loc='best')

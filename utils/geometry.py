@@ -3,6 +3,7 @@ from ctapipe.io.camera import CameraGeometry
 from ctapipe.io.camera import find_neighbor_pixels
 from astropy import units as u
 
+# TODO pixel list from the CTS/DigiCam config
 def generate_geometry_MC(n_pixels=1296):
     pix_id = np.arange(0, n_pixels, 1)
     pix_x = [0.]*n_pixels
@@ -11,8 +12,9 @@ def generate_geometry_MC(n_pixels=1296):
     return CameraGeometry(0, pix_id, pix_x * u.mm, pix_y * u.mm, np.ones(n_pixels) * 400., neighbor_pixels, 'hexagonal')
 
 
-def generate_geometry_0(n_pixels=1296):
-    pix_id = np.arange(0, 1296, 1)
+def generate_geometry_0(n_pixels=1296, pixel_list=None):
+    # TODO setup the proper range
+    pix_id = np.arange(0, n_pixels, 1)
     pix_x = [-12.15, -48.6, -24.3, 0.0, 24.3, -85.05, -60.75, -36.45, -12.15, 12.15, 36.45, 60.75, -121.5, -97.2, -72.9,
              -48.6,
              -24.3, 0.0, 24.3, 48.6, 72.9, 97.2, -157.95, -133.65, -109.35, -85.05, -60.75, -36.45, -12.15, 12.15,
@@ -883,7 +885,13 @@ def generate_geometry_0(n_pixels=1296):
                        [1287, 1278, 1279], [1282, 1283, 1290], [1289, 1284, 1283, 1291, 1294],
                        [1284, 1294, 1290, 1295, 1285, 1292],
                        [1291, 1295, 1285, 1286, 1293], [1292, 1286, 1287], [1291, 1290, 1295], [1291, 1294, 1292]]
-    return CameraGeometry(0, pix_id[0:n_pixels:1], pix_x[0:n_pixels:1] * u.mm, pix_y[0:n_pixels:1] * u.mm, np.ones(n_pixels) * 400., neighbor_pixels[0:n_pixels:1], 'hexagonal')
+    if pixel_list is None:
+
+        return CameraGeometry(0, pix_id[0:n_pixels:1], pix_x[0:n_pixels:1] * u.mm, pix_y[0:n_pixels:1] * u.mm, np.ones(n_pixels) * 400., neighbor_pixels[0:n_pixels:1], 'hexagonal')
+
+    else:
+
+        return CameraGeometry(0, pix_id[pixel_list], np.array(pix_x)[pixel_list] * u.mm, np.array(pix_y)[pixel_list] * u.mm, np.ones(len(pixel_list)) * 400., np.array(neighbor_pixels)[pixel_list], 'hexagonal')
 
 
 def generate_geometry(cts, available_board=None):

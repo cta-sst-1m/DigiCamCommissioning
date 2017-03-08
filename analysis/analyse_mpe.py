@@ -43,6 +43,7 @@ def create_histo(options):
     mpes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                bin_width=options.adcs_binwidth, data_shape=(len(options.scan_level),options.n_pixels,),
                                label='MPE',xlabel='Peak ADC',ylabel = '$\mathrm{N_{entries}}$')
+
     # Get the reference sampling time
     peaks = histogram.Histogram(filename = options.output_directory + options.synch_histo_filename)
     mpe_hist.run(mpes, options, peak_positions= peaks.data)
@@ -166,7 +167,7 @@ def display_results(options):
 
             fig = plt.figure()
             axis = fig.add_subplot(111)
-            display.draw_hist(axis, adcs, index=(level, int(options.n_pixels-1),), limits=[2005, 2150], draw_fit=True, label='Pixel %s')
+            display.draw_hist(axis, adcs, index=(level, pixel_start,), limits=[2005, 2150], draw_fit=True, label='Pixel %s')
 
         x = np.array(options.scan_level)*5.
         y = adcs.fit_result[:,int(options.n_pixels-1),0,0]
@@ -206,10 +207,7 @@ def display_results(options):
 
 
     else:
-        fig = plt.figure()
-        axis = fig.add_subplot(111)
-        display.draw_hist(axis, adcs, index=(15, 700,), limits=[2005, 2150], draw_fit=True, label='Pixel %s')
-        '''
+
         for level in options.scan_level:
             fig = plt.figure()
             axis = fig.add_subplot(111)
@@ -223,8 +221,8 @@ def display_results(options):
 
                 continue
 
-         #display.draw_hist(axis, adcs, index=index, limits=[2005, 2150], draw_fit=True, label='Pixel %s')
-         '''
+        #display.draw_hist(axis, adcs, index=index, limits=[2005, 2150], draw_fit=True, label='Pixel %s')
+
     #display.display_hist(adcs, geom=geom, index_default=(20,700,), param_to_display=1, limits=[1900., 2100.], draw_fit=True)
     input('press button to quit')
 

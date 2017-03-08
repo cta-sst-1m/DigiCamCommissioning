@@ -87,7 +87,7 @@ def display_results(options):
     # Load the histogram
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    index_default = 700#options.pixel_list[0]
+    index_default = options.pixel_list[0]
     #print(index_default)
 
     # Define Geometry
@@ -96,10 +96,10 @@ def display_results(options):
     display_fit = True
     # Perform some plots
     #display.display_fit_result(adcs, geom, index_var=0, limits=[0, adcs.data.shape[1]*2], display_fit=display_fit)
-    #display.display_fit_result(adcs, geom, index_var=1,  display_fit=display_fit)
-    #display.display_fit_result(adcs, geom, index_var=2,  display_fit=display_fit)
+    display.display_fit_result(adcs, geom, index_var=1, limits=[0, options.adcs_max], display_fit=display_fit)
+    display.display_fit_result(adcs, geom, index_var=2, limits=[0, 1], display_fit=display_fit)
 
-    display.display_hist(adcs,  geom,   param_to_display=2, draw_fit=display_fit)
+    display.display_hist(adcs,  geom, limits=[0, 3], index_default=(index_default, ), param_to_display=2, draw_fit=display_fit, limitsCam=[0, 1])
     # display([adcs], geom, fit_hv_off.slice_func, norm='linear')
     input('press button to quit')
 

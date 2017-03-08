@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import curve_fit
 import peakutils
+import logging,sys
 import utils.pdf
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
@@ -17,78 +18,83 @@ def p0_func(y, x, *args, config=None, **kwargs):
     :param kwargs: potential unused keyword arguments
     :return: starting points for []
     """
+    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
+
     if config is not None:
-        mu = 0.001
-        mu_xt = 0.0 #config[1, 0]
-        gain = config[1, 0]
+
+        ## Load from previous result
         baseline = config[0, 0]
+        gain = config[1, 0]
         sigma_e = config[2, 0]
-        sigma_1 = config[3,0]
-        amplitude = np.nan
+        sigma_1 = config[3, 0]
+
+        ## Compute estimate
+
+        amplitude = np.sum(y)
+        start = int(baseline - gain/2.)
+        end = int(baseline + gain/2.)
+        mu = - np.log(np.sum(y[start:end]/amplitude))
+        mu_xt = 0.
         offset = 0.
-        #variance = config[8, 0]
+
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
 
-
-    if np.isnan(config[1, 0]):
         return param
 
+    else :
 
-    max_bin = np.where(y != 0)[0][0]
-    if x[max_bin]== 4095: max_bin-=1
-    slice = [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
-    param[0] = np.average(x[slice[0]:slice[1]:slice[2]], weights=y[slice[0]:slice[1]:slice[2]])
-    # Get a primary amplitude to consider
-    param[6] = np.sum(y)
-
-    #param[8] = np.sqrt(np.average((x - np.average(x, weights=y))**2, weights=y))
-    if type(config).__name__ == 'NoneType':
-        # Get the list of peaks in the Histogram
-        threshold = 0.05
-        min_dist = param[2] // 2
+        amplitude = np.sum(y)
+        offset = 0.
+        threshold = 0.3
+        min_dist = 3.
 
         peak_index = peakutils.indexes(y, threshold, min_dist)
+        photo_peak = np.arange(0, len(peak_index), 1)
 
-        if len(peak_index) == 0:
-            return param
+
+        if len(peak_index)<=2:
+
+            gain = np.max(x[y>0]) - np.min(x[y>0])
+            baseline = np.min(x[y>0]) + gain/2.
+            start = int(baseline - gain / 2.)
+            end = int(baseline + gain / 2.)
 
         else:
 
-            photo_peak = np.arange(0, peak_index.shape[-1], 1)
-            param[2] = np.polynomial.polynomial.polyfit(photo_peak, x[peak_index], deg=1)[1]
+            gain = np.mean(np.diff(x[peak_index]))
+            baseline = np.min(x[y>0]) + gain/2.
+            start = int(baseline - gain / 2.)
+            end = int(baseline + gain / 2.)
 
-            sigma = np.zeros(peak_index.shape[-1])
-            for i in range(sigma.shape[-1]):
-
-                start = max(int(peak_index[i] - param[2] // 2), 0)
-                end = min(int(peak_index[i] + param[2] // 2), len(x))
-
-                # if i == 0:
-
-                #    param[0] = - np.log(np.sum(y[start:end]) / param[6])
-
-                try:
-
-                    temp = np.average(x[start:end], weights=y[start:end])
-                    sigma[i] = np.sqrt(np.average((x[start:end] - temp) ** 2, weights=y[start:end]))
-
-                except Exception as inst:
-                    print('Could not compute weights for sigma !!!')
-                    sigma[i] = param[4]
-
-            sigma_n = lambda sigma_1, n: np.sqrt(param[4] ** 2 + n * sigma_1 ** 2)
-            sigma, sigma_error = curve_fit(sigma_n, photo_peak, sigma, bounds=[0., np.inf])
-            param[5] = sigma / param[2]
-
-    param[0] = (param[0]-param[3])/param[2]
-    if not( param[0]<np.inf): param[0]=100.
-    if param[0]<0.: param[0]=0.01
-    if not(param[2])<np.inf : param[2]=1.
-    return param
+        mu = - np.log(np.sum(y[start:end]/amplitude))
+        mu_xt = 0.06
 
 
+        sigma = np.zeros(peak_index.shape[-1])
 
+        for i in range(sigma.shape[-1]):
 
+            start = max(int(peak_index[i] - gain/2.), 0)
+            end = min(int(peak_index[i] + gain/2.), len(x))
+
+            try:
+
+                temp = np.average(x[start:end], weights=y[start:end])
+                sigma[i] = np.sqrt(np.average((x[start:end] - temp) ** 2, weights=y[start:end]))
+
+            except Exception as inst:
+                log.error('Could not compute weights for sigma !!!')
+                sigma[i] = gain/2.
+
+        sigma_n = lambda sigma_e, sigma_1, n: np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2)
+        sigmas, sigma_error = curve_fit(sigma_n, photo_peak, sigma, bounds=[0., np.inf])
+
+        sigma_e = sigmas[0]
+        sigma_1 = sigmas[1]
+
+        param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
+
+        return param
 
 # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
 def slice_func(y, x, *args, **kwargs):
@@ -101,10 +107,10 @@ def slice_func(y, x, *args, **kwargs):
     :return: the index to slice the Histogram
     """
     # Check that the Histogram has none empty values
-    if np.where(y != 0)[0].shape[0] == 0:
-        return []
-    max_bin = np.where(y != 0)[0][0]
-    if x[max_bin]== 4095: max_bin-=1
+    #if np.where(y != 0)[0].shape[0] == 0:
+    #    return []
+    #max_bin = np.where(y != 0)[0][0]
+    #if x[max_bin]== 4095: max_bin-=1
     return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
 
 
@@ -117,12 +123,12 @@ def bounds_func(*args, config=None, **kwargs):
     :return:
     """
 
+    if config is None:
 
-    if False:
+        param_min = [0., 0., 0., 0., 0., 0., 0., 0.]
+        param_max = [200., 1., np.inf, np.inf, np.inf, np.inf, np.inf, np.inf]
 
-        param_min = [1.e-3, 1.e-4, 0., -np.inf, 0., 0., 0.,-np.inf]
-        param_max = [2000., 1, np.inf, np.inf, np.inf, np.inf, np.inf,np.inf]
-
+        return param_min, param_max
 
     else:
         mu = config[0]
@@ -132,7 +138,7 @@ def bounds_func(*args, config=None, **kwargs):
         sigma_e = config[4]
         sigma_1 = config[5]
         amplitude = config[6]
-        offset = config[7]
+        offset = config[7] # TODO remove this guy
 
         param_min = [0.    , 0., 0                   , 0.                , 0.                       , 0.     ,0.    ,-np.inf]
         param_max = [np.inf, 1 , gain[0] + 10*gain[1], baseline[0]+5*baseline[1], sigma_e[0] + 5*sigma_e[1], np.inf ,np.inf, np.inf]
@@ -152,16 +158,16 @@ def fit_func(p, x, *args, **kwargs):
     temp = np.zeros(x.shape)
     n_peak=40
     n_peakmin = 0
-    if len(x)>0:
-        n_peak = int(float(x[-1] - baseline) / gain * 1.5)
-        n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
+    # TODO avoir si ca marche quand on utilise en high light
+    #if len(x)>0:
+    #    n_peak = int(float(x[-1] - baseline) / gain * 1.5)
+    #    n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
 
     x = x - baseline
     for n in range(n_peak):
         sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + 1./12.) # * gain
         param_gauss = [sigma_n, n*gain, 1.]
         temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(param_gauss, x)
-        #temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(x, sigma_n, n * gain + (offset if n!=0 else 0))
 
     return temp * amplitude
 
@@ -170,9 +176,9 @@ def label_func(*args, ** kwargs):
     List of labels for the parameters
     :return:
     """
-    label = ['$\mu$ [p.e.]', '$\mu_{XT}$ [p.e.]', 'Gain [ADC/p.e.]','Baseline [ADC]','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]', 'Amplitude']
+    label = ['$\mu$ [p.e.]', '$\mu_{XT}$ [p.e.]', 'Gain [ADC/p.e.]','Baseline [ADC]','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]', 'Amplitude', 'Offset [ADC]']
     return np.array(label)
 
 if __name__ == '__main__':
 
-    print('Hello')
+    print('Nothing implemented')

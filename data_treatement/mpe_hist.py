@@ -1,7 +1,6 @@
 import numpy as np
 #from ctapipe.calib.camera import integrators fix import with updated cta
 from ctapipe.io import zfits
-from ctapipe.calib.camera.charge_extractors import SimpleIntegrator
 import logging,sys
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
@@ -16,9 +15,6 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=len(options.scan_level)*options.events_per_level)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
-
-    if charge_extraction == 'integration':
-        integrator = SimpleIntegrator({'window_width':5,'window_start':2}, None)
 
     peak = None
     if type(peak_positions).__name__ == 'ndarray':
@@ -63,9 +59,10 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 #print(np.sum(data))
                 # subtract the pedestals
-                data = data
+                data = data[options.pixel_list]
                 # put in proper format
                 data = data.reshape((1,) + data.shape)
+                #### TODO put the new charge extraction
                 # charge extraction type
                 if charge_extraction == 'amplitude':
                     if isinstance(peak,None):
@@ -79,5 +76,3 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
 
     # Update the errors
     hist._compute_errors()
-    # Save the MPE histos in a file
-    hist.save(options.output_directory + options.histo_filename)

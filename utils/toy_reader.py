@@ -8,7 +8,7 @@ class telescope:
         self.eventNumber = 0
         self.adc_samples = {}
         self.id = id
-class r1:
+class dl0:
     def __init__(self,id_list = [0], event_id=0):
         self.tels_with_data = []
         self.event_id = event_id
@@ -25,7 +25,7 @@ class ToyReader: # create a reader as asked
     def __init__(self, filename='../../digicamtoy/data_calibration_cts/toy_data_', id_list = [0], max_events=50000, n_pixel=1296, events_per_level=1000, seed=0, level_start=0):
         self.count = 0
         self.event_id = 0
-        self.r1 = r1(id_list, event_id=self.count)
+        self.dl0 = dl0(id_list, event_id=self.count)
         self.evt_max = max_events
         self.id_list = id_list
         #open file
@@ -42,10 +42,10 @@ class ToyReader: # create a reader as asked
 
         self.log.info('\t\t-|> Will read a total of %d events with %d events per level for %d pixels, level_start = %d, seed = %d ' %(self.evt_max, self.events_per_level, self.n_pixel, self.level, self.seed))
 
-        if self.events_per_level>=self.evt_max:
+        if self.events_per_level>self.evt_max:
 
 
-            print('events_per_level %d must be < than evt_max %d' %(self.events_per_level, self.evt_max))
+            print('events_per_level %d must be <= than evt_max %d' %(self.events_per_level, self.evt_max))
 
 
         return
@@ -59,9 +59,6 @@ class ToyReader: # create a reader as asked
 
 
     def next(self):
-        #aller a ton evt suivant dan le fichier: count+=1
-        ### convertir adcs en list(list()) (pixel*sample)
-
 
         if self.count<self.evt_max:
 
@@ -81,7 +78,7 @@ class ToyReader: # create a reader as asked
             adcs = np.array(adcs).reshape(self.n_pixel, self.n_samples)
 
             for telid in self.id_list:
-                self.r1.set_data(telid, self.count, adcs)
+                self.dl0.set_data(telid, self.count, adcs)
 
             self.count += 1
             if not self.count%self.events_per_level:
@@ -103,17 +100,17 @@ if __name__ == '__main__':
     inputfile_reader = ToyReader(filename=_url, id_list=[0], max_events=2, weights=1.)
     i = 0
 
-    print('event.r1.tels_with_data', inputfile_reader.r1.tels_with_data)
+    print('event.dl0.tels_with_data', inputfile_reader.dl0.tels_with_data)
 
     for event in inputfile_reader:
 
         print(i)
-        print('event.r1.tels_with_data',event.r1.tels_with_data)
+        print('event.dl0.tels_with_data',event.dl0.tels_with_data)
         telid=0
-        print('event.r1.tel[telid].eventNumber',event.r1.tel[telid].eventNumber)
-        print('adcs',np.array(list(event.r1.tel[telid].adc_samples.values())))
-        print('adcs max in pixel 0',np.max(np.array(list(event.r1.tel[telid].adc_samples.values()))[0,:]))
-        print ('adcs shape : ',np.array(list(event.r1.tel[telid].adc_samples.values())).shape)
+        print('event.dl0.tel[telid].eventNumber',event.dl0.tel[telid].eventNumber)
+        print('adcs',np.array(list(event.dl0.tel[telid].adc_samples.values())))
+        print('adcs max in pixel 0',np.max(np.array(list(event.dl0.tel[telid].adc_samples.values()))[0,:]))
+        print ('adcs shape : ',np.array(list(event.dl0.tel[telid].adc_samples.values())).shape)
 
 
         i = i+1

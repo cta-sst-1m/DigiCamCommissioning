@@ -11,7 +11,7 @@ import logging,sys
 import scipy.stats
 import numpy as np
 
-__all__ = ["create_histo", "perform_analysis", "display_results"]
+__all__ = ["create_histo", "perform_analysis", "display_results", "compute_dark_parameters"]
 
 
 def create_histo(options):
@@ -38,11 +38,11 @@ def create_histo(options):
 
     # Define the histograms
     adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
-                               bin_width=options.adcs_binwidth, data_shape=(options.n_pixels,),
+                               bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list  ),),
                                label='Dark ADC',xlabel='ADC',ylabel = 'entries')
 
     # Get the adcs
-    dark_hist.run(adcs, options)
+    dark_hist.run(adcs, options,'ADC')
 
 
 
@@ -57,7 +57,8 @@ def create_histo(options):
 
 def perform_analysis(options):
     """
-    Perform a simple gaussian fit of the ADC histograms
+    Extract the dark rate and cross talk, knowing baseline gain sigmas from previous
+    runs
 
     :param options: a dictionary containing at least the following keys:
         - 'output_directory' : the directory in which the histogram will be saved (str)
@@ -71,44 +72,31 @@ def perform_analysis(options):
     dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
     x = dark_hist.bin_centers
 
+    dark_hist.fit_result_label = ['baseline [ADC]', '$f_{dark}$ [MHz]', '$\mu_{XT}$']
+    dark_hist.fit_result = np.ones((len(options.pixel_list), len(dark_hist.fit_result_label), 2))*np.nan
 
-    if options.hist_type == 'raw':
+    for pixel in range(len(options.pixel_list)):
 
-        dark_hist.fit_result_label = ['baseline [ADC]', 'mean [ADC]', '$f_{dark}$ [MHz]', '$\mu_{XT}$']
-        dark_hist.fit_result = np.ones((options.n_pixels, len(dark_hist.fit_result_label), 2))*np.nan
+        y = dark_hist.data[pixel]
 
-        for pixel in range(options.n_pixels):
+        if options.mc:
 
-            #if pixel not in options.pixel_list:
+            baseline = 2010
+            gain = 5.6
+            sigma_1 = 0.48
+            sigma_e = np.sqrt(0.86**2.)
 
-            #    continue
+        dark_parameters =  compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e)
 
-            if pixel in options.dead_pixel:
-
-                dark_hist.fit_result[pixel, :, 0] = 0
-                dark_hist.fit_result[pixel, :, 1] = np.nan
-
-                continue
-
-            y = dark_hist.data[pixel]
-            baseline = x[np.argmax(y)]
-            mean = np.average(x, weights=y)
-            mean_error = np.sqrt(np.average((x-mean)**2, weights=y))/np.sqrt(np.sum(y))
-            mu_xt = 0.06 + np.random.normal(0, 0.00001)
-            mu_xt_error = 0.
-            f_dark = (mean-baseline)/5.6/15.6/(1.+mu_xt) * 1E3
-            f_dark_error = 0.
-
-            dark_hist.fit_result[pixel, 0, 0] = baseline
-            dark_hist.fit_result[pixel, 0, 1] = 0
-            dark_hist.fit_result[pixel, 1, 0] = mean
-            dark_hist.fit_result[pixel, 1, 1] = mean_error
-            dark_hist.fit_result[pixel, 2, 0] = f_dark
-            dark_hist.fit_result[pixel, 2, 1] = f_dark_error
-            dark_hist.fit_result[pixel, 3, 0] = mu_xt
-            dark_hist.fit_result[pixel, 3, 1] = mu_xt_error
+        dark_hist.fit_result[pixel, 0, 0] = baseline
+        dark_hist.fit_result[pixel, 0, 1] = 0
+        dark_hist.fit_result[pixel, 1, 0] = dark_parameters[0,0]
+        dark_hist.fit_result[pixel, 1, 1] = dark_parameters[0,1]
+        dark_hist.fit_result[pixel, 2, 0] = dark_parameters[1,0]
+        dark_hist.fit_result[pixel, 2, 1] = dark_parameters[1,1]
 
     dark_hist.save(options.output_directory + options.histo_filename)
+    del dark_hist
 
 
 def display_results(options):
@@ -124,16 +112,70 @@ def display_results(options):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0()
+    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
-    # Perform some plots
-    display.display_hist(adcs, index=(options.pixel_list[0],))
-    display.display_hist(adcs, geom=geom, index=(options.pixel_list[0],))
-    display.display_hist(adcs, geom=geom, param_to_display=0, index=(options.pixel_list[0],), draw_fit=False)
-    display.display_hist(adcs, geom=geom, param_to_display=1, index=(options.pixel_list[0],), draw_fit=False)
-    display.display_hist(adcs, geom=geom, param_to_display=2, index=(options.pixel_list[0],), draw_fit=False)
-    display.display_hist(adcs, geom=geom, param_to_display=3, index=(options.pixel_list[0],), draw_fit=False)
-
+    #. Perform some plots
+    display.display_hist(adcs, options=options, geom=geom)
+    #display.display_fit_result(adcs, geom=geom, display_fit=True)
+    display.display_fit_result(adcs, display_fit=True)
     input('press button to quit')
 
     return
+
+def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e):
+    '''
+    In developement
+    :param x:
+    :param y:
+    :param baseline:
+    :param gain:
+    :param sigma_1:
+    :param sigma_e:
+    :return:
+    '''
+
+
+    x = x - baseline
+    sigma_1 = sigma_1/gain
+
+    mean_adc = np.average(x, weights=y)
+    sigma_2_adc = np.average((x - mean_adc) ** 2, weights=y) - 1./12.
+    pulse_shape_area = 15.11851125 * gain
+    pulse_shape_2_area = 9.25845231 * gain**2
+    alpha = (mean_adc * pulse_shape_2_area)/((sigma_2_adc - sigma_e**2)*pulse_shape_area)
+
+    if (1./alpha - sigma_1**2)<0 or np.isnan(1./alpha - sigma_1**2):
+        mu_borel = np.nan
+        mu_xt_dark = np.nan
+        f_dark = np.nan
+
+    elif np.sqrt(1./alpha - sigma_1**2)<1:
+
+        mu_xt_dark = 0.
+        f_dark = mean_adc / pulse_shape_area
+
+
+
+    else:
+
+        mu_borel = np.sqrt(1./alpha - sigma_1**2)
+#        mu_borel = 1./(1.-0.06)
+        mu_xt_dark = 1. - 1./mu_borel
+        f_dark = mean_adc / mu_borel / pulse_shape_area
+
+    f_dark_error = np.nan
+    mu_xt_dark_error = np.nan
+
+    """
+    print('gain [ADC/p.e.]: %0.4f'%gain)
+    print('baseline [ADC]: %0.4f'%baseline)
+    print('sigma_e [ADC]: %0.4f'%sigma_e)
+    print('sigma_1 [ADC]: %0.4f'%(sigma_1*gain))
+    print('mean adc [ADC]: %0.4f' % mean_adc)
+    print('sigma_2 adc [ADC]: %0.4f' % sigma_2_adc)
+    print ('mu_borel : %0.4f [p.e.]'%mu_borel)
+    print('f_dark %0.4f [MHz]' %(f_dark*1E3))
+    print('dark XT : %0.4f [p.e.]' %mu_xt_dark)
+    """
+
+    return np.array([[f_dark*1E3, f_dark_error*1E3], [mu_xt_dark, mu_xt_dark_error]])
