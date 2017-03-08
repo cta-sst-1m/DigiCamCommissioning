@@ -8,7 +8,7 @@ import logging,sys
 from utils.geometry import generate_geometry_0
 #internal modules
 from utils import logger
-
+import numpy as np
 
 if __name__ == '__main__':
     """
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration function",
-                      default='/data/software/DigiCamCommissioning/options/hv_off.yaml')
+                      default='options/module.yaml')
 
     # Other options allows to overwrite the yaml_config interactively
 
@@ -42,6 +42,9 @@ if __name__ == '__main__':
     # Logfile basename
     parser.add_option("-l", "--log_file_basename", dest="log_file_basename",
                       help="string to appear in the log file name")
+
+    parser.add_option("-s", "--save_to_csv", dest="save", action="store_true",
+                      help="create a csv file for the result of the analysis")
 
     # Parse the options
     (options, args) = parser.parse_args()
@@ -68,6 +71,10 @@ if __name__ == '__main__':
                                  globals=None,
                                  fromlist=[None],
                                  level=0)
+
+    if options.pixel_list is None or len(options.pixel_list)==0:
+
+        options.pixel_list = np.arange(0, options.n_pixels, 1)
 
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
@@ -96,3 +103,11 @@ if __name__ == '__main__':
         log.info('-|> Display the analysis results')
 
         analysis_module.display_results(options)
+
+    if options.save:
+        # make the plots non blocking
+        plt.ion()
+        # Call the histogram creation function
+        log.info('-|> Save the analysis results')
+
+        analysis_module.save(options)

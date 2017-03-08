@@ -12,7 +12,7 @@ def run(hist, options, peak_positions=None):
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
-
+    temp = 0
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=len(options.scan_level)*options.events_per_level)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
@@ -59,7 +59,7 @@ def run(hist, options, peak_positions=None):
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 #print(np.sum(data))
                 # subtract the pedestals
-                data = data
+                data = data[options.pixel_list]
                 # put in proper format
                 data = data.reshape((1,) + data.shape)
                 # integration parameter
@@ -68,14 +68,19 @@ def run(hist, options, peak_positions=None):
                 # now integrate
                 #integration, window, peakpos = integrators.simple_integration(data, params)
                 # try with the max instead
-                peak = np.argmax(data[0], axis=1)
                 #print(len(peak[peak>0]))
-                #if type(peak_positions).__name__ == 'ndarray' :
+                if type(peak_positions).__name__ == 'ndarray' :
                     #print (peak_positions)
-                    #peak = np.argmax(peak_positions,axis=1)
+                    peak = np.argmax(peak_positions,axis=1)
                     #print(peak[peak>0])
 
+                else:
+                    peak = np.argmax(data[0], axis=1)
+
+
+                temp +=peak/(options.events_per_level)
                 index_max = (np.arange(0, data[0].shape[0]), peak,)
+
                 '''
                 peak_m1 =  peak - 1
                 peak_m1[peak_m1<0]=0
@@ -95,8 +100,7 @@ def run(hist, options, peak_positions=None):
                 # and fill the histos
                 #if hists[0] : hists[0].fill(integration[0], indices=(level,))
                 #if hists[1]: hists[1].fill(max_value, indices=(level,))
-
     # Update the errors
     hist._compute_errors()
     # Save the MPE histos in a file
-    hist.save(options.output_directory + options.histo_filename)
+    #hist.save(options.output_directory + options.histo_filename) #TODO check for twice saving

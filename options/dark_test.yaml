@@ -11,23 +11,24 @@ verbose           : False
 log_file_basename : 20161214
 
 # Input files
-mc            :     False
-file_basename :     dark.%s.fits.fz
-directory     :     data_test/
+mc            :     True
+file_basename :     xt_0-06_dark_0-003_seed_%s.hdf5
+directory     :     ../digicamtoy/data_dark/
 file_list     :     [0]
 
 # Output files
-output_directory  : data_test/
+output_directory  : ../digicamtoy/data_dark/
 histo_filename    : dark.npz
 
 # Event processing
-max_event           : 1000
+max_event           : 10000
+events_per_level    : 10000
 hist_type           : 'raw'
 
 # Camera Configuration
-n_pixels          : 1296
-pixel_list        : [700, 701, 660, 100, 333]
-dead_pixel        : [527]
+n_pixels          : 100
+pixel_list        : []
+#dead_pixel        : [527]
 
 # Plot configuration
 adcs_min           : 0
