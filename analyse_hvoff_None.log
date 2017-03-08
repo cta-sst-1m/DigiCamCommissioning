@@ -1217,3 +1217,176 @@
 2017-02-24 00:16:27,297 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /data/datasets/CTA/DATA/20170123/adc_hv_off.npz
 2017-02-24 00:16:27,298 | INFO | analyse_hvoff : 	 -|> Display the analysis results
 2017-02-24 00:16:27,314 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/DATA/20170123/adc_hv_off.npz
+2017-03-07 16:04:48,295 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 13000
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 20000
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 300
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /data/datasets/CTA/DATA/20161214/
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-03-07 16:04:48,297 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [109, 110, 111]
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 True
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 20000
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> window_width : 	 7
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 adc_hv_off_w7.npz
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /data/datasets/CTA/20161214/FullChain/
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 -|
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-03-07 16:04:48,298 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-03-07 16:14:47,854 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 16:14:47,855 | INFO | analyse_hvoff : 	 		-|> Perform the analysis
+2017-03-07 16:14:48,207 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 16:14:52,417 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 16:14:52,418 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-03-07 16:14:52,795 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 17:13:26,220 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-03-07 17:13:26,220 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /data/datasets/CTA/20161214/FullChain/
+2017-03-07 17:13:26,220 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-03-07 17:13:26,220 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [109, 110, 111]
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 20000
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 adc_hv_off_w7.npz
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /data/datasets/CTA/DATA/20161214/
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 20000
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 13000
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 300
+2017-03-07 17:13:26,221 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-03-07 17:13:26,222 | INFO | analyse_hvoff : 	 		 |--|> window_width : 	 7
+2017-03-07 17:13:26,222 | INFO | analyse_hvoff : 	 -|
+2017-03-07 17:13:26,222 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-03-07 17:13:26,527 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 17:13:59,847 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-03-07 17:13:59,847 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-03-07 17:13:59,847 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-03-07 17:13:59,847 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> window_width : 	 7
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 20000
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 adc_hv_off_w7.npz
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 13000
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 20000
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [109, 110, 111]
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /data/datasets/CTA/20161214/FullChain/
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 300
+2017-03-07 17:13:59,848 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /data/datasets/CTA/DATA/20161214/
+2017-03-07 17:13:59,849 | INFO | analyse_hvoff : 	 -|
+2017-03-07 17:13:59,849 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-03-07 17:14:00,154 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 17:16:29,495 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-03-07 17:16:29,495 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-03-07 17:16:29,495 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 20000
+2017-03-07 17:16:29,495 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-03-07 17:16:29,495 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 13000
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 20000
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> window_width : 	 7
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 300
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [109, 110, 111]
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-03-07 17:16:29,496 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 adc_hv_off_w7.npz
+2017-03-07 17:16:29,497 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-03-07 17:16:29,497 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /data/datasets/CTA/20161214/FullChain/
+2017-03-07 17:16:29,497 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-03-07 17:16:29,497 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /data/datasets/CTA/DATA/20161214/
+2017-03-07 17:16:29,497 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+2017-03-07 17:16:29,497 | INFO | analyse_hvoff : 	 -|
+2017-03-07 17:16:29,497 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-03-07 17:16:29,832 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 17:16:57,675 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> window_width : 	 7
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /data/datasets/CTA/DATA/20161214/
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 20000
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 300
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /data/datasets/CTA/20161214/FullChain/
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 adc_hv_off_w7.npz
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-03-07 17:16:57,676 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 20000
+2017-03-07 17:16:57,677 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-03-07 17:16:57,677 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [109, 110, 111]
+2017-03-07 17:16:57,677 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-03-07 17:16:57,677 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 13000
+2017-03-07 17:16:57,677 | INFO | analyse_hvoff : 	 -|
+2017-03-07 17:16:57,677 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-03-07 17:16:58,010 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-07 17:17:11,342 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-03-07 17:17:11,342 | INFO | analyse_hvoff : 	 		 |--|> window_width : 	 7
+2017-03-07 17:17:11,342 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-03-07 17:17:11,342 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-03-07 17:17:11,342 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /data/datasets/CTA/20161214/FullChain/
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [109, 110, 111]
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /data/datasets/CTA/DATA/20161214/
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 adc_hv_off_w7.npz
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 13000
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 300
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 20000
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 20000
+2017-03-07 17:17:11,343 | INFO | analyse_hvoff : 	 -|
+2017-03-07 17:17:11,344 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-03-07 17:17:11,680 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_hv_off_w7.npz
+2017-03-08 08:53:00,404 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 13000
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [117, 118]
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 300
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 adc_dark_w7.npz
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /data/datasets/CTA/20161214/FullChain/
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 30000
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-03-08 08:53:00,406 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /data/datasets/CTA/DATA/20161214/
+2017-03-08 08:53:00,407 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 True
+2017-03-08 08:53:00,407 | INFO | analyse_hvoff : 	 		 |--|> window_width : 	 7
+2017-03-08 08:53:00,407 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 20000
+2017-03-08 08:53:00,407 | INFO | analyse_hvoff : 	 -|
+2017-03-08 08:53:00,407 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-03-08 08:53:00,407 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-03-08 09:13:59,924 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /data/datasets/CTA/20161214/FullChain/adc_dark_w7.npz
+2017-03-08 09:13:59,929 | INFO | analyse_hvoff : 	 		-|> Perform the analysis
+2017-03-08 09:14:00,285 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_dark_w7.npz
+2017-03-08 09:14:05,391 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /data/datasets/CTA/20161214/FullChain/adc_dark_w7.npz
+2017-03-08 09:14:05,393 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-03-08 09:14:05,783 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /data/datasets/CTA/20161214/FullChain/adc_dark_w7.npz

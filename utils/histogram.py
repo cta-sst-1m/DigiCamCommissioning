@@ -76,7 +76,7 @@ class Histogram:
         # Initialisation of data
         if data.shape[0] == 0:
             self.logger.debug('Initialise histogram')
-            self.data = np.zeros(data_shape + (self.bin_centers.shape[0],))
+            self.data = np.zeros(data_shape + (self.bin_centers.shape[0],),dtype = np.int)
             self.underflow = np.zeros(data_shape)
             self.overflow = np.zeros(data_shape)
             self.errors = np.zeros(data_shape + (self.bin_centers.shape[0],))
@@ -231,7 +231,12 @@ class Histogram:
         :param indices:
         :return: void
         """
-        # TODO deal with underflow and overflow and do the doc + optimize the function
+        # TODO: Speed this up, it is really crap
+        '''
+        inds = np.digitize(value, self.bin_centers)
+        inds[inds==self.bin_centers[-1]+self.bin_width]=self.bin_centers[-1]
+        self.data[...,inds]+=1
+        '''
 
         # change the value array to an array of Histogram index to be modified
         hist_indices = ((value - self.bin_edges[0]) // self.bin_width).astype(int)
@@ -249,7 +254,8 @@ class Histogram:
             self.data[dim_indices] += 1
         else:
             self.data[indices][dim_indices] += 1
-        self._compute_errors() # TODO... can it be done somewhere else... this is slow
+        #self._compute_errors() # TODO... can it be done somewhere else... this is slow
+
 
     # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):

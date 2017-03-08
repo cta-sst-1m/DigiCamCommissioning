@@ -43,7 +43,8 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
                 # get the data
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 # subtract the pedestals
-                data_max = np.argmax(data, axis=1) #TODO Skip level 0 to avoid biais on position finding
+                data_max = np.argmax(data, axis=1)
+                print(data_max[661])
                 #if (data_max-np.argmin(data, axis=1))/data_max>0.2:
                 hist.fill(data_max)
 

@@ -157,11 +157,11 @@ def create_template():
     pickle.dump(dict_template, pkl_file)
 
 
-def estimated_template(pe,start=0,stop=500):
+def estimated_template(pe,start=0,stop=500,step=0.2):
     pkl_file = open('templates_bspline.p', 'rb')
 
     dict_template = pickle.load(pkl_file)
-    xs = np.linspace(start,stop, (stop-start)*5)
+    xs = np.linspace(start,stop, (stop-start)*1./step)
     coeffs = []
     for coef in range(len(dict_template['coeff_sample'])):
         coeffs.append(dict_template['spline_coeff_func_pe'][coef](float(pe)))
@@ -242,6 +242,7 @@ def plot_pe(pe):
     template = get_template()
     x_template,y_template = estimated_template(pe,start=0,stop=500)
     #y_template[0:-11] = y_template[10:-1]
+    print(template.fit_axis)
     if pe in template.fit_axis:
         i = np.where(template.fit_axis == pe)[0][0]
         plt.errorbar(template.bin_centers[0:300:1], template.data[i][0:300:1], fmt='ok',
@@ -249,6 +250,24 @@ def plot_pe(pe):
     plt.plot(x_template, y_template, 'r', lw=2, label='$f(N_{\gamma}=%d),G=%0.3f$'%(pe,np.max(y_template)/pe))
     plt.legend()
     plt.show()
+
+
+def dump_int_dat(pe):
+    f = open('template_%s.dat'%str(pe),'w')
+    x_template,y_template = estimated_template(pe,start=0,stop=291,step=1)
+    y_template = y_template*0.4285714285714286
+    f.write('-8.0 0.0\n')
+    f.write('-7.0 0.0\n')
+    f.write('-6.0 0.0\n')
+    f.write('-5.0 0.0\n')
+    f.write('-4.0 0.0\n')
+    f.write('-3.0 0.0\n')
+    f.write('-2.0 0.0\n')
+    f.write('-1.0 0.0\n')
+    f.write('0.0 0.0\n')
+    for i in range(x_template.shape[0]):
+        f.write('%0.1f %f\n'%(x_template[i],y_template[i]))
+    f.close()
 
 
 
