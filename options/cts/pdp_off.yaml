@@ -1,0 +1,37 @@
+# Analysis module
+analysis_module : analyse_hvoff
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : log
+
+
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%d.run_5.fits.fz
+directory     :     /home/alispach/data/digicam_commissioning/cts/pdp_off/
+file_list     :     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Output files
+output_directory  : /home/alispach/data/digicam_commissioning/cts/ac_scan/
+histo_filename    : pdp_off.npz
+
+# Event processing
+evt_max           : 10000
+n_evt_per_batch   : 1000
+
+# Camera Configuration
+n_pixels          : 1296
+angle_cts         : 120
+window_width      : 7
+
+# Plot configuration
+adcs_min           : 2500
+adcs_max           : 5000
+adcs_binwidth      : 1

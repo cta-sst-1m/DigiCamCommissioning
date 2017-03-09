@@ -51,8 +51,10 @@ def run(hist, options, hist_type, prev_fit_result=None):
 
             for telid in event.dl0.tels_with_data:
 
+                # Take data from zfits
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
 
+                # Get rid off unwanted pixels
                 data = data[options.pixel_list]
 
                 if hist_type == 'raw':

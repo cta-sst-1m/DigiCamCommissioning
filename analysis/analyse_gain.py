@@ -44,13 +44,14 @@ def create_histo(options):
     # recover previous fit
     if options.mc:
 
-        prev_fit_result = np.ones((options.n_pixels, 8, 2))
+        prev_fit_result = np.ones((len(options.pixel_list), 8, 2))
 
     else:
 
-        spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename, fit_only=True)
-        prev_fit_result = np.copy(spes_fit.fit_result)
-        del spes_fit
+        hv_off_hist = histogram.Histogram(filename=options.output_directory + options.hv_off_histo_filename, fit_only=True)
+        prev_fit_result = np.copy(hv_off_hist.fit_result)
+        del hv_off_hist
+
 
     # Define the histograms
     mpes = histogram.Histogram(filename = options.output_directory + options.mpes_histo_filename)
@@ -74,13 +75,12 @@ def create_histo(options):
                 if (i*mpes.data.shape[1]+j) %int(pbar.total/1000)==0: pbar.update(pbar.total/1000)
             # put the slice or remove empty bins
 
-            if not options.mc or (prev_fit_result is None):
+            if not options.mc and (prev_fit_result is not None):
                 s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
                 if s[0]==s[1]:continue
                 mpe_tmp = mpes.data[i,j]
                 mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
-                                  weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,0,0]
-
+                                  weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,1,0]
                 if mean < options.mean_range_for_mpe[0] or mean > options.mean_range_for_mpe[1] : continue
                 mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
             else:
@@ -124,9 +124,9 @@ def perform_analysis(options):
      # recover previous fit
     else:
 
-        spes_fit = histogram.Histogram(filename=options.output_directory + options.input_dark_filename,fit_only=True)
-        prev_fit_result = np.copy(spes_fit.fit_result)
-        del spes_fit
+        hv_off_histo = histogram.Histogram(filename=options.output_directory + options.hv_off_histo_filename,fit_only=True)
+        prev_fit_result = np.copy(hv_off_histo.fit_result)
+        del hv_off_histo
 
     if options.mc:
         n_peak = int(len(options.scan_level) * (1 + 0.06))
@@ -140,7 +140,7 @@ def perform_analysis(options):
     reduced_p0 = lambda *args,config=None, **kwargs: fit_full_mpe.p0_func(*args,n_peaks = n_peak, config=config, **kwargs)
     reduced_slice = lambda *args, config=None, **kwargs: fit_full_mpe.slice_func(*args, n_peaks=n_peak, config=config, **kwargs)
     mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
-                  reduced_bounds, config=prev_fit_result, labels_func=fit_full_mpe.labels_func)#,limited_indices=(4,))
+                  reduced_bounds, config=prev_fit_result, labels_func=fit_full_mpe.label_func)#,limited_indices=(4,))
 
 
     # get the bad fits
@@ -163,7 +163,7 @@ def perform_analysis(options):
                                                                                              config=config, **kwargs)
                 mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
                               reduced_bounds, config=prev_fit_result ,limited_indices=(pix,),force_quiet=True,
-                              labels_func=fit_full_mpe.labels_func)
+                              labels_func=fit_full_mpe.label_func)
                 i-=1
 
         if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]):
@@ -177,7 +177,7 @@ def perform_analysis(options):
                                                                                              config=config, **kwargs)
                 mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
                               reduced_bounds, config=prev_fit_result ,limited_indices=(pix,),force_quiet=True,
-                              labels_func=fit_full_mpe.labels_func)
+                              labels_func=fit_full_mpe.label_func)
                 i-=1
 
 
@@ -191,6 +191,7 @@ def perform_analysis(options):
             log.info('\t-|> Pixel %s still badly fitted'%pix)
 
     mpes_full.save(options.output_directory + options.histo_filename)
+    del mpes_full
 
 
 def display_results(options, param_to_display=1):
@@ -207,25 +208,14 @@ def display_results(options, param_to_display=1):
 
     # Define Geometry
 
-    if options.mc:
-
-        index_default = (0,)
-
-    else:
-
-        index_default = (options.pixel_list[0],)
-
-    geom = geometry.generate_geometry_0(options.n_pixels)
+    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     # Perform some plots
-    display_fit = True
+    display_fit = False
 
     print(adcs.data.shape)
 
-    fig_hist = display.display_hist(adcs, geom, index_default=index_default, param_to_display=param_to_display, limits=[0,1], limitsCam=[0,10000], draw_fit = display_fit)
-    fig_hist.savefig(options.output_directory + 'figures/hist.png')
-
-    geom = None
+    display.display_hist(adcs, options=options, geom=geom, display_parameter=True, draw_fit=True)
 
     if display_fit:
         fig_chi2 = display.display_chi2(adcs, geom, display_fit=display_fit)

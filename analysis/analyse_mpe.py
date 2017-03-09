@@ -41,12 +41,14 @@ def create_histo(options):
 
     # Define the histograms
     mpes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
-                               bin_width=options.adcs_binwidth, data_shape=(len(options.scan_level),options.n_pixels,),
+                               bin_width=options.adcs_binwidth, data_shape=(len(options.scan_level),len(options.pixel_list),),
                                label='MPE',xlabel='Peak ADC',ylabel = '$\mathrm{N_{entries}}$')
 
     # Get the reference sampling time
     peaks = histogram.Histogram(filename = options.output_directory + options.synch_histo_filename)
-    mpe_hist.run(mpes, options, peak_positions= peaks.data)
+
+    # Construct the histogram
+    mpe_hist.run(mpes, options, peak_positions=peaks.data)
 
     # Save the histogram
     mpes.save(options.output_directory + options.histo_filename)
@@ -154,7 +156,7 @@ def display_results(options):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0()
+    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     import matplotlib.pyplot as plt
 
@@ -208,22 +210,7 @@ def display_results(options):
 
     else:
 
-        for level in options.scan_level:
-            fig = plt.figure()
-            axis = fig.add_subplot(111)
-
-            try:
-
-                display.draw_hist(axis, adcs, index=(level, pixel_start,), limits=[2005, 2150], draw_fit=True,
-                                label='Pixel %s')
-            except:
-
-
-                continue
-
-        #display.draw_hist(axis, adcs, index=index, limits=[2005, 2150], draw_fit=True, label='Pixel %s')
-
-    #display.display_hist(adcs, geom=geom, index_default=(20,700,), param_to_display=1, limits=[1900., 2100.], draw_fit=True)
+        display.display_hist(adcs, options=options, geom=geom)
     input('press button to quit')
 
     return

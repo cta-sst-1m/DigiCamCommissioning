@@ -65,7 +65,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
                 #### TODO put the new charge extraction
                 # charge extraction type
                 if charge_extraction == 'amplitude':
-                    if isinstance(peak,None):
+                    if peak is None:
                         peak = np.argmax(data[0], axis=1)
                     index_max = (np.arange(0, data[0].shape[0]), peak,)
                     hist.fill(data[0][index_max], indices=(level,))

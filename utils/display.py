@@ -30,16 +30,21 @@ def draw_fit_result(axis, hist, index=0, limits = None, display_fit=False):
     else:
         h = np.copy(hist.fit_result[:, index, 0])
 
-    if limits:
-        h[h<limits[0]]=limits[0]
-        h[h>limits[1]]=limits[1]
     h_to_return = h
 
     ### Avoid NANs
     mask = (~np.isnan(h) * (h>0))
+    h_to_return[~mask] = np.nanmax(h_to_return)
     h = h[mask]
 
-    histo = axis.hist(h, bins='auto', histtype='step', align='left', label='all pixels', color='k', linewidth=1)
+    if limits:
+        h[(h>=limits[0]) * (h<=limits[1])]
+
+    else:
+        limits = [np.median(h) - np.std(h), np.median(h) + np.std(h)]
+        h[(h>=limits[0]) * (h<=limits[1])]
+
+    histo = axis.hist(h, bins='auto', histtype='step', align='left', color='k', linewidth=1)
 
     bin_edges = histo[1][0:-1]
     if len(bin_edges)==1:
@@ -191,8 +196,8 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
     :return:
     """
     pixel_label = index
-    pixel_label[-1]= options.pixel_list[pixel_label[-1]] if not hasattr(options,'display_pixel' ) else options.display_pixel
-    pixel_label = tuple(pixel_label)
+    #pixel_label[-1]= options.pixel_list[pixel_label[-1]] if not hasattr(options,'display_pixel' ) else options.display_pixel
+    #pixel_label = tuple(pixel_label)
 
     # Get the data and assign limits
     h = np.copy(hist.data[index])
@@ -200,7 +205,11 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
     h_to_return = h
 
     ### Avoid NANs
-    mask = (~np.isnan(h)) * (~np.isnan(h_err) * (h > 0))
+    mask = (~np.isnan(h) * (h > 0))
+
+    if np.sum(mask)==0:
+        mask = [True**len(h)]
+
     h = h[mask]
     h_err = h_err[mask]
     x = hist.bin_centers[mask]
@@ -211,7 +220,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
 
     if draw_fit:
         reduced_axis = x
-        fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1], 10*reduced_axis.shape[0])
+        fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1]+1E-8, 10*reduced_axis.shape[0])
         reduced_func = hist.fit_function
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
         text_fit_result += '$\chi^{2}/ndf : %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
@@ -227,6 +236,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
 
     axis.set_xlabel(hist.xlabel)
     axis.set_ylabel(hist.ylabel)
+    axis.set_ylim(bottom=1)
     axis.xaxis.get_label().set_ha('right')
     axis.xaxis.get_label().set_position((1, 0))
     axis.yaxis.get_label().set_ha('right')
@@ -411,7 +421,10 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
             if prev_count != new_count:
                 axis_histogram.cla()
-                draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                image = draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                if geom is not None:
+                    print('camera visu change not implemented')
+                    #camera_visu.image = image
 
         elif event.key == '*':
             prev_count = counter.count_level
@@ -420,7 +433,10 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
             if prev_count != new_count:
                 axis_histogram.cla()
-                draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                image = draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                if geom is not None:
+                    print('camera visu change not implemented')
+                    #camera_visu.image = image
 
         elif event.key == '.':
 
@@ -455,13 +471,19 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
             if len(hist.data.shape) > 2:
                 image = np.zeros(hist.data.shape[1])
                 for i in range(hist.data.shape[1]):
-                    image[i] = np.average(hist.bin_centers, weights=hist.data[0, i])
+                    if np.sum(hist.data[0,i])==0:
+                        image[i] = 0.
+                    else:
+                        image[i] = np.average(hist.bin_centers, weights=hist.data[0, i])
 
             else:
+
                 image = np.zeros(hist.data.shape[0])
                 for i in range(hist.data.shape[0]):
-                    image[i] = np.average(hist.bin_centers, weights=hist.data[i])
-
+                    if np.sum(hist.data[i]) == 0:
+                        image[i] = 0.
+                    else:
+                        image[i] = np.average(hist.bin_centers, weights=hist.data[i])
 
         elif display_parameter:
 
@@ -475,6 +497,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
         camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
         camera_visu.image = image
         camera_visu.add_colorbar()
+        #camera_visu.colorbar.set_clim(np.nanmin(image), np.nanmax(image))
 
         if display_parameter:
 

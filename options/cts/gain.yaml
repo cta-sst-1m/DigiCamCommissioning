@@ -1,0 +1,32 @@
+# Analysis module
+analysis_module : analyse_gain
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20161214
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%d.run_1.fits.fz
+directory     :     /home/alispach/data/digicam_commissioning/cts/ac_scan/
+scan_level    :     [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 640, 680, 720, 760, 800, 840, 880, 920, 960, 1000]
+
+
+# Output files
+output_directory  : /home/alispach/data/digicam_commissioning/cts/ac_scan/
+histo_filename        : full_mpe.npz
+dark_histo_filename   : dark.npz
+hv_off_histo_filename : hv_off.npz
+mpes_histo_filename   : mpe.npz
+
+# Camera Configuration
+n_pixels          : 1296
+angle_cts         : 120
+
+# Histo config
+mean_range_for_mpe : [0, 40]
