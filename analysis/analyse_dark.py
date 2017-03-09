@@ -11,7 +11,7 @@ import logging,sys
 import scipy.stats
 import numpy as np
 
-__all__ = ["create_histo", "perform_analysis", "display_results", "compute_dark_parameters"]
+__all__ = ["create_histo", "perform_analysis", "display_results"]
 
 
 def create_histo(options):
@@ -42,7 +42,7 @@ def create_histo(options):
                                label='Dark ADC',xlabel='ADC',ylabel = 'entries')
 
     # Get the adcs
-    dark_hist.run(adcs, options, hist_type=options.hist_type)
+    adc_hist.run(adcs, options,'ADC')
 
 
 
@@ -57,7 +57,8 @@ def create_histo(options):
 
 def perform_analysis(options):
     """
-    Perform a simple gaussian fit of the ADC histograms
+    Extract the dark rate and cross talk, knowing baseline gain sigmas from previous
+    runs
 
     :param options: a dictionary containing at least the following keys:
         - 'output_directory' : the directory in which the histogram will be saved (str)
@@ -71,22 +72,10 @@ def perform_analysis(options):
     dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
     x = dark_hist.bin_centers
 
-    dark_hist.fit_result_label = ['baseline [ADC]', '$f_{dark}$ [MHz]', '$\mu_{XT}$']
-    dark_hist.fit_result = np.ones((len(options.pixel_list), len(dark_hist.fit_result_label), 2))*np.nan
 
     for pixel in range(len(options.pixel_list)):
 
         y = dark_hist.data[pixel]
-
-        """
-        baseline = x[np.argmax(y)]
-        mean = np.average(x, weights=y)
-        mean_error = np.sqrt(np.average((x-mean)**2, weights=y))/np.sqrt(np.sum(y))
-        mu_xt = 0.06 + np.random.normal(0, 0.00001)
-        mu_xt_error = 0.
-        f_dark = (mean-baseline)/5.6/15.6/(1.+mu_xt) * 1E3
-        f_dark_error = 0.
-        """
 
         if options.mc:
 
@@ -132,6 +121,16 @@ def display_results(options):
     return
 
 def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e):
+    '''
+    In developement
+    :param x:
+    :param y:
+    :param baseline:
+    :param gain:
+    :param sigma_1:
+    :param sigma_e:
+    :return:
+    '''
 
 
     x = x - baseline

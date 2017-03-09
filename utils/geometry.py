@@ -3,6 +3,7 @@ from ctapipe.io.camera import CameraGeometry
 from ctapipe.io.camera import find_neighbor_pixels
 from astropy import units as u
 
+# TODO pixel list from the CTS/DigiCam config
 def generate_geometry_MC(n_pixels=1296):
     pix_id = np.arange(0, n_pixels, 1)
     pix_x = [0.]*n_pixels
@@ -12,7 +13,8 @@ def generate_geometry_MC(n_pixels=1296):
 
 
 def generate_geometry_0(n_pixels=1296, pixel_list=None):
-    pix_id = np.arange(0, 1296, 1)
+    # TODO setup the proper range
+    pix_id = np.arange(0, n_pixels, 1)
     pix_x = [-12.15, -48.6, -24.3, 0.0, 24.3, -85.05, -60.75, -36.45, -12.15, 12.15, 36.45, 60.75, -121.5, -97.2, -72.9,
              -48.6,
              -24.3, 0.0, 24.3, 48.6, 72.9, 97.2, -157.95, -133.65, -109.35, -85.05, -60.75, -36.45, -12.15, 12.15,

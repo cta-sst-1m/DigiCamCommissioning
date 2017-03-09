@@ -71,12 +71,12 @@ def create_histo(options):
     # Fill HV_Off and Dark histo
     log.info('Filling HV off')
     options.file_basename = 'hv_low.%s.fits.fz'
-    dark_hist.run(hist=hv_off_histogram, options=options, hist_type='raw')
+    dark_hist.run(hist=hv_off_histogram, options=options)
     hv_off_histogram.save(options.output_directory + 'hv_low.npz')
     del hv_off_histogram
     log.info('Filling Dark')
     options.file_basename = 'dark.%s.fits.fz'
-    dark_hist.run(hist=dark_histogram, options=options, hist_type='raw')
+    dark_hist.run(hist=dark_histogram, options=options)
     dark_histogram.save(options.output_directory + 'dark.npz')
     del dark_histogram
 

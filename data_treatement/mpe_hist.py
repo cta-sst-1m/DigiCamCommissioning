@@ -7,15 +7,18 @@ from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
 
 # noinspection PyProtectedMember
-def run(hist, options, peak_positions=None):
+def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
 
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
-    temp = 0
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=len(options.scan_level)*options.events_per_level)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
+
+    peak = None
+    if type(peak_positions).__name__ == 'ndarray':
+        peak = np.argmax(peak_positions, axis=1)
 
     for file in options.file_list:
         if level > len(options.scan_level) - 1:
@@ -36,11 +39,8 @@ def run(hist, options, peak_positions=None):
         # Loop over event in this file
         for event in inputfile_reader:
             if level > len(options.scan_level) - 1:
-
                 break
-
-
-            for telid in event.dl0.tels_with_data: #TODO WAS R1 before change in MCToy
+            for telid in event.dl0.tels_with_data:
                 if first_evt:
                     first_evt_num = event.dl0.tel[telid].event_number
                     first_evt = False
@@ -62,45 +62,17 @@ def run(hist, options, peak_positions=None):
                 data = data[options.pixel_list]
                 # put in proper format
                 data = data.reshape((1,) + data.shape)
-                # integration parameter
-                params = {"integrator": "nb_peak_integration", "integration_window": [8, 4],
-                          "integration_sigamp": [2, 4], "integration_lwt": 0}
-                # now integrate
-                #integration, window, peakpos = integrators.simple_integration(data, params)
-                # try with the max instead
-                #print(len(peak[peak>0]))
-                if type(peak_positions).__name__ == 'ndarray' :
-                    #print (peak_positions)
-                    peak = np.argmax(peak_positions,axis=1)
-                    #print(peak[peak>0])
+                #### TODO put the new charge extraction
+                # charge extraction type
+                if charge_extraction == 'amplitude':
+                    if isinstance(peak,None):
+                        peak = np.argmax(data[0], axis=1)
+                    index_max = (np.arange(0, data[0].shape[0]), peak,)
+                    hist.fill(data[0][index_max], indices=(level,))
+                elif charge_extraction == 'integration':
+                    if not isinstance(peak,None):
+                        integrator.window_start = np.mean(peak,axis=0)[0] - 2
+                        hist.fill(integrator.extract_charge(data[0])/5, indices=(level,))
 
-                else:
-                    peak = np.argmax(data[0], axis=1)
-
-
-                temp +=peak/(options.events_per_level)
-                index_max = (np.arange(0, data[0].shape[0]), peak,)
-
-                '''
-                peak_m1 =  peak - 1
-                peak_m1[peak_m1<0]=0
-                peak_p1 =  peak + 1
-                peak_p1[peak_p1>49]=49
-
-                index_max_m1 = (np.arange(0, data[0].shape[0]), peak_m1,)
-                index_max_p1 = (np.arange(0, data[0].shape[0]), peak_p1,)
-                h = np.append(data[0][index_max].reshape(data[0][index_max].shape+(1,)),
-                              data[0][index_max_m1].reshape(data[0][index_max_m1].shape+(1,)),axis=1)
-                h = np.append(h,
-                              data[0][index_max_p1].reshape(data[0][index_max_p1].shape + (1,)),axis=1)
-
-                max_value = np.max(h,axis=1)
-                '''
-                hist.fill(data[0][index_max], indices=(level,))
-                # and fill the histos
-                #if hists[0] : hists[0].fill(integration[0], indices=(level,))
-                #if hists[1]: hists[1].fill(max_value, indices=(level,))
     # Update the errors
     hist._compute_errors()
-    # Save the MPE histos in a file
-    #hist.save(options.output_directory + options.histo_filename) #TODO check for twice saving

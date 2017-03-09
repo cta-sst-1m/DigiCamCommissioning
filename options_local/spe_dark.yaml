@@ -8,21 +8,21 @@ display_results   : False
 
 # Logging
 verbose           : False
-log_file_basename : 20161214
+log_file_basename : 20170123
 
 # Input files
 mc            :     False
 file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.fits.fz
-directory     :     /data/datasets/CTA/DATA/20161214/
-file_list     :     [117,118,119,120,121]
+directory     :     /data/datasets/CTA/DATA/20170123/
+file_list     :     [0.run_660]
 
 # Output files
-output_directory  : /data/datasets/CTA/20161214/FullChain/
+output_directory  : /data/datasets/CTA/DATA/20170123/
 histo_filename    : spe.npz
 hv_off_histo_filename    : adc_hv_off.npz
 
 # Event processing
-evt_max           : 50000
+evt_max           : 10000
 n_evt_per_batch   : 500
 
 # Camera Configuration

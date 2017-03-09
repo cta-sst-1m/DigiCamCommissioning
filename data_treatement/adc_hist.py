@@ -28,6 +28,10 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
     else:
         log.info('Running on MC data')
 
+
+    def integrate_trace(d):
+        return np.convolve(d, np.ones((options.window_width), dtype=int), 'valid')
+
     pbar = tqdm(total=max_evt)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
@@ -36,7 +40,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
         # Open the file
         _url = options.directory + options.file_basename % file
         if not options.mc:
-            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=100000) #TODO data_type arg does not exist anymore
+            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=options.evt_max)
         else:
             inputfile_reader = ToyReader(filename=_url, id_list=[0],
                                          max_events=options.evt_max,
@@ -66,6 +70,8 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                     log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
                 # Get the data
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                if hasattr(options,'window_width'):
+                    data = np.apply_along_axis(integrate_trace,-1,data)
                 # Append the data to the batch
                 if type(batch).__name__ != 'ndarray':
                     batch = data.reshape(data.shape[0], 1, data.shape[1])

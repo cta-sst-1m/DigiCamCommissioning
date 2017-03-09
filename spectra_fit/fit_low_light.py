@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import curve_fit
 import peakutils
+import logging,sys
 import utils.pdf
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
@@ -17,6 +18,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
     :param kwargs: potential unused keyword arguments
     :return: starting points for []
     """
+    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
 
     if config is not None:
 
@@ -39,7 +41,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
 
         return param
 
-    if config is None:
+    else :
 
         amplitude = np.sum(y)
         offset = 0.
@@ -81,7 +83,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
                 sigma[i] = np.sqrt(np.average((x[start:end] - temp) ** 2, weights=y[start:end]))
 
             except Exception as inst:
-                print('Could not compute weights for sigma !!!')
+                log.error('Could not compute weights for sigma !!!')
                 sigma[i] = gain/2.
 
         sigma_n = lambda sigma_e, sigma_1, n: np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2)
@@ -105,17 +107,10 @@ def slice_func(y, x, *args, **kwargs):
     :return: the index to slice the Histogram
     """
     # Check that the Histogram has none empty values
-
-    if True:
-
-        return [np.where(y!=0)[0][0], np.where(y!=0)[0][-1], 1]
-
-    if np.where(y != 0)[0].shape[0] == 0:
-
-        #print ('hello')
-        return []
-    max_bin = np.where(y != 0)[0][0]
-    if x[max_bin]== 4095: max_bin-=1
+    #if np.where(y != 0)[0].shape[0] == 0:
+    #    return []
+    #max_bin = np.where(y != 0)[0][0]
+    #if x[max_bin]== 4095: max_bin-=1
     return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
 
 
@@ -135,12 +130,6 @@ def bounds_func(*args, config=None, **kwargs):
 
         return param_min, param_max
 
-    if False:
-
-        param_min = [1.e-3, 1.e-4, 0., -np.inf, 0., 0., 0.,-np.inf]
-        param_max = [2000., 1, np.inf, np.inf, np.inf, np.inf, np.inf,np.inf]
-
-
     else:
         mu = config[0]
         mu_xt = config[1]
@@ -149,7 +138,7 @@ def bounds_func(*args, config=None, **kwargs):
         sigma_e = config[4]
         sigma_1 = config[5]
         amplitude = config[6]
-        offset = config[7]
+        offset = config[7] # TODO remove this guy
 
         param_min = [0.    , 0., 0                   , 0.                , 0.                       , 0.     ,0.    ,-np.inf]
         param_max = [np.inf, 1 , gain[0] + 10*gain[1], baseline[0]+5*baseline[1], sigma_e[0] + 5*sigma_e[1], np.inf ,np.inf, np.inf]
@@ -169,16 +158,16 @@ def fit_func(p, x, *args, **kwargs):
     temp = np.zeros(x.shape)
     n_peak=40
     n_peakmin = 0
+    # TODO avoir si ca marche quand on utilise en high light
     #if len(x)>0:
     #    n_peak = int(float(x[-1] - baseline) / gain * 1.5)
     #    n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
 
     x = x - baseline
     for n in range(n_peak):
-        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2) # * gain
+        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + 1./12.) # * gain
         param_gauss = [sigma_n, n*gain, 1.]
         temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(param_gauss, x)
-        #temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(x, sigma_n, n * gain + (offset if n!=0 else 0))
 
     return temp * amplitude
 
@@ -190,3 +179,6 @@ def label_func(*args, ** kwargs):
     label = ['$\mu$ [p.e.]', '$\mu_{XT}$ [p.e.]', 'Gain [ADC/p.e.]','Baseline [ADC]','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]', 'Amplitude', 'Offset [ADC]']
     return np.array(label)
 
+if __name__ == '__main__':
+
+    print('Nothing implemented')

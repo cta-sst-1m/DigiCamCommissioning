@@ -42,9 +42,9 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
                 if evt_num > max_evt: break
                 # get the data
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
-                data = data[options.pixel_list]
-                #np.take(data, np.random.permutation(data.shape[1]), axis=1, out=data) # randomize choise of max to not favorize lower indices
-                data_max = np.argmax(data, axis=1) #TODO Skip level 0 to avoid biais on position finding , TODO randomize choice of argmax when multiple occurrences
+                # subtract the pedestals
+                data_max = np.argmax(data, axis=1)
+                print(data_max[661])
                 #if (data_max-np.argmin(data, axis=1))/data_max>0.2:
                 hist.fill(data_max)
 
@@ -52,4 +52,4 @@ def run(hist, options, min_evt = 5000.*3 , max_evt=5000*10):
     # noinspection PyProtectedMember
     hist._compute_errors()
     # Save the histo in a file
-    #hist.save(options.output_directory + options.histo_filename) #TODO check for double saving
+    hist.save(options.output_directory + options.histo_filename) #TODO check for double saving

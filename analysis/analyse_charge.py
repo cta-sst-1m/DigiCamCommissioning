@@ -1,11 +1,9 @@
-#!/usr/bin/env python3
-
-# external modules
 
 # internal modules
-from data_treatement import adc_hist
-from spectra_fit import fit_hv_off
+from data_treatement import charge_hist
 from utils import display, histogram, geometry
+import logging,sys
+import scipy.stats
 import numpy as np
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
@@ -13,7 +11,7 @@ __all__ = ["create_histo", "perform_analysis", "display_results"]
 
 def create_histo(options):
     """
-    Create a list of ADC histograms and fill it with data
+    Create a list histograms and fill it with data
 
     :param options: a dictionary containing at least the following keys:
         - 'output_directory' : the directory in which the histogram will be saved (str)
@@ -32,13 +30,17 @@ def create_histo(options):
 
     :return:
     """
+
     # Define the histograms
     adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                bin_width=options.adcs_binwidth, data_shape=(options.n_pixels,),
-                               label='Pixel ADC count',xlabel='Pixel ADC',ylabel = 'Count / ADC')
+                               label='Dark ADC',xlabel='ADC',ylabel = 'entries')
 
     # Get the adcs
-    adc_hist.run(adcs, options, 'ADC')
+    peaks = histogram.Histogram(filename=options.output_directory + options.synch_histo_filename)
+    hvoff = histogram.Histogram(filename=options.output_directory + options.hvoff_histo_filename)
+
+    charge_hist.run(adcs, options , peak_positions= peaks.data , prev_fit_result=hvoff.fit_result)
 
     # Save the histogram
     adcs.save(options.output_directory + options.histo_filename)
@@ -59,20 +61,8 @@ def perform_analysis(options):
 
     :return:
     """
-
-    # Load the histogram
-    adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-
-    # Fit the baseline and sigma_e of all pixels
-    #TODO include the limited indicie
-    adcs.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func,
-             labels_func=fit_hv_off.labels_func)#, limited_indices=tuple(options.pixel_list))
-
-    # Save the fit
-    adcs.save(options.output_directory + options.histo_filename)
-
-    # Delete the histograms
-    del adcs
+    log = logging.getLogger(sys.modules['__main__'].__name__+__name__)
+    log.info('No analysis is implemented for ADC distribution in dark conditions')
 
 
 def display_results(options):
@@ -87,20 +77,12 @@ def display_results(options):
     # Load the histogram
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    index_default = options.pixel_list[0]
-    #print(index_default)
-
     # Define Geometry
-    geom = geometry.generate_geometry_0(n_pixels=options.n_pixels)
+    geom = geometry.generate_geometry_0()
 
-    display_fit = True
     # Perform some plots
-    #display.display_fit_result(adcs, geom, index_var=0, limits=[0, adcs.data.shape[1]*2], display_fit=display_fit)
-    display.display_fit_result(adcs, geom, index_var=1, limits=[0, options.adcs_max], display_fit=display_fit)
-    display.display_fit_result(adcs, geom, index_var=2, limits=[0, 1], display_fit=display_fit)
+    display.display_hist(adcs, index=(700,))
 
-    display.display_hist(adcs,  geom, limits=[0, 3], index_default=(index_default, ), param_to_display=2, draw_fit=display_fit, limitsCam=[0, 1])
-    # display([adcs], geom, fit_hv_off.slice_func, norm='linear')
     input('press button to quit')
 
     return

@@ -46,7 +46,6 @@ def create_histo(options):
 
     # Get the reference sampling time
     peaks = histogram.Histogram(filename = options.output_directory + options.synch_histo_filename)
-    print (peaks.data.shape)
     mpe_hist.run(mpes, options, peak_positions= peaks.data)
 
     # Save the histogram
@@ -82,8 +81,6 @@ def perform_analysis(options):
     pbar = tqdm(total=mpes.data.shape[0]*mpes.data.shape[1])
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
-    print(mpes.data.shape)
-
     def std_dev(x, y):
         if np.sum(y)<=0: return 0.
         avg = np.average(x, weights=y)
@@ -92,7 +89,7 @@ def perform_analysis(options):
     ## Now perform the mu and mu_XT fits
     for pixel in range(mpes.data.shape[1]):
 
-        if pixel not in options.pixel_list:
+        if hasattr(options,'pixel_list') and pixel not in options.pixel_list:
             continue
 
         force_xt = False
@@ -137,8 +134,6 @@ def perform_analysis(options):
                     [5, (3, 0)],  # sigma_1
                     [7, 0.]  # offset
                 ]
-
-            print((level,pixel,))
             mpes.fit(_fit_spectra.fit_func, _fit_spectra.p0_func, _fit_spectra.slice_func,
                      _fit_spectra.bounds_func, config=mpes_full_fit_result, fixed_param=fixed_param
                      , limited_indices=[(level, pixel,)], force_quiet=True, labels_func=_fit_spectra.label_func)

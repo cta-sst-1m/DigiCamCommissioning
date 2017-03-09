@@ -58,8 +58,6 @@ def create_histo(options):
     mpes_full = histogram.Histogram(data=np.zeros(mpes.data[0].shape),bin_centers=mpes.bin_centers, xlabel='ADC',
                           ylabel='$\mathrm{N_{trigger}}$', label='Summed MPE')
 
-    print(mpes.data)
-
     # Add an Histogram corresponding to the sum of all other only if the mu is above a certain threshold
 
     pbar = tqdm(total=mpes.data.shape[0]*mpes.data.shape[1])
@@ -70,21 +68,21 @@ def create_histo(options):
     for i in range(mpes.data.shape[0]):
         for j in range(mpes.data.shape[1]):
 
-            pbar.update(1)
+            if pbar.total<=1000:
+                pbar.update(1)
+            else:
+                if (i*mpes.data.shape[1]+j) %int(pbar.total/1000)==0: pbar.update(pbar.total/1000)
             # put the slice or remove empty bins
 
-            if not options.mc:
+            if not options.mc or (prev_fit_result is None):
+                s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
+                if s[0]==s[1]:continue
+                mpe_tmp = mpes.data[i,j]
+                mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
+                                  weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,0,0]
 
-                #s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
-                #if s[0]==s[1]:continue
-                #mpe_tmp = mpes.data[i,j]
-                #mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
-                 #                 weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,0,0]
-
-                #if mean < 10 : continue #TODO this is not generic it needs prev_fit_result....
-
+                if mean < options.mean_range_for_mpe[0] or mean > options.mean_range_for_mpe[1] : continue
                 mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
-
             else:
 
                 mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
@@ -117,6 +115,8 @@ def perform_analysis(options):
     # recover previous fit
     mpes_full = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
+    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
+
     if options.mc:
 
         prev_fit_result = None
@@ -129,28 +129,26 @@ def perform_analysis(options):
         del spes_fit
 
     if options.mc:
-
-        n_peak = int(len(options.scan_level) * (1 + 0.06)) #TODO auto detect number of peaks (XT might produce more peaks)
-
-    else:
-        print(options.pixel_list)
-
-
-        n_peak = 10
+        n_peak = int(len(options.scan_level) * (1 + 0.06))
+    elif hasattr(options,'mpe_max_peaks_to_fit'):
+        n_peak = options.mpe_max_peaks_to_fit
+    else :
+        #TODO AUtomatic
+        n_peak = 15
+        log.warning('\t-> Max number of peak for MPE is not computed automatically, set to 15')
     reduced_bounds = lambda *args,config=None, **kwargs: fit_full_mpe.bounds_func(*args,n_peaks = n_peak, config=config, **kwargs)
     reduced_p0 = lambda *args,config=None, **kwargs: fit_full_mpe.p0_func(*args,n_peaks = n_peak, config=config, **kwargs)
     reduced_slice = lambda *args, config=None, **kwargs: fit_full_mpe.slice_func(*args, n_peaks=n_peak, config=config, **kwargs)
     mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
-                  reduced_bounds, config=prev_fit_result, labels_func=fit_full_mpe.labels_func,limited_indices=tuple(options.pixel_list))
+                  reduced_bounds, config=prev_fit_result, labels_func=fit_full_mpe.labels_func)#,limited_indices=(4,))
 
 
     # get the bad fits
-    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' +  __name__)
     log.info('\t-|> Try to correct the pixels with wrong fit results')
     for pix,pix_fit_result in enumerate(mpes_full.fit_result):
 
         if pix not in options.pixel_list:
-            print('pass pixel %d' %pix)
+            log.debug('pass pixel %d' %pix)
             continue
 
 
@@ -186,6 +184,7 @@ def perform_analysis(options):
     for pix,pix_fit_result in enumerate(mpes_full.fit_result):
 
         if pix not in options.pixel_list:
+            log.debug('pass pixel %d'%pix)
             continue
 
         if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]):
@@ -205,8 +204,6 @@ def display_results(options, param_to_display=1):
 
     # Load the histogram
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-
-    print (adcs.data[adcs.data>0])
 
     # Define Geometry
 

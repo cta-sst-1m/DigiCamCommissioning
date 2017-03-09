@@ -72,8 +72,8 @@ if __name__ == '__main__':
                                  fromlist=[None],
                                  level=0)
 
-    if options.pixel_list is None or len(options.pixel_list)==0:
-
+    if not hasattr(options,'pixel_list') or options.pixel_list is None or len(options.pixel_list)==0:
+        # TODO add usage of digicam and cts geometry to define the list
         options.pixel_list = np.arange(0, options.n_pixels, 1)
 
     # Some logging
@@ -107,7 +107,10 @@ if __name__ == '__main__':
     if options.save:
         # make the plots non blocking
         plt.ion()
-        # Call the histogram creation function
-        log.info('-|> Save the analysis results')
+        if hasattr(analysis_module,'save'):
+            # Call the histogram creation function
+            log.info('-|> Save the analysis results')
 
-        analysis_module.save(options)
+            analysis_module.save(options)
+        else:
+            log.warning('-|> Save function does not exist')

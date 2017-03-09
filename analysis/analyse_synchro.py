@@ -85,10 +85,10 @@ def display_results(options):
     if options.mc:
 
         index_default = (0, )
+
     else:
 
-        index_default = (660,)
-
+        index_default = (700, )
 
     display.display_hist(peaks,  geom, index_default=index_default, param_to_display=-1,limits = [0.,51.],limitsCam = [0.,51.])
 

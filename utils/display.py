@@ -10,9 +10,8 @@ from matplotlib.widgets import Button
 import sys
 from matplotlib.offsetbox import AnchoredText
 
-#TODO add change of camera display with levels
 
-def draw_fit_result(axis, hist, index=0, display_fit=False):
+def draw_fit_result(axis, hist, index=0, limits = None, display_fit=False):
     """
     A function to display the histogram of a variable from fit_results
 
@@ -25,31 +24,26 @@ def draw_fit_result(axis, hist, index=0, display_fit=False):
     """
 
     # Get the data and assign limits
-
+    #TODO deal with various shape
     if len(hist.fit_result.shape)>3:
-
         h = np.copy(hist.fit_result[0, :, index, 0])
-        h_err = np.copy(hist.fit_result[0, :, index, 1])
-
     else:
-
         h = np.copy(hist.fit_result[:, index, 0])
-        h_err = np.copy(hist.fit_result[:, index, 1])
 
+    if limits:
+        h[h<limits[0]]=limits[0]
+        h[h>limits[1]]=limits[1]
     h_to_return = h
+
     ### Avoid NANs
     mask = (~np.isnan(h) * (h>0))
     h = h[mask]
 
-
-
-
-    histo = axis.hist(h, bins='auto', histtype='step', align='left', color='k', linewidth=1)
+    histo = axis.hist(h, bins='auto', histtype='step', align='left', label='all pixels', color='k', linewidth=1)
 
     bin_edges = histo[1][0:-1]
     if len(bin_edges)==1:
         bin_width = 0.
-
     else:
         bin_width = bin_edges[1] - bin_edges[0]
 
@@ -63,7 +57,6 @@ def draw_fit_result(axis, hist, index=0, display_fit=False):
         x = np.linspace(min(bin_edges), max(bin_edges), 100)
         axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*(bin_width), label='fit', color='r')
         text_fit_result = '$\mu$ : %0.2f \n $\sigma$ : %0.2f \n entries : %d' % (fit_param[0], fit_param[1], h.shape[0])
-        #axis.text(bin_edges[-1], max(histo), text_fit_result)
         anchored_text = AnchoredText(text_fit_result, loc=2, prop=dict(size=18))
         axis.add_artist(anchored_text)
 
@@ -197,14 +190,9 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
     :param draw_fit:  should the fit be displayed?                         (bool)
     :return:
     """
-
-    if len(index)>1:
-
-        pixel_label = (index[0], options.pixel_list[index[1]])
-
-    else:
-
-        pixel_label = (options.pixel_list[index[0]],)
+    pixel_label = index
+    pixel_label[-1]= options.pixel_list[pixel_label[-1]] if not hasattr(options,'display_pixel' ) else options.display_pixel
+    pixel_label = tuple(pixel_label)
 
     # Get the data and assign limits
     h = np.copy(hist.data[index])
@@ -568,3 +556,4 @@ class Counter():
         elif len(self.shape) == 2:
             self.count = (self.count_pixel, )
 
+    #TODO (initialise at value in options.pixel_display)

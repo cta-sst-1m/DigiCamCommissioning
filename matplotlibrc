@@ -35,13 +35,13 @@
 # You can also deploy your own backend outside of matplotlib by
 # referring to the module name (which must be in the PYTHONPATH) as
 # 'module://my_backend'.
-backend      : qt5agg
+backend      : qt4agg
 
 # If you are using the Qt4Agg backend, you can choose here
 # to use the PyQt4 bindings or the newer PySide bindings to
 # the underlying Qt4 toolkit.
 
-backend.qt5 : PyQt5       # PyQt4 | PySide
+backend.qt4 : PyQt4       # PyQt4 | PySide
 
 # Note that this can be overridden by the environment variable
 # QT_API used by Enthought Tool Suite (ETS); valid values are
@@ -311,7 +311,7 @@ grid.alpha       :   0.75     # transparency, between 0.0 and 1.0
 ### Legend
 legend.fancybox      : False  # if True, use a rounded box for the
                                # legend, else a rectangle
-legend.isaxes        : True
+#legend.isaxes        : True
 legend.numpoints     : 1      # the number of points in the legend line
 legend.fontsize      : x-large
 #legend.borderpad     : 0.5    # border whitespace in fontsize units
