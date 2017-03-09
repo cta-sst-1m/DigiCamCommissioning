@@ -3,7 +3,7 @@
 # external modules
 
 # internal modules
-from data_treatement import dark_hist
+from data_treatement import adc_hist
 from spectra_fit import fit_hv_off
 from utils import display, histogram, geometry
 from analysis import analyse_dark
@@ -42,7 +42,7 @@ def create_histo(options):
                                label='Dark ADC',xlabel='ADC',ylabel = 'entries')
 
     # Get the adcs
-    dark_hist.run(adcs, options,'ADC')
+    adc_hist.run(adcs, options,'ADC')
 
 
 

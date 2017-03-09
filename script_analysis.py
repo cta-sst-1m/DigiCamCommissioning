@@ -72,7 +72,7 @@ if __name__ == '__main__':
                                  fromlist=[None],
                                  level=0)
 
-    if options.pixel_list is None or len(options.pixel_list)==0:
+    if not hasattr(options,'pixel_list') or options.pixel_list is None or len(options.pixel_list)==0:
         # TODO add usage of digicam and cts geometry to define the list
         options.pixel_list = np.arange(0, options.n_pixels, 1)
 
