@@ -8,26 +8,36 @@ display_results   : False
 
 # Logging
 verbose           : False
-log_file_basename : analyse
+log_file_basename : testlog
 
 # Input files
 mc            :     False
-file_basename :     dark.%s.fits.fz
-directory     :     data_test/
+#directory     :    /home/alispach/data/digicam_commissioning/module_test_setup_109-110-111-112/
+#directory     :     /home/alispach/data/digicam_commissioning/module_test_setup_113-114-120-116/
+#directory     :     /home/alispach/data/digicam_commissioning/module_test_setup_115-117-118-119/
+directory     :     /home/alispach/data/digicam_commissioning/module_test_setup_115-112-118-119/
 file_list     :     [0]
+scan_level    :     [0] # should be 0
 
 # Output files
-output_directory  : data_test/
-histo_filename    : %s.npz
+#output_directory  : /home/alispach/data/digicam_commissioning/module_test_setup_109-110-111-112/
+#output_directory  : /home/alispach/data/digicam_commissioning/module_test_setup_113-114-120-116/
+#output_directory  : /home/alispach/data/digicam_commissioning/module_test_setup_115-117-118-119/
+output_directory  : /home/alispach/data/digicam_commissioning/module_test_setup_115-112-118-119/
 
 # Event processing
 max_event           : 10000
-hist_type           : 'raw'
+events_per_level    : 10000 # should be same as max_event
+sample_max          : 92
 
 # Camera Configuration
 n_pixels          : 1296
-pixel_list        : [698, 662, 626, 590, 697, 661, 625, 589, 660, 624, 588, 552]
-dead_pixel        : [527]
+pixel_list        : [698, 662, 626, 590, 697, 661, 625, 589, 660, 624, 588, 552, 554, 518, 482, 446, 553, 517, 481, 445, 516, 480, 444, 408, 629, 593, 557, 521, 628, 592, 556, 520, 591, 555, 519, 483, 773, 737, 701, 665, 772, 736, 700, 664, 735, 699, 663, 627]
+#module_list       : [109, 110, 111, 112]
+#module_list       : [113, 114, 120, 116]
+#module_list       : [115, 117, 118, 119]
+module_list       : [115, 112, 118, 119]
+dead_pixel        : []
 
 # Plot configuration
 adcs_min           : 0

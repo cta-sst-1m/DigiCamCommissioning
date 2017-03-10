@@ -4,7 +4,7 @@
 
 # internal modules
 from data_treatement import adc_hist
-from spectra_fit import fit_hv_off
+from spectra_fit import fit_hv_off, fit_2_gaussian
 from utils import display, histogram, geometry
 import numpy as np
 
@@ -34,7 +34,7 @@ def create_histo(options):
     """
     # Define the histograms
     adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
-                               bin_width=options.adcs_binwidth, data_shape=(options.n_pixels,),
+                               bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
                                label='Pixel ADC count',xlabel='Pixel ADC',ylabel = 'Count / ADC')
 
     # Get the adcs
@@ -65,8 +65,10 @@ def perform_analysis(options):
 
     # Fit the baseline and sigma_e of all pixels
     #TODO include the limited indicie
-    adcs.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func,
-             labels_func=fit_hv_off.labels_func)#, limited_indices=tuple(options.pixel_list))
+    adcs.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func, \
+            labels_func=fit_hv_off.labels_func)  # , limited_indices=tuple(options.pixel_list))
+    #adcs.fit(fit_2_gaussian.fit_func, fit_2_gaussian.p0_func, fit_2_gaussian.slice_func, fit_2_gaussian.bounds_func, \
+    #         labels_func=fit_2_gaussian.label_func)#, limited_indices=tuple(options.pixel_list))
 
     # Save the fit
     adcs.save(options.output_directory + options.histo_filename)
@@ -91,16 +93,10 @@ def display_results(options):
     #print(index_default)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0(n_pixels=options.n_pixels)
+    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
-    display_fit = True
     # Perform some plots
-    #display.display_fit_result(adcs, geom, index_var=0, limits=[0, adcs.data.shape[1]*2], display_fit=display_fit)
-    display.display_fit_result(adcs, geom, index_var=1, limits=[0, options.adcs_max], display_fit=display_fit)
-    display.display_fit_result(adcs, geom, index_var=2, limits=[0, 1], display_fit=display_fit)
-
-    display.display_hist(adcs,  geom, limits=[0, 3], index_default=(index_default, ), param_to_display=2, draw_fit=display_fit, limitsCam=[0, 1])
-    # display([adcs], geom, fit_hv_off.slice_func, norm='linear')
+    display.display_hist(adcs, geom=geom, options=options, display_parameter=True, draw_fit=True)
     input('press button to quit')
 
     return

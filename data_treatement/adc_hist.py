@@ -70,6 +70,9 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                     log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
                 # Get the data
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                # Get ride off unwanted pixels
+                data = data[options.pixel_list]
+
                 if hasattr(options,'window_width'):
                     data = np.apply_along_axis(integrate_trace,-1,data)
                 # Append the data to the batch

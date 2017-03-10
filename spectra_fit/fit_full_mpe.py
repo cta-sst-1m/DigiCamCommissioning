@@ -1,5 +1,7 @@
 import numpy as np
+import peakutils
 from utils.pdf import gaussian_sum
+from scipy.optimize import curve_fit
 
 __all__ = ["p0_func", "slice_func", "bounds_func", "fit_func"]
 
@@ -24,49 +26,65 @@ def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
     # TODO update with auto determination of the peaks
 
     param = []
-    if (config is None) or (len(np.where(y != 0)[0])<2):
-        param += [2010]
-        param += [5.6]
-        param += [0.8]
-        param += [0.4]
-        param += [np.sum(y)]*n_peaks
+
+    if config is None:
+
+        amplitudes = [np.sum(y)/n_peaks]*n_peaks
+        threshold = 0.3
+        min_dist = 3.
+        peak_index = peakutils.indexes(y, threshold, min_dist)
+        photo_peak = np.arange(0, len(peak_index), 1)
+
+        if len(peak_index) <= 2:
+
+            gain = np.max(x[y > 0]) - np.min(x[y > 0])
+            baseline = np.min(x[y > 0]) + gain / 2.
+
+        else:
+
+            gain = np.mean(np.diff(x[peak_index]))
+            baseline = np.min(x[y > 0]) + gain / 2.
+
+        sigma = np.zeros(peak_index.shape[-1])
+
+        for i in range(sigma.shape[-1]):
+
+            start = max(int(peak_index[i] - gain / 2.), 0)
+            end = min(int(peak_index[i] + gain / 2.), len(x))
+
+            try:
+
+                temp = np.average(x[start:end], weights=y[start:end])
+                sigma[i] = np.sqrt(np.average((x[start:end] - temp) ** 2, weights=y[start:end]))
+
+            except Exception as inst:
+                log.error('Could not compute weights for sigma !!!')
+                sigma[i] = gain / 2.
+
+        sigma_n = lambda sigma_e, sigma_1, n: np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + 1./12.)
+        sigmas, sigma_error = curve_fit(sigma_n, photo_peak, sigma, bounds=[0., np.inf])
+
+        sigma_e = sigmas[0]
+        sigma_1 = sigmas[1]
+
+        param += [baseline]
+        param += [gain]
+        param += [sigma_e]
+        param += [sigma_1]
+        param += amplitudes
+
+
     else:
 
         if config.shape[-2] == 3:
-            # get the edge
-            xmin, xmax = x[np.where(y != 0)[0][1]], x[np.where(y != 0)[0][-1]]
-            # Get the gain, sigma_e, sigma_1 and baseline
+
             param += [config[1, 0]]  # baseline
-            # param += [config[1,0]*1.05] #gain
-            # param += [config[2,0]] #sigma_e
-            # param += [config[3,0]] #sigma_1
             param += [5.6]  # gain
             param += [config[2, 0]]  # sigma_e
-            param += [0.5*config[2, 0]]  # sigma_1
-            # param += [0.9] #sigma_e
-            # param += [0.5] #sigma_1
-
-            # Fit only the first 15 peaks, give 17 gaussian
-            amplitudes = [100.] * n_peaks
+            param += [config[2, 0]]  # sigma_1
+            amplitudes = [np.sum(y)/n_peaks] * n_peaks
             param += amplitudes
-        else:
 
-            # get the edge
-            xmin, xmax = x[np.where(y != 0)[0][1]], x[np.where(y != 0)[0][-1]]
-            # Get the gain, sigma_e, sigma_1 and baseline
-            param += [config[0, 0]]  # baseline
-            # param += [config[1,0]*1.05] #gain
-            # param += [config[2,0]] #sigma_e
-            # param += [config[3,0]] #sigma_1
-            param += [5.6]  # gain
-            param += [config[2, 0]]  # sigma_e
-            param += [config[3, 0]]  # sigma_1
-            # param += [0.9] #sigma_e
-            # param += [0.5] #sigma_1
-
-            # Fit only the first 15 peaks, give 17 gaussian
-            amplitudes = [100.] * n_peaks
-            param += amplitudes
     return param
 
 
@@ -81,26 +99,29 @@ def slice_func(y, x, *args,n_peaks=22,config=None, **kwargs):
     :return: the index to slice the Histogram
     """
 
-    if True:
-        return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
+    if config is None:
+        if np.where(y != 0)[0].shape[0] < 2:
+            return [0, 1, 1]
+
+        else:
+
+            return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
         #return [2030, 2100, 1] #### ATENTNENT ###
 
     # Check that the Histogram has none empty values
-    if np.where(y != 0)[0].shape[0] < 2:
-        return [0, 1, 1]
-
-    if config is None:
-
-        return [np.where(y != 0)[0][0], np.where( y!= 0)[0][-1], 1]  # np.where( y != 0)[0][-1], 1]
 
     else:
 
+        if np.where(y != 0)[0].shape[0] < 2:
+            return [0, 1, 1]
+
         xmax_hist_for_fit = config[0,0] + (n_peaks-2) * config[1,0] * 1.1
 
-    if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
-        return [0, 1, 1]
-    #TODO: sometimes np.where(x <xmax_hist_for_fit)[0].shape[0] <2  through an error
-    return [np.where(y != 0)[0][0],np.where(x < xmax_hist_for_fit)[0][-1],1]# np.where( y != 0)[0][-1], 1]
+        if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
+            return [0, 1, 1]
+
+        else:
+            return [np.where(y != 0)[0][0], np.where(x < xmax_hist_for_fit)[0][-1], 1]
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal
@@ -115,17 +136,17 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
 
     if config is None:
 
-        bound_min += [2008]  # baseline-sigma
-        bound_max += [2012]  # baseline+sigma
+        bound_min += [300]  # baseline-sigma
+        bound_max += [700]  # baseline+sigma
 
-        bound_min += [0.7 * 5.6]  # 0.8*gain
-        bound_max += [2. * 5.6]  # 1.2*gain
+        bound_min += [2.]
+        bound_max += [10.]
 
-        bound_min += [0.2 * 0.86]   # 0.2*sigma_e
-        bound_max += [3.333 * 0.86]  # 5.*sigma_e
+        bound_min += [0.]
+        bound_max += [4.]
 
-        bound_min += [0.2 *0.48]  # 0.2*sigma_1
-        bound_max += [3.333 * 0.48]  # 5.*sigma_1
+        bound_min += [0.]
+        bound_max += [4.]
 
         bound_min += [0.] * n_peaks
         bound_max += [np.sum(y)] * n_peaks
@@ -195,7 +216,7 @@ def fit_func(p, x ,*args, **kwargs):
     return gaussian_sum(p, x)
 
 # noinspection PyUnusedLocal,PyUnusedLocal
-def labels_func(*args,n_peaks = 22, **kwargs):
+def label_func(*args,n_peaks = 22, **kwargs):
     """
     List of labels for the parameters
     :return:

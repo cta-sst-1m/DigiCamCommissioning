@@ -9,7 +9,7 @@ from utils.logger import TqdmToLogger
 from tqdm import tqdm
 
 
-def run(hist, options, prev_fit_result=None):
+def run(hist, options, hist_type, prev_fit_result=None):
     """
     Fill the adcs Histogram out of darkrun/baseline runs
     :param h_type: type of Histogram to produce: ADC for all samples adcs or SPE for only peaks
@@ -38,7 +38,7 @@ def run(hist, options, prev_fit_result=None):
         else:
             inputfile_reader = ToyReader(filename=_url, id_list=[0],
                                          max_events=options.max_event,
-                                         n_pixel=options.n_pixels)
+                                         n_pixel=options.n_pixels, events_per_level=options.events_per_level)
 
         log.debug('--|> Moving to file %s' % _url)
         # Loop over event in this file
@@ -51,20 +51,24 @@ def run(hist, options, prev_fit_result=None):
 
             for telid in event.dl0.tels_with_data:
 
+                # Take data from zfits
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
 
-                if options.hist_type == 'raw':
+                # Get rid off unwanted pixels
+                data = data[options.pixel_list]
+
+                if hist_type == 'raw':
 
                     hist.fill_with_batch(data)
 
-                elif options.hist_type == 'integral':
+                elif hist_type == 'integral':
 
                     temp = np.sum(data - 2000, axis=1) # TODO need to compress this <4095
                     hist.fill(temp)
 
                 else:
 
-                    log.info('Unknown hist_type = %s' %options.hist_type)
+                    log.info('Unknown hist_type = %s' %hist_type)
 
             event_number += 1
 

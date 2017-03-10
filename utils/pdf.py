@@ -58,6 +58,19 @@ def gaussian_sum(param, x):
 
     return temp
 
+def gaussian_2(param, x):
+
+    temp = np.zeros(x.shape)
+
+    param = np.array([[param[0], param[1], param[2]],[param[3], param[4], param[5]]])
+
+
+    for i in range(int(len(param)/3.)):
+
+        temp += gaussian(param[i], x)
+
+    return temp
+
 def chi2(param, x):
 
     ndf = param[0]

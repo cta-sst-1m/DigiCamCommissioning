@@ -30,17 +30,19 @@ def create_histo(options):
     :return:
     """
     # Define the histograms
-    peaks = histogram.Histogram(bin_center_min=0, bin_center_max=options.sample_max,
-                               bin_width=1, data_shape=(options.n_pixels,),
+    peaks = histogram.Histogram(bin_center_min=1, bin_center_max=options.adcs_max,
+                               bin_width=1, data_shape=(len(options.scan_level),len(options.pixel_list),),
                                label='Position of the peak',xlabel='Sample [/ 4 ns]',ylabel = 'Events / sample')
 
     # Get the adcs
-    synch_hist.run(peaks, options,min_evt = options.evt_min , max_evt=options.evt_max)
+    synch_hist.run(peaks, options)
 
     # Save the histogram
 
     peaks.save(options.output_directory + options.histo_filename)
 
+
+    print(peaks.data.shape)
     # Delete the histograms
     del peaks
 
@@ -82,15 +84,7 @@ def display_results(options):
 
     # Perform some plots
 
-    if options.mc:
-
-        index_default = (0, )
-
-    else:
-
-        index_default = (700, )
-
-    display.display_hist(peaks,  geom, index_default=index_default, param_to_display=-1,limits = [0.,51.],limitsCam = [0.,51.])
+    display.display_hist(peaks,  geom)
 
     input('press button to quit')
 

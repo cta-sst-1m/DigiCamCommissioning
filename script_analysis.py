@@ -5,10 +5,11 @@ from optparse import OptionParser
 from  yaml import load,dump
 import matplotlib.pyplot as plt
 import logging,sys
-from utils.geometry import generate_geometry_0
+from utils.geometry import generate_geometry_0, generate_geometry
 #internal modules
 from utils import logger
 import numpy as np
+from cts_core.cameratestsetup import CTS
 
 if __name__ == '__main__':
     """
@@ -75,6 +76,10 @@ if __name__ == '__main__':
     if not hasattr(options,'pixel_list') or options.pixel_list is None or len(options.pixel_list)==0:
         # TODO add usage of digicam and cts geometry to define the list
         options.pixel_list = np.arange(0, options.n_pixels, 1)
+
+    if options.angle_cts is not None:
+        cts = CTS('/home/alispach/Documents/PhD/ctasoft/CTS/config/cts_config_' + str(int(options.angle_cts)) + '.cfg', '/home/alispach/Documents/PhD/ctasoft/CTS/config/camera_config.cfg', angle=options.angle_cts, connected=True)
+        options.pixel_list = generate_geometry(cts, available_board=None)[1]
 
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)

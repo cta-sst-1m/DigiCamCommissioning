@@ -3,7 +3,7 @@
 # external modules
 
 # internal modules
-from data_treatement import adc_hist
+from data_treatement import dark_hist
 from spectra_fit import fit_hv_off
 from utils import display, histogram, geometry
 from analysis import analyse_dark
@@ -11,7 +11,7 @@ import logging,sys
 import scipy.stats
 import numpy as np
 
-__all__ = ["create_histo", "perform_analysis", "display_results", "compute_dark_parameters"]
+__all__ = ["create_histo", "perform_analysis", "display_results"]
 
 
 def create_histo(options):
@@ -72,8 +72,6 @@ def perform_analysis(options):
     dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
     x = dark_hist.bin_centers
 
-    dark_hist.fit_result_label = ['baseline [ADC]', '$f_{dark}$ [MHz]', '$\mu_{XT}$']
-    dark_hist.fit_result = np.ones((len(options.pixel_list), len(dark_hist.fit_result_label), 2))*np.nan
 
     for pixel in range(len(options.pixel_list)):
 
