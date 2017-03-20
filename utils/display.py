@@ -185,8 +185,24 @@ def draw_chi2(axis, hist, display_fit):
     return h
 
 
+def draw_pulse_shape(axis, pulse_shape, options, index, color='k'):
+
+
+    h = np.max(pulse_shape[0,..., 0], axis=-1)
+    y = pulse_shape[index][:, 0]
+    x = np.arange(0, y.shape[0], 1) * options.sampling_time
+    yerr = pulse_shape[index][:, 1]
+
+    axis.step(x, y, color=color, where='mid')
+    axis.errorbar(x, y, yerr=yerr, fmt='ok', label='pixel %s' % (index, ))
+    axis.legend(loc='upper right')
+    axis.set_xlabel('t [ns]')
+    axis.set_ylabel('ADC')
+
+    return h
 
 def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'log'):
+
     """
     A function to display the histogram of a variable from fit_results
 
@@ -517,6 +533,136 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
     return fig
 
 
+def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_fit = False): #TODO rename hist to pulse_shapes
+    """
+
+    :return:
+    """
+
+    fig = plt.figure(figsize=(48, 27))
+
+
+
+    if display_parameter:
+        counter = Counter(hist.data.shape, param_len=hist.fit_result.shape[-2])
+
+    else:
+        counter = Counter(hist.data.shape)
+
+    def press(event):
+
+        sys.stdout.flush()
+        if event.key == '+':
+            prev_count = counter.count_pixel
+            counter.next_pixel()
+            new_count = counter.count_pixel
+
+            if prev_count != new_count:
+                axis_histogram.cla()
+                draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
+        elif event.key == '-':
+            prev_count = counter.count_pixel
+            counter.previous_pixel()
+            new_count = counter.count_pixel
+
+            if prev_count != new_count:
+                axis_histogram.cla()
+                draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
+
+        elif event.key == '/':
+            prev_count = counter.count_level
+            counter.previous_level()
+            new_count = counter.count_level
+
+            if prev_count != new_count:
+                axis_histogram.cla()
+                image = draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
+                if geom is not None:
+                    print('camera visu change not implemented')
+                    #camera_visu.image = image
+
+        elif event.key == '*':
+            prev_count = counter.count_level
+            counter.next_level()
+            new_count = counter.count_level
+
+            if prev_count != new_count:
+                axis_histogram.cla()
+                image = draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
+                if geom is not None:
+                    print('camera visu change not implemented')
+                    #camera_visu.image = image
+
+        #elif event.key == '.':
+
+         #   if display_parameter:
+         #       counter.next_param()
+         #       axis_param.cla()
+         #       image = draw_fit_result(axis_param, hist, index=counter.count_param)
+
+         #       if geom is not None:
+         #           camera_visu.image = image
+         #           camera_visu.colorbar.set_label(hist.fit_result_label[counter.count_param])
+
+        else:
+
+            print('Invalid key : %s' %event.key)
+
+    fig.canvas.mpl_connect('key_press_event', press)
+
+    if geom is None and not display_parameter:
+
+        axis_histogram = fig.add_subplot(111)
+        draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
+
+
+    elif geom is not None:
+
+        if not display_parameter:
+            axis_histogram = fig.add_subplot(121)
+            axis_camera = fig.add_subplot(122)
+
+            if len(hist.data.shape) > 2:
+                image = np.zeros(hist.data.shape[1])
+                for i in range(hist.data.shape[1]):
+                    if np.sum(hist.data[0,i])==0:
+                        image[i] = 0.
+                    else:
+                        image[i] = np.average(hist.bin_centers, weights=hist.data[0, i])
+
+            else:
+
+                image = np.zeros(hist.data.shape[0])
+                for i in range(hist.data.shape[0]):
+                    if np.sum(hist.data[i]) == 0:
+                        image[i] = 0.
+                    else:
+                        image[i] = np.average(hist.bin_centers, weights=hist.data[i])
+
+        elif display_parameter:
+
+            axis_param = fig.add_subplot(221)
+            axis_histogram = fig.add_subplot(212)
+            axis_camera = fig.add_subplot(222)
+            image = draw_fit_result(axis_param, hist, index=counter.count_param, display_fit=True)
+
+
+        draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+        camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
+        camera_visu.image = image
+        camera_visu.add_colorbar()
+        #camera_visu.colorbar.set_clim(np.nanmin(image), np.nanmax(image))
+
+        if display_parameter:
+
+            camera_visu.colorbar.set_label(hist.fit_result_label[counter.count_param])
+
+        camera_visu.axes.set_xlabel('x [mm]')
+        camera_visu.axes.set_ylabel('y [mm]')
+
+    return fig
+
+
 class Counter():
 
     def __init__(self, index, param_len=None):
@@ -529,7 +675,7 @@ class Counter():
             self.min_param = 0
             self.max_param = param_len
 
-        if len(self.shape) == 3:
+        if len(self.shape) >= 3:
 
             self.count_pixel = 0
             self.min_pixel = 0
@@ -581,7 +727,7 @@ class Counter():
 
     def _update(self):
 
-        if len(self.shape) == 3:
+        if len(self.shape) >= 3:
             self.count = (self.count_level, self.count_pixel, )
 
         elif len(self.shape) == 2:
