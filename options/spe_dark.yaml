@@ -19,7 +19,7 @@ file_list     :     [117,118,119,120,121]
 # Output files
 output_directory  : /data/datasets/CTA/20161214/FullChain/
 histo_filename    : spe.npz
-hv_off_histo_filename    : adc_hv_off.npz
+hv_off_histo_filename    : adc_dark.npz
 
 # Event processing
 evt_max           : 50000

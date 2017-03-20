@@ -79,12 +79,13 @@ def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
         if config.shape[-2] == 3:
 
             param += [config[1, 0]]  # baseline
-            param += [5.6]  # gain
-            param += [config[2, 0]]  # sigma_e
-            param += [config[2, 0]]  # sigma_1
+            param += [5.6*4.3]  # gain
+            #param += [config[2, 0]]  # sigma_e
+            #param += [config[2, 0]*0.5]  # sigma_1
+            param += [3.5]  # sigma_e
+            param += [1.77]  # sigma_1
             amplitudes = [np.sum(y)/n_peaks] * n_peaks
             param += amplitudes
-
     return param
 
 
@@ -115,7 +116,7 @@ def slice_func(y, x, *args,n_peaks=22,config=None, **kwargs):
         if np.where(y != 0)[0].shape[0] < 2:
             return [0, 1, 1]
 
-        xmax_hist_for_fit = config[0,0] + (n_peaks-2) * config[1,0] * 1.1
+        xmax_hist_for_fit = config[1,0] + (n_peaks-3) * 5.6 * 4.3
 
         if np.where(x <xmax_hist_for_fit)[0].shape[0] <2 :
             return [0, 1, 1]
@@ -140,13 +141,13 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
         bound_max += [700]  # baseline+sigma
 
         bound_min += [2.]
-        bound_max += [10.]
+        bound_max += [10.*4.3]
 
         bound_min += [0.]
-        bound_max += [4.]
+        bound_max += [6.]
 
         bound_min += [0.]
-        bound_max += [4.]
+        bound_max += [3.]
 
         bound_min += [0.] * n_peaks
         bound_max += [np.sum(y)] * n_peaks
@@ -155,8 +156,8 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
 
         if config.shape[-2] == 3:
 
-            bound_min += [config[1, 0] - 2* config[2, 0]]  # baseline-sigma
-            bound_max += [config[1, 0] + 2* config[2, 0]]  # baseline+sigma
+            bound_min += [config[1, 0] - 20]  # baseline-sigma
+            bound_max += [config[1, 0] + 30]  # baseline+sigma
             '''
             bound_min += [0.9*5.6]  # 0.8*gain
             bound_max += [1.1*5.6]  # 1.2*gain
@@ -167,21 +168,23 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
             bound_min += [0.4]  # 0.2*sigma_1
             bound_max += [1.3]  # 5.*sigma_1
             '''
-            bound_min += [0.7 * 5.6]  # 0.8*gain
-            bound_max += [1.5 * 5.6]  # 1.2*gain
+            bound_min += [0.7 * 5.6 * 4.3]  # 0.8*gain
+            bound_max += [1.5 * 5.6 * 4.3]  # 1.2*gain
 
-            bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
-            bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e
+            bound_min += [0.2]  # 0.2*sigma_e
+            bound_max += [6.]  # 5.*sigma_e
 
-            bound_min += [0.2 * 0.5 * config[2, 0]]  # 0.2*sigma_1
-            bound_max += [3.333 * 0.5 * config[2, 0]]  # 5.*sigma_1
+            bound_min += [0.2]  # 0.2*sigma_1
+            bound_max += [3.]  # 5.*sigma_1
 
             bound_min += [0.] * n_peaks
-            bound_max += [np.sum(y)] * n_peaks
+            bound_max += [np.inf] * n_peaks
         else:
 
-            bound_min += [config[0, 0] - 2 * config[2, 0]]  # baseline-sigma
-            bound_max += [config[0, 0] + 2 * config[2, 0]]  # baseline+sigma
+            bound_min += [config[1, 0] - 20]  # baseline-sigma
+            bound_max += [config[1, 0] + 20]  # baseline+sigma
+            #bound_min += [config[0, 0] - 2 * config[2, 0]]  # baseline-sigma
+            #bound_max += [config[0, 0] + 2 * config[2, 0]]  # baseline+sigma
             '''
             bound_min += [0.9*5.6]  # 0.8*gain
             bound_max += [1.1*5.6]  # 1.2*gain
@@ -192,14 +195,14 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
             bound_min += [0.4]  # 0.2*sigma_1
             bound_max += [1.3]  # 5.*sigma_1
             '''
-            bound_min += [0.7 * 5.6]  # 0.8*gain
-            bound_max += [1.5 * 5.6]  # 1.2*gain
+            bound_min += [0.7 * 5.6 * 4.3]  # 0.8*gain
+            bound_max += [1.5 * 5.6 * 4.3]  # 1.2*gain
 
             bound_min += [0.2 * config[2, 0]]  # 0.2*sigma_e
-            bound_max += [3.333 * config[2, 0]]  # 5.*sigma_e
+            bound_max += [6.]  # 5.*sigma_e
 
             bound_min += [0.2 * config[3, 0]]  # 0.2*sigma_1
-            bound_max += [3.333 * config[3, 0]]  # 5.*sigma_1
+            bound_max += [3.]  # 5.*sigma_1
 
             bound_min += [0.] * n_peaks
             bound_max += [np.inf] * n_peaks

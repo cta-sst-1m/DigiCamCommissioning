@@ -76,6 +76,7 @@ def create_histo(options):
             # put the slice or remove empty bins
 
             if not options.mc and (prev_fit_result is not None):
+                if np.where(mpes.data[i,j] != 0)[0].shape[0]==0 : continue
                 s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
                 if s[0]==s[1]:continue
                 mpe_tmp = mpes.data[i,j]

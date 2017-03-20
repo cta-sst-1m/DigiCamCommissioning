@@ -31,14 +31,16 @@ def p0_func(y, x, *args, config=None, **kwargs):
         ## Compute estimate
 
         amplitude = np.sum(y)
-        start = int(baseline - gain/2.)
-        end = int(baseline + gain/2.)
-        mu = - np.log(np.sum(y[start:end]/amplitude))
+        mean = np.average(x,weights=y)-baseline
+        #start = y.flat[np.abs(x - (baseline - gain/2.)).argmin()]
+        #end = y.flat[np.abs(x - (baseline + gain/2.)).argmin()]
+        #print(baseline,gain,start,end,np.sum(y[start:end]),amplitude)
+        mu = mean #- np.log(float(np.sum(y[start:end]))/amplitude)
         mu_xt = 0.
         offset = 0.
 
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
-
+        #print('param',param)
         return param
 
     else :
@@ -159,12 +161,12 @@ def fit_func(p, x, *args, **kwargs):
     n_peak=40
     n_peakmin = 0
     # TODO avoir si ca marche quand on utilise en high light
-    #if len(x)>0:
-    #    n_peak = int(float(x[-1] - baseline) / gain * 1.5)
-    #    n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
+    if len(x)>0:
+        n_peak = int(float(x[-1] - baseline) / gain * 1.5)
+        n_peakmin = max(0,int(float(x[0] - baseline) / gain * 0.7))
 
     x = x - baseline
-    for n in range(n_peak):
+    for n in range(n_peakmin,n_peak):
         sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + 1./12.) # * gain
         param_gauss = [sigma_n, n*gain, 1.]
         temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(param_gauss, x)

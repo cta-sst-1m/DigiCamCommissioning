@@ -184,6 +184,7 @@ def draw_chi2(axis, hist, display_fit):
     axis.legend()
     return h
 
+
 def draw_pulse_shape(axis, pulse_shape, options, index, color='k'):
 
 
@@ -200,7 +201,8 @@ def draw_pulse_shape(axis, pulse_shape, options, index, color='k'):
 
     return h
 
-def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
+def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'log'):
+
     """
     A function to display the histogram of a variable from fit_results
 
@@ -214,10 +216,16 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
     pixel_label = index
     #pixel_label[-1]= options.pixel_list[pixel_label[-1]] if not hasattr(options,'display_pixel' ) else options.display_pixel
     #pixel_label = tuple(pixel_label)
-
+    _tmp = list(hist.data.shape)
+    _tmp2 = _tmp.pop()
+    slice=[np.zeros(tuple(_tmp),dtype=int),np.ones(tuple(_tmp),dtype=int)*-1]
+    if draw_fit:
+        slice = [hist.fit_slices[..., 0], hist.fit_slices[..., 1]]
     # Get the data and assign limits
-    h = np.copy(hist.data[index])
-    h_err = np.copy(hist.errors[index])
+    h = np.copy(hist.data[index][slice[0][index]:slice[1][index]:1])
+    h_err = np.copy(hist.errors[index][slice[0][index]:slice[1][index]:1])
+
+    #print(slice)
     h_to_return = h
 
     ### Avoid NANs
@@ -228,8 +236,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
 
     h = h[mask]
     h_err = h_err[mask]
-    x = hist.bin_centers[mask]
-
+    x = hist.bin_centers[slice[0][index]:slice[1][index]:1][mask]
     axis.step(x, h, color=color, where='mid')
     axis.errorbar(x, h, yerr=h_err, fmt='ok', label='pixel %s' % (pixel_label, ))
     text_fit_result = ''
@@ -257,7 +264,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k'):
     axis.xaxis.get_label().set_position((1, 0))
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
-    axis.set_yscale('log', nonposy='clip')
+    axis.set_yscale(scale, nonposy='clip')
     axis.legend(loc='upper right')
 
 
@@ -394,7 +401,7 @@ def display_chi2(hist, geom = None, display_fit=False):
 
     return fig
 
-def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = False): #TODO check default pixel=700 better zero to avoid conflict with mc
+def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = False, scale = 'log'): #TODO check default pixel=700 better zero to avoid conflict with mc
     """
 
     :return:
@@ -420,7 +427,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
             if prev_count != new_count:
                 axis_histogram.cla()
-                draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
         elif event.key == '-':
             prev_count = counter.count_pixel
             counter.previous_pixel()
@@ -428,7 +435,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
             if prev_count != new_count:
                 axis_histogram.cla()
-                draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
 
         elif event.key == '/':
             prev_count = counter.count_level
@@ -437,7 +444,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
             if prev_count != new_count:
                 axis_histogram.cla()
-                image = draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                image = draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
                 if geom is not None:
                     print('camera visu change not implemented')
                     #camera_visu.image = image
@@ -449,7 +456,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
             if prev_count != new_count:
                 axis_histogram.cla()
-                image = draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+                image = draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
                 if geom is not None:
                     print('camera visu change not implemented')
                     #camera_visu.image = image
@@ -475,7 +482,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
     if geom is None and not display_parameter:
 
         axis_histogram = fig.add_subplot(111)
-        draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+        draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
 
 
     elif geom is not None:
@@ -493,8 +500,9 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
                         image[i] = np.average(hist.bin_centers, weights=hist.data[0, i])
 
             else:
-
+                hist.data = hist.data[...,0:10000]
                 image = np.zeros(hist.data.shape[0])
+
                 for i in range(hist.data.shape[0]):
                     if np.sum(hist.data[i]) == 0:
                         image[i] = 0.
@@ -509,7 +517,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
             image = draw_fit_result(axis_param, hist, index=counter.count_param, display_fit=True)
 
 
-        draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+        draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
         camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
         camera_visu.image = image
         camera_visu.add_colorbar()
@@ -725,4 +733,18 @@ class Counter():
         elif len(self.shape) == 2:
             self.count = (self.count_pixel, )
 
-    #TODO (initialise at value in options.pixel_display)
+    #TODO (in# itialise at value in options.pixel_display)
+
+
+def display_by_pixel(hist,options):
+    print(np.max(hist),options.pixel_list)
+    h = np.zeros((1296,),dtype=float)
+    for module in options.cts.camera.Modules:
+        for pix in module.pixelsID_inModule:
+            if module.pixels[pix-1].ID in options.pixel_list:
+                h[(module.ID - 1) * 12 + (pix - 1)]=hist[options.pixel_list.index(module.pixels[pix-1].ID)]
+
+
+    plt.figure()
+    plt.step(np.arange(0,1296),h)
+    plt.show()
