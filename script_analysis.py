@@ -67,19 +67,21 @@ if __name__ == '__main__':
     # Start the loggers
     logger.initialise_logger( options )
     # load the analysis module
+    print('--------------------------',options.analysis_module)
     analysis_module = __import__('analysis.%s'%options.analysis_module,
                                  locals=None,
                                  globals=None,
                                  fromlist=[None],
                                  level=0)
 
-    if not hasattr(options,'pixel_list') or options.pixel_list is None or len(options.pixel_list)==0:
+
+    if hasattr(options,'angle_cts'):
+        options.cts = CTS('/data/software/CTS/config/cts_config_' + str(int(options.angle_cts)) + '.cfg', '/data/software/CTS/config/camera_config.cfg', angle=options.angle_cts, connected=True)
+        options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
+
+    if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
         # TODO add usage of digicam and cts geometry to define the list
         options.pixel_list = np.arange(0, options.n_pixels, 1)
-
-    if options.angle_cts is not None:
-        cts = CTS('/home/alispach/Documents/PhD/ctasoft/CTS/config/cts_config_' + str(int(options.angle_cts)) + '.cfg', '/home/alispach/Documents/PhD/ctasoft/CTS/config/camera_config.cfg', angle=options.angle_cts, connected=True)
-        options.pixel_list = generate_geometry(cts, available_board=None)[1]
 
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)

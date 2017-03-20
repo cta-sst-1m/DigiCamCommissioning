@@ -1786,13 +1786,14 @@ def generate_geometry(cts, available_board=None):
     pix_good_id = []
 
     for pix in cts.camera.Pixels:
-        if not available_board and pix.ID in cts.pixel_to_led['AC'].keys():
+        if pix.ID in cts.pixel_to_led['AC'].keys():
             pix_x.append(pix.center[0])
             pix_y.append(pix.center[1])
             pix_id.append(pix.ID)
 
     neighbors_pix = find_neighbor_pixels(pix_x, pix_y, 30.)
     geom = CameraGeometry(0, pix_id, pix_x * u.mm, pix_y * u.mm, np.ones(1296) * 400., neighbors_pix, 'hexagonal')
+    print(pix_id)
     return geom, pix_id
 
     '''

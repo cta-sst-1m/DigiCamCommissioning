@@ -3,10 +3,10 @@
 # external modules
 
 # internal modules
-from data_treatement import dark_hist
-from spectra_fit import fit_hv_off
+from spectra_fit import fit_dark_adc
 from utils import display, histogram, geometry
-from analysis import analyse_dark
+
+from data_treatement import adc_hist
 import logging,sys
 import scipy.stats
 import numpy as np
@@ -66,35 +66,55 @@ def perform_analysis(options):
 
     :return:
     """
-    log = logging.getLogger(sys.modules['__main__'].__name__+__name__)
-    log.info('No analysis is implemented for ADC distribution in dark conditions')
+    if options.dark_analysis == 'fit_baseline':
+        log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
+        log.info('Perform a gaussian fit of the left side of the dark (==> baseline and sigmae for full mpe)')
 
-    dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    x = dark_hist.bin_centers
+        # Load the histogram
+        adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+
+        # Fit the baseline and sigma_e of all pixels
+        adcs.fit(fit_dark_adc.fit_func, fit_dark_adc.p0_func, fit_dark_adc.slice_func, fit_dark_adc.bounds_func, \
+                 labels_func=fit_dark_adc.labels_func)  # , limited_indices=tuple(options.pixel_list))
+        # adcs.fit(fit_2_gaussian.fit_func, fit_2_gaussian.p0_func, fit_2_gaussian.slice_func, fit_2_gaussian.bounds_func, \
+        #         labels_func=fit_2_gaussian.label_func)#, limited_indices=tuple(options.pixel_list))
+
+        # Save the fit
+        adcs.save(options.output_directory + options.histo_filename)
+
+        # Delete the histograms
+        del adcs
+    elif  options.dark_analysis == 'analytic':
+
+        log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
+        log.info('Perform an analytic extraction of mu_XT ( ==> baseline and sigmae for full mpe )')
 
 
-    for pixel in range(len(options.pixel_list)):
+        # Load the histogram
+        dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+        x = dark_hist.bin_centers
 
-        y = dark_hist.data[pixel]
+        for pixel in range(len(options.pixel_list)):
 
-        if options.mc:
+            y = dark_hist.data[pixel]
 
-            baseline = 2010
-            gain = 5.6
-            sigma_1 = 0.48
-            sigma_e = np.sqrt(0.86**2.)
+            if options.mc:
+                baseline = 2010
+                gain = 5.6
+                sigma_1 = 0.48
+                sigma_e = np.sqrt(0.86 ** 2.)
 
-        dark_parameters =  compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e)
+            dark_parameters = compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e)
 
-        dark_hist.fit_result[pixel, 0, 0] = baseline
-        dark_hist.fit_result[pixel, 0, 1] = 0
-        dark_hist.fit_result[pixel, 1, 0] = dark_parameters[0,0]
-        dark_hist.fit_result[pixel, 1, 1] = dark_parameters[0,1]
-        dark_hist.fit_result[pixel, 2, 0] = dark_parameters[1,0]
-        dark_hist.fit_result[pixel, 2, 1] = dark_parameters[1,1]
+            dark_hist.fit_result[pixel, 0, 0] = baseline
+            dark_hist.fit_result[pixel, 0, 1] = 0
+            dark_hist.fit_result[pixel, 1, 0] = dark_parameters[0, 0]
+            dark_hist.fit_result[pixel, 1, 1] = dark_parameters[0, 1]
+            dark_hist.fit_result[pixel, 2, 0] = dark_parameters[1, 0]
+            dark_hist.fit_result[pixel, 2, 1] = dark_parameters[1, 1]
 
-    dark_hist.save(options.output_directory + options.histo_filename)
-    del dark_hist
+        dark_hist.save(options.output_directory + options.histo_filename)
+        del dark_hist
 
 
 def display_results(options):
@@ -113,7 +133,7 @@ def display_results(options):
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     #. Perform some plots
-    display.display_hist(adcs, options=options, geom=geom)
+    display.display_hist(adcs, options=options, geom=geom,draw_fit=True)
     #display.display_fit_result(adcs, geom=geom, display_fit=True)
     display.display_fit_result(adcs, display_fit=True)
     input('press button to quit')

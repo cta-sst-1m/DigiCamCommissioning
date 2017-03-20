@@ -5,6 +5,7 @@
 # internal modules
 from data_treatement import synch_hist
 from utils import display, histogram, geometry
+from spectra_fit import fit_synch
 import logging,sys
 import numpy as np
 
@@ -30,12 +31,16 @@ def create_histo(options):
     :return:
     """
     # Define the histograms
-    peaks = histogram.Histogram(bin_center_min=1, bin_center_max=options.adcs_max,
-                               bin_width=1, data_shape=(len(options.scan_level),len(options.pixel_list),),
+    peaks = histogram.Histogram(bin_center_min=0, bin_center_max=options.sample_max,
+                               bin_width=1, data_shape=(len(options.pixel_list),),
                                label='Position of the peak',xlabel='Sample [/ 4 ns]',ylabel = 'Events / sample')
 
     # Get the adcs
-    synch_hist.run(peaks, options)
+    dark = histogram.Histogram(filename=options.output_directory + options.dark_histo_filename, fit_only=True)
+    options.prev_fit_result = np.copy(dark.fit_result)
+    del dark
+
+    synch_hist.run(peaks, options,min_evt = options.evt_min , max_evt=options.evt_max)
 
     # Save the histogram
 
@@ -64,7 +69,44 @@ def perform_analysis(options):
     # Fit the baseline and sigma_e of all pixels
     log = logging.getLogger(sys.modules['__main__'].__name__+__name__)
 
-    log.info('No analysis is implemented for peaks determination')
+    peaks = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    peaks.data[...,0]=1e-8
+    peaks.data[...,1]=1e-8
+    peaks.data[...,2]=1e-8
+    peaks.data[...,3]=1e-8
+    peaks.data[...,4]=1e-8
+    peaks.data[...,5]=1e-8
+    peaks.data[...,-1]=1e-8
+    sum = np.sum(peaks.data, axis=1)[:,None]
+    peaks.data = peaks.data.astype(dtype=float)/sum
+    peaks.errors = peaks.errors.astype(dtype=float)/sum*5
+
+    '''
+
+    # Fit the baseline and sigma_e of all pixels
+    peaks.fit(fit_synch.fit_func, fit_synch.p0_func, fit_synch.slice_func, fit_synch.bounds_func, \
+            labels_func=fit_synch.labels_func)  # , limited_indices=tuple(options.pixel_list))
+
+    f  = lambda x, pix: peaks.fit_result[pix,3,0]*(np.exp(-peaks.fit_result[pix,4,0]*(x))+peaks.fit_result[pix,5,0])+\
+         peaks.fit_result[pix,6,0]*(np.exp(-peaks.fit_result[pix,7,0]*(x))+peaks.fit_result[pix,8,0])
+
+    for pix in range(peaks.data.shape[0]):
+        slice = fit_synch.slice_func(peaks.data[pix],peaks.bin_centers)
+        for i,x in enumerate(peaks.bin_centers):#[slice[0]:slice[1]:1]):
+            #print(i,x)
+            #print(peaks.data[pix][slice[0]:slice[1]:1])
+            #print(peaks.errors[pix][slice[0]:slice[1]:1])
+            #print(f(x,pix))
+            if peaks.data[pix][i]<f(x,pix)+peaks.errors[pix][i]:
+                peaks.data[pix][i] = 1e-8
+        '''
+    peaks.data[...,-2]=1e-8
+    peaks.data[...,-3]=1e-8
+    peaks.data[...,-4]=1e-8
+
+    peaks.save(options.output_directory + options.histo_filename)
+    del peaks
+
 
 
 def display_results(options):
@@ -80,11 +122,13 @@ def display_results(options):
     peaks = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0(options.n_pixels)
+    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     # Perform some plots
 
-    display.display_hist(peaks,  geom)
+    display.display_hist(peaks, options=options, geom=geom,draw_fit=False, scale='linear')
+
+    #display.display_hist(peaks,  geom)
 
     input('press button to quit')
 
