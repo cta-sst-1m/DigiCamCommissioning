@@ -52,8 +52,8 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
             n_evt += 1
             if n_evt > max_evt:
                 break
-            if (n_evt % int(max_evt/1000) ==0):
-                pbar.update(max_evt/1000)
+
+            pbar.update(1)
 
             for telid in event.dl0.tels_with_data:
                 if n_evt % n_batch == 0:

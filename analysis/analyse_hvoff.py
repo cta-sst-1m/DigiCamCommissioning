@@ -95,8 +95,18 @@ def display_results(options):
     # Define Geometry
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
+
     # Perform some plots
-    display.display_hist(adcs, geom=geom, options=options, display_parameter=True, draw_fit=True)
+
+    try:
+
+        display.display_hist(adcs, geom=geom, options=options, display_parameter=True, draw_fit=True)
+
+    except:
+
+        display.display_hist(adcs, geom=geom, options=options)
+
+
     input('press button to quit')
 
     return

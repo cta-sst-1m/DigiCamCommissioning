@@ -14,15 +14,16 @@ log_file_basename : log
 
 # Input files
 mc            :     False
-file_basename :     CameraDigicam@localhost.localdomain_0_000.%d.run_4.fits.fz
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%d.run_60.fits.fz
 #directory     :     /home/alispach/data/digicam_commissioning/cts/hv_off/
-directory     :     /home/alispach/data/digicam_commissioning/full_chain/
-file_list     :     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+directory     :     /home/alispach/data/digicam_commissioning/cts/anaylse_gain_nsb/ac_0/
+file_list     :     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 # Output files
 #output_directory  : /home/alispach/data/digicam_commissioning/cts/ac_scan/
-output_directory  : /home/alispach/data/digicam_commissioning/full_chain/
-histo_filename    : adc_hv_off.npz
+#output_directory  : /home/alispach/data/digicam_commissioning/full_chain/
+output_directory  : /home/alispach/data/digicam_commissioning/cts/anaylse_gain_nsb/ac_0/
+histo_filename    : baseline.npz
 
 # Event processing
 evt_max           : 10000
@@ -30,7 +31,7 @@ n_evt_per_batch   : 1000
 
 # Camera Configuration
 n_pixels          : 1296
-angle_cts         :
+angle_cts         : 120
 #window_width      : 7
 
 # Plot configuration
