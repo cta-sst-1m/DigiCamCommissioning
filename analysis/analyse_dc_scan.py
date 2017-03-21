@@ -3,7 +3,8 @@
 # external modules
 
 # internal modules
-from data_treatement import pulse_shape
+from data_treatement import mpe_hist
+from analysis import analyse_hvoff
 from utils import display, histogram, geometry
 import logging,sys
 import numpy as np
@@ -38,10 +39,20 @@ def create_histo(options):
     :return:
     """
 
-    pulse_shapes = np.zeros((len(options.scan_level), len(options.pixel_list), options.n_bins, 2))
-    pulse_shapes = pulse_shape.run(pulse_shapes, options=options)
-    pulse_shapes = pulse_shape.run(pulse_shapes, options=options, compute_errors=True)
-    np.savez(options.output_directory + options.pulse_shape_filename, pulse_shapes=pulse_shapes)
+    baseline = histogram.Histogram(filename=options.directory + options.baseline_filename)
+
+
+
+    amplitudes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+                               bin_width=options.adcs_binwidth,
+                               data_shape=(len(options.scan_level), len(options.pixel_list),),
+                               label='MPE', xlabel='ADC', ylabel='$\mathrm{N_{entries}}$')
+
+    mpe_hist.run(amplitudes, options, baseline=baseline.fit_result[:,0])
+    amplitudes.save(options.output_directory + options.histo_filename)
+
+    del baseline, amplitudes
+
     return
 
 
@@ -58,12 +69,8 @@ def display_results(options):
 
     :return:
     """
-    data = np.load(options.output_directory + options.pulse_shape_filename)
 
-    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
+    amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    display.display_hist(amplitudes, options)
 
-
-    display.display_pulse_shape(data['pulse_shapes'], options=options, geom=geom)
-
-    plt.show()
     return
