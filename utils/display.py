@@ -188,13 +188,22 @@ def draw_chi2(axis, hist, display_fit):
 def draw_pulse_shape(axis, pulse_shape, options, index, color='k'):
 
 
-    h = np.max(pulse_shape[0,..., 0], axis=-1)
+
+    if len(index)>=2:
+
+        pixel_label = ' pixel : %d, level : %d' %(options.pixel_list[index[1]], index[0])
+
+    else:
+
+        pixel_label = ' pixel : %d' %(options.pixel_list[index[0]])
+
+    h = np.max(pulse_shape[index[0], :, :, 0], axis=1)
     y = pulse_shape[index][:, 0]
     x = np.arange(0, y.shape[0], 1) * options.sampling_time
     yerr = pulse_shape[index][:, 1]
 
     axis.step(x, y, color=color, where='mid')
-    axis.errorbar(x, y, yerr=yerr, fmt='ok', label='pixel %s' % (index, ))
+    axis.errorbar(x, y, yerr=yerr, fmt='ok', label=pixel_label)
     axis.legend(loc='upper right')
     axis.set_xlabel('t [ns]')
     axis.set_ylabel('ADC')
@@ -213,7 +222,17 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     :param draw_fit:  should the fit be displayed?                         (bool)
     :return:
     """
-    pixel_label = index
+
+    if len(index)>=2:
+
+        pixel_label = ' pixel : %d, level : %d' %(options.pixel_list[index[1]], index[0])
+
+    else:
+
+        pixel_label = ' pixel : %d' %(options.pixel_list[index[0]])
+
+
+
     #pixel_label[-1]= options.pixel_list[pixel_label[-1]] if not hasattr(options,'display_pixel' ) else options.display_pixel
     #pixel_label = tuple(pixel_label)
     _tmp = list(hist.data.shape)
@@ -238,7 +257,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     h_err = h_err[mask]
     x = hist.bin_centers[slice[0][index]:slice[1][index]:1][mask]
     axis.step(x, h, color=color, where='mid')
-    axis.errorbar(x, h, yerr=h_err, fmt='ok', label='pixel %s' % (pixel_label, ))
+    axis.errorbar(x, h, yerr=h_err, fmt='ok', label=pixel_label)
     text_fit_result = ''
 
     if draw_fit:
@@ -579,7 +598,7 @@ def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_
                 image = draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
                 if geom is not None:
                     print('camera visu change not implemented')
-                    #camera_visu.image = image
+                    camera_visu.image = image
 
         elif event.key == '*':
             prev_count = counter.count_level
@@ -590,8 +609,7 @@ def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_
                 axis_histogram.cla()
                 image = draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
                 if geom is not None:
-                    print('camera visu change not implemented')
-                    #camera_visu.image = image
+                    camera_visu.image = image
 
         #elif event.key == '.':
 
@@ -622,22 +640,23 @@ def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_
             axis_histogram = fig.add_subplot(121)
             axis_camera = fig.add_subplot(122)
 
-            if len(hist.data.shape) > 2:
-                image = np.zeros(hist.data.shape[1])
-                for i in range(hist.data.shape[1]):
-                    if np.sum(hist.data[0,i])==0:
+            if len(hist.data.shape) > 3:
+                image = np.zeros(hist.shape[1])
+                for i in range(hist.shape[1]):
+                    temp = np.sum(hist[0,i,:,0])
+                    if temp==0:
                         image[i] = 0.
                     else:
-                        image[i] = np.average(hist.bin_centers, weights=hist.data[0, i])
+                        image[i] = np.mean(hist[0, i, :, 0])
 
             else:
-
+                exit()
                 image = np.zeros(hist.data.shape[0])
                 for i in range(hist.data.shape[0]):
                     if np.sum(hist.data[i]) == 0:
                         image[i] = 0.
                     else:
-                        image[i] = np.average(hist.bin_centers, weights=hist.data[i])
+                        image[i] = np.mean(hist.data[i])
 
         elif display_parameter:
 
@@ -647,7 +666,7 @@ def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_
             image = draw_fit_result(axis_param, hist, index=counter.count_param, display_fit=True)
 
 
-        draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit)
+        draw_pulse_shape(axis_histogram, hist, options=options, index=counter.count)
         camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
         camera_visu.image = image
         camera_visu.add_colorbar()
@@ -701,21 +720,29 @@ class Counter():
         if self.count_pixel + 1<self.max_pixel:
             self.count_pixel +=1
             self._update()
+        else:
+            self.count_pixel = self.min_pixel
 
     def previous_pixel(self):
         if self.count_pixel -1 >=self.min_pixel:
             self.count_pixel -=1
             self._update()
+        else:
+            self.count_pixel = self.max_pixel
 
     def next_level(self):
         if self.count_level + 1<self.max_level:
             self.count_level +=1
             self._update()
+        else:
+            self.count_level = self.min_level
 
     def previous_level(self):
         if self.count_level -1 >=self.min_level:
             self.count_level -=1
             self._update()
+        else:
+            self.count_level = self.max_level
 
     def next_param(self):
 

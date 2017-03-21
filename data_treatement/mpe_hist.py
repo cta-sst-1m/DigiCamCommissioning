@@ -7,7 +7,7 @@ from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
 
 # noinspection PyProtectedMember
-def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
+def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', baseline=0.):
 
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
@@ -142,7 +142,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude'):
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 #print(np.sum(data))
                 # subtract the pedestals
-                data = data[options.pixel_list]
+                data = data[options.pixel_list] - baseline
                 # put in proper format
                 #rdata = data.reshape((1,) + data.shape)
                 # charge extraction type
