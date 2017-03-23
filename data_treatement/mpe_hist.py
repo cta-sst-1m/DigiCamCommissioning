@@ -118,12 +118,12 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
         for event in inputfile_reader:
             if level > len(options.scan_level) - 1:
                 break
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 if first_evt:
-                    first_evt_num = event.dl0.tel[telid].camera_event_number
+                    first_evt_num = event.r0.tel[telid].camera_event_number
                     batch = np.zeros((len(options.pixel_list), options.events_per_level),dtype=int)
                     first_evt = False
-                evt_num = event.dl0.tel[telid].camera_event_number - first_evt_num
+                evt_num = event.r0.tel[telid].camera_event_number - first_evt_num
                 if evt_num % options.events_per_level == 0:
                     if charge_extraction == 'integration':
                         hist.fill_with_batch(batch, indices=(level,))
@@ -139,13 +139,27 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     pbar.update(int(options.events_per_level/1000))
 
                 # get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 #print(np.sum(data))
                 # subtract the pedestals
                 data = data[options.pixel_list] - baseline
                 # put in proper format
                 #rdata = data.reshape((1,) + data.shape)
                 # charge extraction type
+                if hasattr(options,'baseline_per_event_limit'):
+                    baseline = np.mean(data[...,0:options.baseline_per_event_limit],axis=-1)
+                    # get the indices where baseline is good
+                    '''
+                    dev = np.std(data[0:options.baseline_per_event_limit],axis=-1)
+                    tmp_dev = tmp_dev+dev
+                    ind_good_baseline = dev[np.abs(dev/tmp_dev*(evt_num%options.events_per_level))>1]
+                    if n_evt > 0:
+                        _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
+                    else:
+                        _tmp_baseline = baseline
+                    '''
+                    _tmp_baseline = baseline
+                    data = data-_tmp_baseline[:,None]
 
                 # charge extraction type
                 if charge_extraction == 'global_max':

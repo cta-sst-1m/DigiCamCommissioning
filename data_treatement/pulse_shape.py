@@ -35,12 +35,12 @@ def run(pulse_shapes, options, compute_errors=False):
         for event in inputfile_reader:
             if level > len(options.scan_level) - 1:
                 break
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 if first_evt:
-                    #print(event.dl0.tel[telid].camera_event_number)
-                    first_evt_num = event.dl0.tel[telid].camera_event_number
+                    #print(event.r0.tel[telid].camera_event_number)
+                    first_evt_num = event.r0.tel[telid].camera_event_number
                     first_evt = False
-                evt_num = event.dl0.tel[telid].camera_event_number - first_evt_num
+                evt_num = event.r0.tel[telid].camera_event_number - first_evt_num
                 if evt_num % options.events_per_level == 0:
                     level = int(evt_num / options.events_per_level)
                     if level > len(options.scan_level) - 1:
@@ -52,7 +52,7 @@ def run(pulse_shapes, options, compute_errors=False):
                 pbar.update(1)
 
                 # get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 #print(np.sum(data))
                 # subtract the pedestals
                 data = data[options.pixel_list]

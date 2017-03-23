@@ -19,7 +19,6 @@ def p0_func(y, x, *args, config=None, **kwargs):
     :return: starting points for []
     """
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
-
     if config is not None:
 
         ## Load from previous result
@@ -31,16 +30,16 @@ def p0_func(y, x, *args, config=None, **kwargs):
         ## Compute estimate
 
         amplitude = np.sum(y)
-        mean = np.average(x,weights=y)-baseline
+        mean = (np.average(x,weights=y)-baseline)/gain
         #start = y.flat[np.abs(x - (baseline - gain/2.)).argmin()]
         #end = y.flat[np.abs(x - (baseline + gain/2.)).argmin()]
         #print(baseline,gain,start,end,np.sum(y[start:end]),amplitude)
-        mu = mean #- np.log(float(np.sum(y[start:end]))/amplitude)
+        mu = max(0,mean) #- np.log(float(np.sum(y[start:end]))/amplitude)
         mu_xt = 0.
         offset = 0.
 
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
-        #print('param',param)
+        #print(param)
         return param
 
     else :
@@ -133,6 +132,7 @@ def bounds_func(*args, config=None, **kwargs):
         return param_min, param_max
 
     else:
+        '''
         mu = config[0]
         mu_xt = config[1]
         gain = config[2]
@@ -141,10 +141,15 @@ def bounds_func(*args, config=None, **kwargs):
         sigma_1 = config[5]
         amplitude = config[6]
         offset = config[7] # TODO remove this guy
-
-        param_min = [0.    , 0., 0                   , 0.                , 0.                       , 0.     ,0.    ,-np.inf]
-        param_max = [np.inf, 1 , gain[0] + 10*gain[1], baseline[0]+5*baseline[1], sigma_e[0] + 5*sigma_e[1], np.inf ,np.inf, np.inf]
-
+        '''
+        baseline = config[0]
+        gain = config[1]
+        sigma_e = config[2]
+        sigma_1 = config[3]
+        param_min = [0.    , 0., 0                   , baseline[0]-0.5*gain[0]                , sigma_e[0] /2                      , sigma_1[0] /2    ,0.    ,-np.inf]
+        param_max = [np.inf, 1. , gain[0] + 10*gain[1], baseline[0]+0.2*gain[0] , sigma_e[0] *2, sigma_1[0] *2,np.inf, np.inf]
+    #print(param_min)
+    #print(param_max)
     return param_min, param_max
 
 
@@ -158,6 +163,7 @@ def fit_func(p, x, *args, **kwargs):
     #mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset, variance = p
     mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset = p
     temp = np.zeros(x.shape)
+    print(temp)
     n_peak=40
     n_peakmin = 0
     # TODO avoir si ca marche quand on utilise en high light

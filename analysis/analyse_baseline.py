@@ -24,6 +24,7 @@ def create_histo(options):
 
     # Define the array
     baseline = np.zeros((len(options.pixel_list  ),options.evt_max+1),dtype=float)
+    rms = np.zeros((len(options.pixel_list  ),options.evt_max+1),dtype=float)
     print(baseline.shape)
 
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
@@ -47,22 +48,33 @@ def create_histo(options):
         log.debug('--|> Moving to file %s' % _url)
         # Loop over event in this file
         for event in inputfile_reader:
+            #print('bla',event_number,options.evt_max)
             if event_number > options.evt_max:
                 break
+
             if event_number%int(float(options.evt_max)/100) == 0 :
                 pbar.update(int(float(options.evt_max)/100))
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 # Take data from zfits
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+
+                #print('evt_num',event_number)
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 data = data[options.pixel_list]
-                means = np.mean(data,axis=-1)
+                maxsample = -1
+                if hasattr(options,'max_sample_baseline'):
+                    maxsample=options.max_sample_baseline
+                means = np.mean(data[...,0:maxsample],axis=-1)
+
+                stddev = np.std(data[...,0:maxsample],axis=-1)
+                #print(means[0])
                 baseline[...,event_number]=means
+                rms[...,event_number]=stddev
             event_number += 1
 
 
 
     # Save the histogram
-    np.savez_compressed(options.output_directory + options.histo_filename,baseline=baseline)
+    np.savez_compressed(options.output_directory + options.histo_filename,baseline=baseline,rms=rms)
 
     # Delete the histograms
     del baseline
@@ -101,6 +113,8 @@ def display_results(options):
     camera_visu = visualization.CameraDisplay(geom, ax=ax[0], title='', norm='lin', cmap='viridis',
                                               allow_pick=True)
     image = np.var(baseline - np.mean(baseline, axis=-1)[:, None], axis=-1)
+    image2 = np.var(baseline - np.mean(baseline, axis=-1)[:, None], axis=-1)
+    image2[image2>1]=1
     image[image > 0.2] = 0.2
     camera_visu.image = image
     camera_visu.add_colorbar()
@@ -111,7 +125,7 @@ def display_results(options):
     plt.hist(image,bins=100)
 
 
-    display.display_by_pixel(image,options)
+    display.display_by_pixel(image2,options)
 
     #. Perform some plots
     input('press button to quit')

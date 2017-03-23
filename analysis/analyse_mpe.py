@@ -86,15 +86,15 @@ def perform_analysis(options):
     log = logging.getLogger(sys.modules['__main__'].__name__+__name__)
     pbar = tqdm(total=mpes.data.shape[0]*mpes.data.shape[1])
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
-
     def std_dev(x, y):
         if np.sum(y)<=0: return 0.
         avg = np.average(x, weights=y)
         return np.sqrt(np.average((x - avg) ** 2, weights=y))
 
     ## Now perform the mu and mu_XT fits
-    for pixel,real_pix in enumerate([4])    :#enumerate(options.pixel_list):
+    for pixel,real_pix in enumerate(options.pixel_list):
 
+        _tmp_level = -1
         #if hasattr(options,'pixel_list') and pixel not in options.pixel_list:
         #    continue
 
@@ -106,21 +106,26 @@ def perform_analysis(options):
             if np.nonzero(mpes.data[level, pixel])[0].shape[0] == 1: continue
             if std_dev(mpes.bin_centers, mpes.data[level, pixel]) > 400: continue
             if mpes.data[level, pixel, -1] > 0.02 * np.sum(mpes.data[level, pixel]): continue
-            print('++++++++++++++++++++++++++++++ Pixel',pixel)
+            if np.sum(mpes.data[level, pixel])<1e-8 or np.sum(mpes.data[level, pixel])<options.events_per_level/10:continue
+            if _tmp_level!= level-1: continue
+            #print(np.sum(mpes.data[level, pixel]),std_dev(mpes.bin_centers, mpes.data[level, pixel]))
+            #print(mpes.data[level, pixel])
             # check if the mu of the previous level is above 5
+            _tmp_level = level
             fixed_param = []
             _fit_spectra = fit_low_light
             #if level > 0:
                 #print('####################### MU :',mpes.fit_result[level - 1, pixel, 0, 0] )
-
+            #print('pixel %d, level %d'%(pixel,level))
             successful = False
             while not successful:
 
-                if level > 0 : print(mpes.fit_result[level - 1, pixel, 0, 0],mpes.fit_result[level - 1, pixel, 1, 0],mpes.fit_result[level - 1, pixel, 0, 1],mpes.fit_result[level - 1, pixel, 1, 1])
-                if level > 0 and mpes.fit_result[level - 1, pixel, 0, 0] > 30.:
-                    mpes.save(options.output_directory + options.histo_filename)
-                    sys.exit()
-                    print('fit hight light')
+                #if level > 0 :
+                #    print('level:',level-1,mpes.fit_result[level - 1, pixel, 0, 0],mpes.fit_result[level - 1, pixel, 1, 0],mpes.fit_result[level - 1, pixel, 0, 1],mpes.fit_result[level - 1, pixel, 1, 1])
+
+                if level > 0 and (mpes.fit_result[level - 1, pixel, 0, 0] > 25. or _fit_spectra is fit_high_light):
+                   #mpes.save(options.output_directory + options.histo_filename)
+                    #sys.exit()
                     fixed_param = [
                         # in this case assign the cross talk estimation with smallest error
                         [1, mpes.fit_result[np.argmin(mpes.fit_result[5:level:1, pixel, 1, 1]), pixel, 1, 0]],
@@ -136,24 +141,21 @@ def perform_analysis(options):
                         level - 1, pixel, 0, 0] > 10.) or force_xt:  # TODO Sometimes mu_xt error min is for mu_xt =0. (dark/hv off)
                     fixed_xt = mpes.fit_result[np.argmin(mpes.fit_result[0:level:1, pixel, 1,
                                                          1]), pixel, 1, 0]  # start from level 5 to avoid taking dark or hv off
-
-                    print('fix cross talk, low light')
                     fixed_param = [
                         # in this case assign the cross talk estimation with smallest error
                         [1, fixed_xt],
                         [2, (1, 0)],  # gain
-                        [3, (0, 0)],  # baseline
+                        #[3, (0, 0)],  # baseline
                         [4, (2, 0)],  # sigma_e
                         [5, (3, 0)],  # sigma_1
                         [7, 0.]  # offset
                     ]
                 else:
-                    print('low light')
                     fixed_param = [
                         [2, (1, 0)],  # gain
-                        [3, (0, 0)],  # baseline
-                        [4, (2, 0)],  # sigma_e
-                        [5, (3, 0)],  # sigma_1
+                        #[3, (0, 0)],  # baseline
+                        #[4, (2, 0)],  # sigma_e
+                        #[5, (3, 0)],  # sigma_1
                         [7, 0.]  # offset
                     ]
                 mpes.fit(_fit_spectra.fit_func, _fit_spectra.p0_func, _fit_spectra.slice_func,
@@ -230,7 +232,7 @@ def display_results(options):
 
     else:
 
-        display.display_hist(adcs, options=options, geom=geom,draw_fit=False)
+        display.display_hist(adcs, options=options, geom=geom,draw_fit=True)
     input('press button to quit')
 
     return

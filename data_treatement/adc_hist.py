@@ -21,12 +21,16 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     # Reading the file
     n_evt, n_batch, batch_num, max_evt = 0, options.n_evt_per_batch, 0, options.evt_max
+    _tmp_baseline = None
     batch = None
 
     if not options.mc:
         log.info('Running on DigiCam data')
     else:
         log.info('Running on MC data')
+    params=None
+    if hasattr(options, 'baseline_per_event_limit'):
+        params = np.load(options.output_directory + options.baseline_param_data)['params']
 
 
     def integrate_trace(d):
@@ -55,7 +59,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
 
             pbar.update(1)
 
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 if n_evt % n_batch == 0:
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
                     # Update adc histo
@@ -65,34 +69,43 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                         hist.fill_with_batch(
                             spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
                     # Reset the batch
-
                     if hasattr(options, 'window_width'):
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1] - options.window_width + 1), dtype=int)
+                        if hasattr(options, 'baseline_per_event_limit'):
+                            batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=int)
                     else:
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]), dtype=int)
                     batch_num += 1
                     log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
                 # Get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 # Get ride off unwanted pixels
                 data = data[options.pixel_list]
                 if n_evt==1:
                     if hasattr(options,'window_width'):
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width+1),dtype=int)
+                        if hasattr(options, 'baseline_per_event_limit'):
+                            batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=int)
                     else:
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]),dtype=int)
-
                 if hasattr(options,'window_width'):
-                    batch[:,n_evt%n_batch-1,:]=np.apply_along_axis(integrate_trace,-1,data)
+                    if hasattr(options, 'baseline_per_event_limit'):
+                        baseline = np.mean(data[...,0:options.baseline_per_event_limit], axis=-1)
+                        rms = np.std(data[...,0:options.baseline_per_event_limit], axis=-1)
+                        if h_type == 'MEANRMS':
+                            hist[0][...,n_evt-1]=baseline
+                            hist[1][...,n_evt-1]=rms
+                        # get the indices where baseline is good
+                        ind_good_baseline = (rms - params[:,2])/params[:,3] < 0.5
+                        if n_evt > 1:
+                            _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
+                        else:
+                            _tmp_baseline = baseline
+                        #_tmp_baseline = baseline
+                        data = data - _tmp_baseline[:, None]
+                    if not  h_type == 'MEANRMS':
+                        batch[:,n_evt%n_batch-1,:]=np.apply_along_axis(integrate_trace,-1,data[...,options.baseline_per_event_limit:-1])
+
                 else:
                     batch[:, n_evt%n_batch-1, :] = data
-                '''
-                if hasattr(options,'window_width'):
-                    data = np.apply_along_axis(integrate_trace,-1,data)
-                # Append the data to the batch
-                if type(batch).__name__ != 'ndarray':
-                    batch = data.reshape(data.shape[0], 1, data.shape[1])
-                else:
-                    batch = np.append(batch, data.reshape(data.shape[0], 1, data.shape[1]), axis=1)
-                '''
     return

@@ -11,6 +11,8 @@ import logging,sys
 import scipy.stats
 import numpy as np
 
+from scipy import stats
+
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
 
@@ -35,19 +37,27 @@ def create_histo(options):
 
     :return:
     """
-
+    adcs = None
     # Define the histograms
-    adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
-                               bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list  ),),
-                               label='Dark ADC',xlabel='ADC',ylabel = 'entries')
+    if options.dark_analysis == 'mean_rms':
+        adcs = [np.zeros((len(options.pixel_list), options.evt_max)),
+                np.zeros((len(options.pixel_list), options.evt_max))]
+        # Get the adcs
+        adc_hist.run(adcs, options,'MEANRMS')
+        np.savez_compressed(options.output_directory + options.histo_filename, mean = adcs[0], rms = adcs[1])
+    else:
+        adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+                                   bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
+                                   label='Dark ADC', xlabel='ADC', ylabel='entries')
 
-    # Get the adcs
-    adc_hist.run(adcs, options,'ADC')
+        # Get the adcs
+        adc_hist.run(adcs, options,'ADC')
 
 
+        # Save the histogram
+        adcs.save(options.output_directory + options.histo_filename)
 
-    # Save the histogram
-    adcs.save(options.output_directory + options.histo_filename)
+
 
     # Delete the histograms
     del adcs
@@ -72,7 +82,8 @@ def perform_analysis(options):
 
         # Load the histogram
         adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-
+        print(adcs.data.shape,adcs.bin_centers.shape)
+        5./0
         # Fit the baseline and sigma_e of all pixels
         adcs.fit(fit_dark_adc.fit_func, fit_dark_adc.p0_func, fit_dark_adc.slice_func, fit_dark_adc.bounds_func, \
                  labels_func=fit_dark_adc.labels_func)  # , limited_indices=tuple(options.pixel_list))
@@ -84,6 +95,25 @@ def perform_analysis(options):
 
         # Delete the histograms
         del adcs
+    elif  options.dark_analysis == 'mean_rms':
+        log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
+        log.info('Get the distribution of mean and RMS in the dark')
+
+        # Load the histogram
+        adcs = np.load(options.output_directory + options.histo_filename)
+        params = np.zeros((len(options.pixel_list),4),dtype=float)
+        #print(stats.mode(adcs['mean'], axis=-1 ))
+        tmp = stats.mode(adcs['mean'], axis=-1 )[0]
+        print(tmp.shape)
+        params[...,0]  = tmp[0]
+        params[...,1]  = np.std( adcs['mean'], axis=-1 )
+        params[...,2]  = stats.mode(adcs['rms'], axis=-1 )[0][0]
+        params[...,3]  = np.std( adcs['rms'], axis=-1 )
+        np.savez_compressed(options.output_directory + options.histo_filename, mean = adcs['mean'], rms = adcs['rms'], params = params)
+
+
+
+
     elif  options.dark_analysis == 'analytic':
 
         log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
@@ -133,7 +163,7 @@ def display_results(options):
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     #. Perform some plots
-    display.display_hist(adcs, options=options, geom=geom,draw_fit=True)
+    display.display_hist(adcs, options=options, geom=geom,draw_fit=False)
     #display.display_fit_result(adcs, geom=geom, display_fit=True)
     display.display_fit_result(adcs, display_fit=True)
     input('press button to quit')

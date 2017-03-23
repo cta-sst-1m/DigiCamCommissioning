@@ -7,6 +7,7 @@ import scipy.stats
 from spectra_fit import fit_low_light
 from astropy import units as u
 from matplotlib.widgets import Button
+from spectra_fit import fit_low_light,fit_high_light
 import sys
 from matplotlib.offsetbox import AnchoredText
 
@@ -264,6 +265,10 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
         reduced_axis = x
         fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1]+1E-8, 10*reduced_axis.shape[0])
         reduced_func = hist.fit_function
+        print()
+        print(fit_axis,fit_axis.shape)
+        print('fit_res',hist.fit_result[index][:, 0])
+        print(reduced_func(hist.fit_result[index][:, 0], fit_axis),reduced_func(hist.fit_result[index][:, 0], fit_axis).shape)
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
         text_fit_result += '$\chi^{2}/ndf : %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
         for i in range(hist.fit_result.shape[-2]):
@@ -766,12 +771,18 @@ class Counter():
 def display_by_pixel(hist,options):
     print(np.max(hist),options.pixel_list)
     h = np.zeros((1296,),dtype=float)
+    h1 = np.zeros((12,),dtype=float)
     for module in options.cts.camera.Modules:
         for pix in module.pixelsID_inModule:
             if module.pixels[pix-1].ID in options.pixel_list:
+                if hist[options.pixel_list.index(module.pixels[pix-1].ID)]>0.05:
+                    h1[(pix - 1)]=h1[(pix - 1)]+hist[options.pixel_list.index(module.pixels[pix-1].ID)]
                 h[(module.ID - 1) * 12 + (pix - 1)]=hist[options.pixel_list.index(module.pixels[pix-1].ID)]
 
 
     plt.figure()
-    plt.step(np.arange(0,1296),h)
+    plt.step(np.arange(0,1296),h, where='mid')
+    plt.show()
+    plt.figure()
+    plt.step(np.arange(0,12),h1, where='mid')
     plt.show()

@@ -76,8 +76,8 @@ if __name__ == '__main__':
 
 
     if hasattr(options,'angle_cts'):
-        #cts_path = '/data/software/CTS/'
-        cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
+        cts_path = '/data/software/CTS/'
+        #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
         options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
 

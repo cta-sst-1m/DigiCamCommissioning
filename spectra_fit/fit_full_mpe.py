@@ -156,7 +156,7 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
 
         if config.shape[-2] == 3:
 
-            bound_min += [config[1, 0] - 20]  # baseline-sigma
+            bound_min += [config[1, 0] - 30]  # baseline-sigma
             bound_max += [config[1, 0] + 30]  # baseline+sigma
             '''
             bound_min += [0.9*5.6]  # 0.8*gain
@@ -181,8 +181,8 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
             bound_max += [np.inf] * n_peaks
         else:
 
-            bound_min += [config[1, 0] - 20]  # baseline-sigma
-            bound_max += [config[1, 0] + 20]  # baseline+sigma
+            bound_min += [config[1, 0] - 30]  # baseline-sigma
+            bound_max += [config[1, 0] + 30]  # baseline+sigma
             #bound_min += [config[0, 0] - 2 * config[2, 0]]  # baseline-sigma
             #bound_max += [config[0, 0] + 2 * config[2, 0]]  # baseline+sigma
             '''

@@ -12,16 +12,17 @@ log_file_basename : 20170316
 
 # Input files
 mc            :     False
-file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.run_46.fits.fz
-directory     :     /data/datasets/CTA/DATA/20170316/simple_run_21/
-file_list     :     [0,1,2,3,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.run_35.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170316/simple_run_10/
+file_list     :     [0,1,2,3]
 
 # Output file
-histo_filename    : baseline.npz
-output_directory     :     /data/datasets/CTA/DATA/20170316/simple_run_21/
+max_sample_baseline : 40
+histo_filename    : baseline_rms.npz
+output_directory     :  /data/datasets/CTA/DATA/20170316/simple_run_10/
 
 # Event processing
-evt_max           : 1803841
+evt_max           : 10000
 
 # Camera Configuration
 angle_cts         : 120.

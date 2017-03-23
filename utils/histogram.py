@@ -22,7 +22,7 @@ class Histogram:
                  bin_center_min: int = 0,
                  bin_center_max: int = 1,
                  bin_width: int = 1, xlabel: str = 'x', ylabel: str = 'y', label: str = 'hist',
-                 filename: str = '', fit_only : bool = False):
+                 filename: str = '', fit_only : bool = False , auto_errors = False):
 
         """
         Initialise method
@@ -45,6 +45,7 @@ class Histogram:
         :param label: the base label for the histograms
         """
         # Initialise the logger
+        self.auto_errors = auto_errors
         self.logger = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
         if filename:
             if fit_only:
@@ -85,7 +86,7 @@ class Histogram:
             self.data = data
             self.underflow = np.zeros(data_shape)
             self.overflow = np.zeros(data_shape)
-            self._compute_errors()
+            if self.auto_errors: self._compute_errors()
 
         # Initialisation of fit results and labels
         self.fit_result = None
@@ -125,6 +126,7 @@ class Histogram:
                                 fit_slices = self.fit_slices,
                                 fit_chi2_ndof=self.fit_chi2_ndof,
                                 fit_axis=self.fit_axis,
+                                auto_errors=np.array([self.auto_errors]),
                                 xlabel=np.array([self.xlabel]),
                                 ylabel=np.array([self.ylabel]),
                                 label=np.array([self.label]),
@@ -153,6 +155,7 @@ class Histogram:
             self.bin_edges = file['bin_edges']
             self.bin_width = file['bin_width'][0]
             self.errors = file['errors']
+            self.auto_errors = file['auto_errors'][0]
             self.underflow = file['underflow']
             self.overflow = file['overflow']
             self.fit_slices = file['fit_slices'] if 'fit_slices' in file.keys() else None
@@ -224,7 +227,7 @@ class Histogram:
         return
 
 
-    def fill(self, value, indices=None):
+    def fill(self, value, indices=None, fill_errors = False):
         """
         Update the Histogram array with an array of values
         :param value:
@@ -245,10 +248,17 @@ class Histogram:
                              range(np.indices(value.shape).shape[0])], )
         dim_indices += (hist_indices.reshape(np.prod(value.shape)),)
 
-        if value[..., 0].shape == self.data[..., 0].shape or not indices:
-            self.data[dim_indices] += 1
+        if not fill_errors:
+            if value[..., 0].shape == self.data[..., 0].shape or not indices:
+                self.data[dim_indices] += 1
+            else:
+                self.data[indices][dim_indices] += 1
         else:
-            self.data[indices][dim_indices] += 1
+            if value[..., 0].shape == self.errors[..., 0].shape or not indices:
+                self.errors[dim_indices] += 1
+            else:
+                self.errors[indices][dim_indices] += 1
+
 
     # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):
@@ -304,7 +314,7 @@ class Histogram:
             self.underflow[indices] = underflow
             self.overflow[indices] = overflow
         # compute the poisson error on the data
-        self._compute_errors()
+        if self.auto_errors : self._compute_errors()
 
     @staticmethod
     def _residual(function, p, x, y, y_err):
@@ -426,10 +436,10 @@ class Histogram:
 
             except Exception as inst:
                 self.logger.error('Could not fit index %s'%idx[-1])
-                self.logger.error(inst)
-                self.logger.debug('p0:', reduced_p0)
-                self.logger.debug('bound min:', reduced_bounds[0])
-                self.logger.debug('bound max:', reduced_bounds[1])
+                #self.logger.error(inst)
+                print('p0:', reduced_p0)
+                print('bound min:', reduced_bounds[0])
+                print('bound max:', reduced_bounds[1])
                 fit_result = (np.ones((len(reduced_p0), 2)) * np.nan)
 
         # restore the fixed_params in the fit_result
