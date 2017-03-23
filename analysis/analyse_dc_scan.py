@@ -61,8 +61,16 @@ def perform_analysis(options):
 
     amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    amplitudes.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func, \
-            labels_func=fit_hv_off.labels_func)
+    amplitudes.fit_result = np.zeros((amplitudes.data.shape[:-1])+(3,2,))
+    amplitudes.fit_result_label = ['amplitude', 'mean [ADC]','sigma [ADC]']
+    for i in range(amplitudes.data.shape[0]):
+        for j in range(amplitudes.data.shape[1]):
+
+            amplitudes.fit_result[i,j,1,0] = np.average(amplitudes.bin_centers, weights=amplitudes.data[i,j])
+            amplitudes.fit_result[i,j,2,0] = np.sqrt(np.average((amplitudes.bin_centers-amplitudes.fit_result[i,j,0,0])**2, weights=amplitudes.data[i,j]))
+            amplitudes.fit_result[i,j,0,0] = np.sum(amplitudes.data[i,j])
+            amplitudes.fit_result[i,j,1,1] = amplitudes.fit_result[i,j,2,0]/ np.sqrt(amplitudes.fit_result[i,j,0,0])
+
 
     amplitudes.save(options.output_directory + options.histo_filename)
 

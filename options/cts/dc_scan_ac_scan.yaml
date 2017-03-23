@@ -37,6 +37,6 @@ n_pixels          : 1296
 angle_cts         : 120
 
 # Plot configuration
-adcs_min           : -1000
-adcs_max           : 1000
+adcs_min           : -500
+adcs_max           : 19000
 adcs_binwidth      : 4

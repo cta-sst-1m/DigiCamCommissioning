@@ -49,7 +49,6 @@ def create_histo(options):
 
     # Construct the histogram
     baseline = histogram.Histogram(fit_only=True, filename=options.directory + options.baseline_filename)
-    print(baseline.fit_result.shape)
     mpe_hist.run(mpes, options, peak_positions=peaks.data, baseline=baseline.fit_result[:,:,1,0])
 
 
@@ -63,23 +62,30 @@ def create_histo(options):
 
 
 def perform_analysis(options):
-    """
-    Perform a simple gaussian fit of the ADC histograms
-
-    :param options: a dictionary containing at least the following keys:
-        - 'output_directory' : the directory in which the histogram will be saved (str)
-        - 'histo_filename'   : the name of the file containing the histogram
-                                                 whose fit contains the gain,sigmas etc...(str)
-
-    :return:
-    """
-    # Fit the baseline and sigma_e of all pixels
 
     mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    mpes.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func, \
-            labels_func=fit_hv_off.labels_func)
+
+    mpes.fit_result = np.zeros((mpes.data.shape[:-1])+(4,2,))
+    mpes.fit_result_label = ['amplitude []', 'mean [ADC]', 'sigma [ADC]', 'G/G$_{dark}$ []']
+
+    for i in range(mpes.data.shape[0]):
+        for j in range(mpes.data.shape[1]):
+
+            if np.sum(mpes.data[i,j])!=0:
+
+                mpes.fit_result[i, j, 0, 0] = np.sum(mpes.data[i, j])
+                mpes.fit_result[i, j, 1, 0] = np.average(mpes.bin_centers, weights=mpes.data[i, j])
+                mpes.fit_result[i, j, 2, 0] = np.sqrt(np.average((mpes.bin_centers-mpes.fit_result[i, j, 0, 0])**2, weights=mpes.data[i, j]))
+                mpes.fit_result[i, j, 1, 1] = mpes.fit_result[i, j, 2, 0]/ np.sqrt(mpes.fit_result[i, j, 0, 0])
+                mpes.fit_result[i, j, 3, 0] = mpes.fit_result[i, j, 1, 0]/mpes.fit_result[0, j, 1, 0]
+                mpes.fit_result[i, j, 3, 1] = mpes.fit_result[i, j, 3, 0] * (mpes.fit_result[i, j, 1, 1]/mpes.fit_result[i, j, 1, 0] + mpes.fit_result[0, j, 1, 1]/mpes.fit_result[0, j, 1, 0])
+
+            else:
+                print('level %d, pixel %d not ok' %(options.scan_level[i], options.pixel_list[j]))
 
     mpes.save(options.output_directory + options.histo_filename)
+
+
 
 
 def display_results(options):
@@ -107,10 +113,6 @@ def display_results(options):
 
     display.display_fit_result_level(mpes, options=options)
 
-    mpes.fit_result[:,:, 1, 0] = mpes.fit_result[:,:, 1, 0]/mpes.fit_result[0,:, 1, 0]
-    mpes.fit_result_label[1] = 'Gain/Gain$_{dark}$'
-
-    display.display_fit_result_level(mpes, options=options)
 
     input('press button to quit')
 

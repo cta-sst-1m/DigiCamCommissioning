@@ -268,7 +268,8 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
 
     if np.sum(mask)==0:
         mask = [True**len(h)]
-
+    #print(mask)
+    #print(index)
     h = h[mask]
     h_err = h_err[mask]
     x = hist.bin_centers[slice[0][index]:slice[1][index]:1][mask]

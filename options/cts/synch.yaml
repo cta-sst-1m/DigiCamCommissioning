@@ -26,7 +26,7 @@ dark_histo_filename :
 
 # Event processing
 n_evt_per_batch   : 1000
-events_per_level  : 5000
+events_per_level  : 10000
 evt_min           : 20000 # TODO maybe change this to level_min and level_max
 evt_max           : 100000
 
