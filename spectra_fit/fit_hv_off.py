@@ -14,10 +14,16 @@ def p0_func(y, x, *args, **kwargs):
     :param kwargs:
     :return: starting points for [norm,mean,std]
     """
+
+    mask = (y > 0)# * (x > np.min(x)) * (x < np.max(x))  # avoid empty bins, underflow and overflow
+    x = x[mask]
+    y = y[mask]
+    bin_width = x[1] - x[0]
+
     if np.sum(y)==0 : return [np.nan, np.nan, np.nan]
     if np.average(x, weights=y) == 0 and np.average((x - np.average(x, weights=y)) ** 2, weights=y) == 0:
         return [np.nan, np.nan, np.nan]
-    return [np.sum(y), np.average(x, weights=y), np.sqrt(np.average((x - np.average(x, weights=y) - 1./12.) ** 2, weights=y))]
+    return [np.sum(y), np.average(x, weights=y), np.sqrt(np.average((x - np.average(x, weights=y) - bin_width**2/12.) ** 2, weights=y))]
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
@@ -32,9 +38,14 @@ def slice_func(y, x, *args, **kwargs):
     """
     # Check that the Histogram has none empty values
     if np.where(y != 0)[0].shape[0] < 2:
-        return [0, 1, 1]
-    return [np.where(y != 0)[0][0], np.where(y != 0)[0][-1], 1]
 
+        slice = [0, 1, 1]
+
+    else:
+        mask = (y > 0)#*(x>np.min(x))*(x<np.max(x)) # avoid underflow, overflow and empty bins
+        slice = [np.where(mask)[0][0], np.where(mask)[0][-1], 1]
+
+    return slice
 
 # noinspection PyUnusedLocal,PyUnusedLocal
 def bounds_func(*args, **kwargs):
@@ -54,8 +65,8 @@ def fit_func(p, x):
     :param x: x
     :return: G(x)
     """
-
-    p[2] = np.sqrt(p[2]**2 + 1./12.)
+    bin_width = x[1] - x[0]
+    p[2] = np.sqrt(p[2]**2 + bin_width**2/12.)
 
     return p[0] / p[2] / np.sqrt(2. * np.pi) * np.exp(-(np.asfarray(x) - p[1]) ** 2 / (2. * p[2] ** 2))
 

@@ -39,6 +39,7 @@ def generalized_poisson(k, mu, mu_xt, amplitude=1):
 def gaussian_sum(param, x):
 
     temp = np.zeros(x.shape)
+    bin_width = x[1] - x[0]
 
     baseline = param[0]
     gain = param[1]
@@ -50,7 +51,7 @@ def gaussian_sum(param, x):
     n_peaks = len(amplitudes)
 
     for i in range(n_peaks):
-        sigma = np.sqrt(sigma_e**2 + i*sigma_1**2 + 1./12.)
+        sigma = np.sqrt(sigma_e**2 + i*sigma_1**2 + bin_width**2/12.)
         #temp += gaussian(x, sigma, baseline + i*gain + (offset if i==0 else 0), amplitude=amplitudes[i])
 
         param = [sigma, baseline + i*gain, amplitudes[i]]

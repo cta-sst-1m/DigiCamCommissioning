@@ -14,7 +14,11 @@ def generate_geometry_MC(n_pixels=1296):
 
 def generate_geometry_0(n_pixels=1296, pixel_list=None):
     # TODO setup the proper range
-    pix_id = np.arange(0, n_pixels, 1)
+    if pixel_list is not None:
+        pix_id = np.array(pixel_list)
+    else:
+        pix_id = np.arange(0,n_pixels,1)
+
     pix_x = [-12.15, -48.6, -24.3, 0.0, 24.3, -85.05, -60.75, -36.45, -12.15, 12.15, 36.45, 60.75, -121.5, -97.2, -72.9,
              -48.6,
              -24.3, 0.0, 24.3, 48.6, 72.9, 97.2, -157.95, -133.65, -109.35, -85.05, -60.75, -36.45, -12.15, 12.15,
@@ -890,8 +894,7 @@ def generate_geometry_0(n_pixels=1296, pixel_list=None):
         return CameraGeometry(0, pix_id[0:n_pixels:1], pix_x[0:n_pixels:1] * u.mm, pix_y[0:n_pixels:1] * u.mm, np.ones(n_pixels) * 400., neighbor_pixels[0:n_pixels:1], 'hexagonal')
 
     else:
-
-        return CameraGeometry(0, pix_id[pixel_list], np.array(pix_x)[pixel_list] * u.mm, np.array(pix_y)[pixel_list] * u.mm, np.ones(len(pixel_list)) * 400., np.array(neighbor_pixels)[pixel_list], 'hexagonal')
+        return CameraGeometry(0, pix_id, np.array(pix_x)[pixel_list] * u.mm, np.array(pix_y)[pixel_list] * u.mm, np.ones(len(pixel_list)) * 400., np.array(neighbor_pixels)[pixel_list], 'hexagonal')
 
 def find_cts_pixels(angle=240.):
 

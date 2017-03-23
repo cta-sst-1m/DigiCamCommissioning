@@ -9,7 +9,7 @@ from utils.logger import TqdmToLogger
 from tqdm import tqdm
 
 
-def run(hist, options, h_type='ADC', prev_fit_result=None):
+def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     """
     Fill the adcs Histogram out of darkrun/baseline runs
     :param h_type: type of Histogram to produce: ADC for all samples adcs or SPE for only peaks
@@ -22,6 +22,10 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
     # Reading the file
     n_evt, n_batch, batch_num, max_evt = 0, options.n_evt_per_batch, 0, options.evt_max
     batch = None
+
+    if baseline is None:
+
+        baseline = np.zeros(len(options.pixel_list))
 
     if not options.mc:
         log.info('Running on DigiCam data')
@@ -57,9 +61,11 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
 
             for telid in event.dl0.tels_with_data:
                 if n_evt % n_batch == 0:
+
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
                     # Update adc histo
                     if h_type == 'ADC':
+                        print ((batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2])).shape)
                         hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
                     elif h_type == 'SPE':
                         hist.fill_with_batch(
@@ -75,7 +81,14 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                 # Get the data
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 # Get ride off unwanted pixels
-                data = data[options.pixel_list]
+
+                #print(data.shape)
+                #print(baseline.shape)
+
+                data = data[options.pixel_list] - baseline[:,None] #np.tile(baseline, data.shape[1]).reshape(baseline.shape[0], data.shape[1])
+
+                #print(data.shape)
+
                 if n_evt==1:
                     if hasattr(options,'window_width'):
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width+1),dtype=int)

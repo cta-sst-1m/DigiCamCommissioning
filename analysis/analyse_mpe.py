@@ -50,6 +50,7 @@ def create_histo(options):
     # Construct the histogram
     mpe_hist.run(mpes, options, peak_positions=peaks.data)
 
+
     # Save the histogram
     mpes.save(options.output_directory + options.histo_filename)
 

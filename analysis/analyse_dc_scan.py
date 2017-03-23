@@ -3,9 +3,10 @@
 # external modules
 
 # internal modules
-from data_treatement import mpe_hist
+from data_treatement import mpe_hist, adc_hist
 from analysis import analyse_hvoff
 from utils import display, histogram, geometry
+from spectra_fit import fit_hv_off
 import logging,sys
 import numpy as np
 import logging
@@ -39,24 +40,31 @@ def create_histo(options):
     :return:
     """
 
-    baseline = histogram.Histogram(filename=options.directory + options.baseline_filename)
+    #baseline = histogram.Histogram(filename=options.directory + options.baseline_filename)
 
 
 
     amplitudes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                bin_width=options.adcs_binwidth,
-                               data_shape=(len(options.scan_level), len(options.pixel_list),),
+                               data_shape=(len(options.scan_level), len(options.pixel_list), ),
                                label='MPE', xlabel='ADC', ylabel='$\mathrm{N_{entries}}$')
 
-    mpe_hist.run(amplitudes, options, baseline=baseline.fit_result[:,0])
+    mpe_hist.run(amplitudes, options)
     amplitudes.save(options.output_directory + options.histo_filename)
 
-    del baseline, amplitudes
+    del amplitudes
 
     return
 
 
 def perform_analysis(options):
+
+    amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+
+    amplitudes.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func, \
+            labels_func=fit_hv_off.labels_func)
+
+    amplitudes.save(options.output_directory + options.histo_filename)
 
     return
 
@@ -71,6 +79,19 @@ def display_results(options):
     """
 
     amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    display.display_hist(amplitudes, options)
+    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
+
+    try:
+
+        display.display_hist(amplitudes, geom=geom, options=options, display_parameter=True, draw_fit=True)
+
+    except:
+
+        display.display_hist(amplitudes, geom=geom, options=options)
+
+
+    display.display_fit_result_level(amplitudes, options=options)
+
+
 
     return

@@ -160,6 +160,7 @@ def fit_func(p, x, *args, **kwargs):
     temp = np.zeros(x.shape)
     n_peak=40
     n_peakmin = 0
+    bin_width = x[1] - x[0]
     # TODO avoir si ca marche quand on utilise en high light
     if len(x)>0:
         n_peak = int(float(x[-1] - baseline) / gain * 1.5)
@@ -167,7 +168,7 @@ def fit_func(p, x, *args, **kwargs):
 
     x = x - baseline
     for n in range(n_peakmin,n_peak):
-        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + 1./12.) # * gain
+        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + bin_width**2/12.) # * gain
         param_gauss = [sigma_n, n*gain, 1.]
         temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(param_gauss, x)
 

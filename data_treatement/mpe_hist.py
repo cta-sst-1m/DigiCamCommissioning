@@ -17,7 +17,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     charge_extraction = options.integration_method
-    if charge_extraction == 'integration' or charge_extraction == 'integration_sat':
+    if charge_extraction == 'integration' or charge_extraction == 'integration_sat' or charge_extraction == 'baseline':
         window_width = options.window_width
         # WARNING: START WRT MAX
         window_start = options.window_start
@@ -121,28 +121,44 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
             for telid in event.dl0.tels_with_data:
                 if first_evt:
                     first_evt_num = event.dl0.tel[telid].camera_event_number
+                    batch_index = 0
                     batch = np.zeros((len(options.pixel_list), options.events_per_level),dtype=int)
+                    if charge_extraction=='baseline':
+                        pass
+                        #batch = np.zeros((len(options.pixel_list*(1+options.n_bins-options.window_width)), options.events_per_level),dtype=int)
+
                     first_evt = False
                 evt_num = event.dl0.tel[telid].camera_event_number - first_evt_num
-                if evt_num % options.events_per_level == 0:
+                if evt_num % options.events_per_level == 0 and evt_num!=0:
+                    batch_index = 0
                     if charge_extraction == 'integration':
+                        #print(batch)
                         hist.fill_with_batch(batch, indices=(level,))
                         # Reset the batch
                         batch = np.zeros((len(options.pixel_list), options.events_per_level),dtype=int)
+                    if charge_extraction == 'baseline':
+                        pass
+                        #batch = np.zeros((len(options.pixel_list*(1+ options.n_bins - options.window_width)), options.events_per_level), dtype=int)
                     level = int(evt_num / options.events_per_level)
                     if level > len(options.scan_level) - 1:
                         break
                     if options.verbose:
 
                         log.debug('--|> Moving to DAC Level %d' % (options.scan_level[level]))
-                if evt_num % int(options.events_per_level/1000)== 0:
-                    pbar.update(int(options.events_per_level/1000))
+                if options.events_per_level<=1000:
+
+                    pbar.update(1)
+
+                else:
+
+                    if evt_num % int(options.events_per_level/1000)== 0:
+                        pbar.update(int(options.events_per_level/1000))
 
                 # get the data
                 data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 #print(np.sum(data))
                 # subtract the pedestals
-                data = data[options.pixel_list] - baseline
+                data = data[options.pixel_list]
                 # put in proper format
                 #rdata = data.reshape((1,) + data.shape)
                 # charge extraction type
@@ -157,10 +173,10 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     ind_with_cumsum_lt_7 = data[index_max] < prev_fit_result[:,2,0]*3
                     local_max[ind_with_cumsum_lt_7] = peak[ind_with_cumsum_lt_7]
                     index_max = (np.arange(0, data.shape[0]), local_max,)
-                    hist.fill(data[index_max],indices=(level,))
+                    hist.fill(data[index_max] - baseline[level, :], indices=(level,))
                 elif charge_extraction == 'fixed_max':
                     index_max = (np.arange(0, data.shape[0]), peak,)
-                    hist.fill(data[index_max],indices=(level,))
+                    hist.fill(data[index_max] - baseline[level, :], indices=(level,))
                 elif charge_extraction == 'integration':
                     integration = np.apply_along_axis(integrate_trace,1,data)
                     local_max = np.argmax(np.multiply(integration, mask_window), axis=1)
@@ -172,7 +188,13 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     local_max[ind_with_lt_th] = peak[ind_with_lt_th]-window_start
                     local_max[local_max<0]=0
                     index_max = (np.arange(0, data.shape[0]), local_max,)
-                    batch[...,evt_num%options.events_per_level]=integration[index_max]
+                    #print(baseline[level,:].shape)
+                    #print(baseline[level,1])
+                    #print(integration[index_max].shape)
+                    #print(integration[index_max][1])
+                    batch[...,batch_index]=integration[index_max]  - baseline[level,:]#(0 if baseline is None else baseline[level, :])#np.tile(baseline, data.shape[1]).reshape(baseline.shape[0], data.shape[1])
+                    batch_index += 1
+
                     #hist.fill(integration[index_max],indices=(level,))
 
                 elif charge_extraction == 'local_max':
@@ -187,7 +209,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     ind_with_cumsum_lt_7 = cum_sum_trace1[index_max] < prev_fit_result[:,1,0]+ 7
                     local_max[ind_with_cumsum_lt_7] = peak[ind_with_cumsum_lt_7]
                     index_max = (np.arange(0, data.shape[0]), local_max,)
-                    hist.fill(data[index_max],indices=(level,))
+                    hist.fill(data[index_max] - baseline[level,:],indices=(level,))
 
                 elif charge_extraction == 'integration_sat':
                     # first deal with normal values
@@ -209,8 +231,25 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     full_integration = integration[index_max]
                     # now deal with saturated ones:
                     sat_integration = np.apply_along_axis(contiguous_regions, 1, data_sat)
-                    full_integration = full_integration + sat_integration
+                    full_integration = full_integration + sat_integration - baseline[level, :]
                     hist.fill(full_integration,indices=(level,))
+
+                elif charge_extraction == 'full':
+
+                    temp = np.sum(data, axis=1) - baseline[level, :]
+                    hist.fill(temp, indices=(level,))
+
+                elif charge_extraction == 'baseline':
+
+                    integral = np.sum(data[:,window_start:window_start+window_width], axis=1)
+                    #batch[:,evt_num%(options.events_per_level*integral.shape[1]):evt_num%(options.events_per_level*integral.shape[1])+integral.shape[1]]=np.apply_along_axis(integrate_trace,-1,data)
+                    hist.fill(integral,indices=(level,))
+
+                if batch_index % options.events_per_level == 0:
+                    batch_index = 0
+
+
+
 
     # Update the errors
     hist._compute_errors()

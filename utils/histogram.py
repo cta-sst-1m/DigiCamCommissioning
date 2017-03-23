@@ -117,7 +117,7 @@ class Histogram:
                                 bin_centers=self.bin_centers,
                                 bin_edges=self.bin_edges,
                                 bin_width=np.array([self.bin_width]),
-                                errors=self.errors,
+                                errors=self.errors, #TODO maybe dont store errors and recompute them while loading to avoid large files (self.errors should return errors(self) ?)
                                 underflow=self.underflow,
                                 overflow=self.overflow,
                                 fit_result=self.fit_result,
@@ -147,7 +147,7 @@ class Histogram:
             raise FileNotFoundError
 
         try:
-            file = np.load(filename)
+            file = np.load(filename)#, mmap_mode='r+') #TODO deal with mmap_mode (.npz does not work since decrompression is needed)
             self.data = file['data']
             self.bin_centers = file['bin_centers']
             self.bin_edges = file['bin_edges']
