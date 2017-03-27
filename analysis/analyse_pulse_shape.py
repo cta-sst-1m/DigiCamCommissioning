@@ -43,30 +43,83 @@ def create_histo(options):
 
     pulse_shapes = np.zeros((len(options.scan_level), len(options.pixel_list), options.n_bins, 2))
     pulse_shapes = pulse_shape.run(pulse_shapes, options=options)
-    pulse_shapes = pulse_shape.run(pulse_shapes, options=options, compute_errors=True)
-    np.savez(options.output_directory + options.pulse_shape_filename, pulse_shapes=pulse_shapes)
+    np.savez(options.output_directory + options.histo_filename, pulse_shape=pulse_shapes)
     return
 
-
 def integrate_trace(d,window_width):
-    return np.convolve(d, np.ones((window_width), dtype=int), 'valid')
+
+    integrated_trace = np.convolve(d, np.ones((window_width), dtype=int), 'same')
+
+    return integrated_trace
 
 def perform_analysis(options):
 
-    mpes_full = histogram.Histogram(filename=options.output_directory + options.full_histo_filename, fit_only= True)
-    mpes_full_fit_result = np.copy(mpes_full.fit_result)
-    pulses = np.load(options.output_directory + options.pulse_shape_filename)['pulse_shapes']
-    ps = pulses[...,0]
-    ps = ps- np.mean(ps[...,0:5],axis=-1).reshape(np.mean(ps[...,0:5],axis=-1).shape+(1,))
-    integrate_trace_7 = lambda x : integrate_trace(x,7)
-    ps =  np.apply_along_axis(integrate_trace_7,-1,ps)
-    ps = np.divide(ps ,np.max(ps,axis=-1).reshape(np.max(ps,axis=-1).shape+(1,)))
-    pulses[...,1]=pulses[...,0]
-    pulses[...,0][...,0:ps.shape[-1]]=ps
-    pulses[..., 0][...,ps.shape[-1]:-1]=0.
-    pulses[...,0][...,-1]=0.
-    print(pulses[35,0,:,0])
-    np.savez(options.output_directory + options.pulse_shape_filename.split('.')[0]+'subtracted.npz', pulse_shapes=pulses)
+    #mpes_full = histogram.Histogram(filename=options.output_directory + options.full_histo_filename, fit_only=True)
+    #mpes_full_fit_result = np.copy(mpes_full.fit_result)
+    pulses = np.load(options.output_directory + options.histo_filename)['pulse_shape']
+    pulse_integrals = np.zeros((pulses.shape[0], pulses.shape[1], 2))
+    pulse_integrals_square = np.zeros((pulses.shape[0], pulses.shape[1], 2))
+
+
+    pulse_shape = pulses[:, :, : ,0]
+    pulse_shape_error = pulses[:, :, : ,1]
+
+    integrate_trace_n = lambda x: integrate_trace(x, options.window_width)
+
+
+    print(pulse_shape_error[0,6, 8])
+
+    n_bins = options.baseline_per_event_limit
+    first_bins = pulse_shape[...,0:n_bins]
+    baseline = np.mean(first_bins, axis=-1)
+    baseline_error = np.std(first_bins, axis=-1)/np.sqrt(n_bins)
+    pulse_shape = pulse_shape - baseline[...,None]
+    pulse_shape_error = np.sqrt(pulse_shape_error**2 + baseline_error[...,None]**2)
+    pulse_shape = np.apply_along_axis(integrate_trace_n, -1, pulse_shape)
+    pulse_shape_error = np.sqrt(np.apply_along_axis(integrate_trace_n, -1, pulse_shape_error**2))
+    pulse_shape_max = np.max(pulse_shape, axis=-1)
+
+    argmax = np.argmax(pulse_shape, axis=-1)
+    for i in range(pulse_shape.shape[0]):
+        for j in range(pulse_shape.shape[1]):
+
+            pulse_shape_max_error = pulse_shape_error[i,j, argmax[i,j]]
+
+    pulse_shape = np.divide(pulse_shape, pulse_shape_max[...,None])
+    pulse_shape_error = pulse_shape * (pulse_shape_error/np.multiply(pulse_shape, pulse_shape_max[...,None]) + (pulse_shape_max_error/pulse_shape_max)[...,None])
+
+    pulse = np.zeros(pulse_shape.shape + (2,))
+    pulse[..., 0] = pulse_shape
+    pulse[..., 1] = pulse_shape_error
+
+    pulse_integrals[..., 0] = np.sum(pulse_shape, axis=-1) * options.sampling_time
+    pulse_integrals[..., 1] = np.sqrt(np.sum(pulse_shape_error**2, axis=-1)) * options.sampling_time
+
+
+
+    pulse_integrals_square[..., 0] = np.sum(pulse_shape**2, axis=-1) * options.sampling_time
+    pulse_integrals_square[..., 1] = np.sqrt(np.sum(pulse_shape_error**2, axis=-1)) * options.sampling_time
+
+
+    '''
+    print (pulses[...,1])
+    ps = pulses[..., 0]
+    ps = ps - np.mean(ps[..., 0:5], axis=-1).reshape(np.mean(ps[..., 0:5], axis=-1).shape + (1,))
+    integrate_trace_7 = lambda x: integrate_trace(x, options.window_width)
+    ps = np.apply_along_axis(integrate_trace_7, -1, ps)
+    ps = np.divide(ps, np.max(ps, axis=-1).reshape(np.max(ps, axis=-1).shape + (1,)))
+    pulses[..., 1] = pulses[...,0] * ( pulses)
+        np.divide(pulses[...,1], np.max(ps, axis=-1).reshape(np.max(ps, axis=-1).shape + (1,))) #TODO compute this !
+    pulses[..., 0][..., 0:ps.shape[-1]] = ps
+    pulses[..., 0][..., ps.shape[-1]:-1] = 0.
+    pulses[..., 0][..., -1] = 0.
+    #pulse_integrals[...,0] = np.sum(pulses[...,0] ,axis=-1)
+    #print(pulses[35, 0, :, 0])
+'''
+    np.savez(options.output_directory + options.histo_filename, pulse_shape=pulse,
+             pulse_integrals=pulse_integrals,pulse_integrals_square=pulse_integrals_square)
+
+
     return
 
 
@@ -78,43 +131,37 @@ def display_results(options):
 
     :return:
     """
-    data = np.load(options.output_directory + options.pulse_shape_filename.split('.')[0]+'subtracted.npz')
-    data = data['pulse_shapes']
+    _file = np.load(options.output_directory + options.histo_filename)
+    #data = np.load(options.output_directory + options.histo_filename)['pulse_shape']
+    data_substracted = _file['pulse_shape']
+    pulse_integrals = _file['pulse_integrals']
+    pulse_integrals_square = _file['pulse_integrals_square']
+
+
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
-    print('there',data.shape)
+    print(data_substracted.shape)
+
+
     #display.display_pulse_shape(data, options=options, geom=geom)
-    good_levels=[0]*data.shape[1]
-    for l,level in enumerate(data):
-        for p,pixel in enumerate(level):
-            if np.max(data[l,p,:,1])<3500:
-                good_levels[p]=l
-    good_template = np.zeros((data.shape[1],data.shape[2]),dtype=float)
-    integrals = np.ones((data.shape[1],),dtype=float)
-    integrals_square = np.ones((data.shape[1],),dtype=float)
-    for p in range(data.shape[1]):
-        good_template[p]=data[good_levels[p],p,:,0]
-        integrals[p]=np.trapz(good_template[p], dx=4)
-        integrals_square[p]=np.trapz(good_template[p]*good_template[p], dx=4)
+    display.display_pulse_shape(data_substracted, options=options, geom=geom)
+
+    import matplotlib.pyplot as plt
 
     plt.figure()
 
-    plt.plot(np.arange(92),good_template[197])
+
     plt.show()
     plt.figure()
-    integrals2 = np.copy(integrals)
-    plt.plot(np.arange(data.shape[1]),integrals)
+    plt.plot(np.arange(data_substracted.shape[1]),pulse_integrals)
     plt.show()
     fig,ax=plt.subplots(1,1)
     camera_visu = visualization.CameraDisplay(geom, ax=ax, title='', norm='lin', cmap='viridis',
                                               allow_pick=True)
-    camera_visu.image = integrals2
-    print(camera_visu.image[0])
+    camera_visu.image = pulse_integrals
     camera_visu.add_colorbar()
     camera_visu.axes.set_xlabel('x [mm]')
     camera_visu.axes.set_ylabel('y [mm]')
     plt.show()
-    np.savez(options.output_directory + options.integrals_filename, integrals=integrals, integrals_square=integrals_square)
-    print('here')
     h = input('press a key')
     return

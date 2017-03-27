@@ -36,11 +36,17 @@ def create_histo(options):
                                label='Position of the peak',xlabel='Sample [/ 4 ns]',ylabel = 'Events / sample')
 
     # Get the adcs
-    dark = histogram.Histogram(filename=options.output_directory + options.dark_histo_filename, fit_only=True)
-    options.prev_fit_result = np.copy(dark.fit_result)
-    del dark
+    if options.dark_histo_filename is not None:
 
-    synch_hist.run(peaks, options,min_evt = options.evt_min , max_evt=options.evt_max)
+        dark = histogram.Histogram(filename=options.output_directory + options.dark_histo_filename, fit_only=True)
+        options.prev_fit_result = np.copy(dark.fit_result)
+        del dark
+
+    else:
+
+        options.prev_fit_result = None
+
+    synch_hist.run(peaks, options, min_evt=options.evt_min)
 
     # Save the histogram
 

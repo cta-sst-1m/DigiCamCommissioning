@@ -6,6 +6,7 @@
 from data_treatement import mpe_hist
 from analysis import analyse_hvoff
 from utils import display, histogram, geometry
+from spectra_fit import fit_hv_off
 import logging,sys
 import numpy as np
 import logging
@@ -39,24 +40,41 @@ def create_histo(options):
     :return:
     """
 
-    baseline = histogram.Histogram(filename=options.directory + options.baseline_filename)
+    #baseline = histogram.Histogram(filename=options.directory + options.baseline_filename)
 
 
 
     amplitudes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                bin_width=options.adcs_binwidth,
-                               data_shape=(len(options.scan_level), len(options.pixel_list),),
+                               data_shape=(len(options.scan_level), len(options.pixel_list), ),
                                label='MPE', xlabel='ADC', ylabel='$\mathrm{N_{entries}}$')
 
-    mpe_hist.run(amplitudes, options, baseline=baseline.fit_result[:,0])
+    mpe_hist.run(amplitudes, options)
     amplitudes.save(options.output_directory + options.histo_filename)
 
-    del baseline, amplitudes
+    del amplitudes
 
     return
 
 
 def perform_analysis(options):
+
+    amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+
+    amplitudes.fit_result = np.zeros((amplitudes.data.shape[:-1])+(3,2,))
+    amplitudes.fit_result_label = ['amplitude', 'mean [ADC]','sigma [ADC]']
+    for i in range(amplitudes.data.shape[0]):
+        for j in range(amplitudes.data.shape[1]):
+
+            amplitudes.fit_result[i,j,0,0] = np.sum(amplitudes.data[i,j])
+            amplitudes.fit_result[i,j,0,1] = np.sqrt(amplitudes.fit_result[i,j, 0, 0])
+            amplitudes.fit_result[i,j,1,0] = np.average(amplitudes.bin_centers, weights=amplitudes.data[i,j])
+            amplitudes.fit_result[i,j,2,0] = np.sqrt(np.average((amplitudes.bin_centers-amplitudes.fit_result[i,j,0,0])**2, weights=amplitudes.data[i,j]))
+            #amplitudes.fit_result[i,j,2,1] = np.sqrt(2./(amplitudes.fit_result[i, j, 0, 0] - 1.)) * amplitudes.fit_result[i, j, 2, 0]**2
+            amplitudes.fit_result[i,j,1,1] = amplitudes.fit_result[i,j,2,0]/ np.sqrt(amplitudes.fit_result[i,j,0,0])
+
+
+    amplitudes.save(options.output_directory + options.histo_filename)
 
     return
 
@@ -71,6 +89,19 @@ def display_results(options):
     """
 
     amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    display.display_hist(amplitudes, options)
+    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
+
+    try:
+
+        display.display_hist(amplitudes, geom=geom, options=options, display_parameter=True, draw_fit=True)
+
+    except:
+
+        display.display_hist(amplitudes, geom=geom, options=options)
+
+
+    display.display_fit_result_level(amplitudes, options=options)
+
+
 
     return

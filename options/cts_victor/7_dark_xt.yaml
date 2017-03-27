@@ -20,7 +20,7 @@ file_list     :     [0]
 output_directory  : /data/datasets/CTA/DATA/20170322/scan_ac_level/
 histo_filename    : adc_dark.npz
 baseline_param_data : baseline_parameters.npz
-integrals_filename    : integrals.npz
+pulse_shape_filename    : integrals.npz
 full_histo_filename   : full_mpe.npz
 
 # Event processing

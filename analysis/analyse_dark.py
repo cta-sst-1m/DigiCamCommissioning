@@ -130,9 +130,9 @@ def perform_analysis(options):
         sigma_e = mpes_full_fit_result[...,2,0]
         sigma_1 = mpes_full_fit_result[...,3,0]
 
-        integ = np.load(options.output_directory + options.integrals_filename)
-        integral = integ['integrals']
-        integral_square = integ['integrals_square']
+        integ = np.load(options.output_directory + options.pulse_shape_filename)
+        integral = integ['pulse_integrals']
+        integral_square = integ['pulse_integrals_square']
 
         for pixel in range(len(options.pixel_list)):
 
@@ -173,7 +173,7 @@ def display_results(options):
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     #. Perform some plots
-    display.display_hist(adcs, options=options, geom=geom,draw_fit=False)
+    display.display_hist(adcs, options=options, geom=geom,draw_fit=True)
     #display.display_fit_result(adcs, geom=geom, display_fit=True)
     display.display_fit_result(adcs, display_fit=True)
     input('press button to quit')

@@ -126,22 +126,34 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
             for telid in event.r0.tels_with_data:
                 if first_evt:
                     first_evt_num = event.r0.tel[telid].camera_event_number
+                    batch_index = 0
                     batch = np.zeros((len(options.pixel_list), options.events_per_level),dtype=int)
+                    if charge_extraction=='baseline':
+                        pass
+                        #batch = np.zeros((len(options.pixel_list*(1+options.n_bins-options.window_width)), options.events_per_level),dtype=int)
+
                     first_evt = False
                 evt_num = event.r0.tel[telid].camera_event_number - first_evt_num
                 if evt_num % options.events_per_level == 0:
+                    batch_index = 0
                     if charge_extraction == 'integration':
                         hist.fill_with_batch(batch, indices=(level,))
                         # Reset the batch
                         batch = np.zeros((len(options.pixel_list), options.events_per_level),dtype=int)
+                    if charge_extraction == 'baseline':
+                        pass
+                        #batch = np.zeros((len(options.pixel_list*(1+ options.n_bins - options.window_width)), options.events_per_level), dtype=int)
                     level = int(evt_num / options.events_per_level)
                     if level > len(options.scan_level) - 1:
                         break
                     if options.verbose:
 
                         log.debug('--|> Moving to DAC Level %d' % (options.scan_level[level]))
-                if evt_num % int(options.events_per_level/1000)== 0:
-                    pbar.update(int(options.events_per_level/1000))
+                if options.events_per_level<=1000:
+                    pbar.update(1)
+                else:
+                    if evt_num % int(options.events_per_level/1000)== 0:
+                        pbar.update(int(options.events_per_level/1000))
 
                 # get the data
                 data = np.array(list(event.r0.tel[telid].adc_samples.values()))
@@ -164,10 +176,10 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     ind_with_cumsum_lt_7 = data[index_max] < prev_fit_result[:,2,0]*3
                     local_max[ind_with_cumsum_lt_7] = peak[ind_with_cumsum_lt_7]
                     index_max = (np.arange(0, data.shape[0]), local_max,)
-                    hist.fill(data[index_max],indices=(level,))
+                    hist.fill(data[index_max] - baseline[level, :], indices=(level,))
                 elif charge_extraction == 'fixed_max':
                     index_max = (np.arange(0, data.shape[0]), peak,)
-                    hist.fill(data[index_max],indices=(level,))
+                    hist.fill(data[index_max] - baseline[level, :], indices=(level,))
                 elif charge_extraction == 'integration':
                     if hasattr(options, 'baseline_per_event_limit'):
                         baseline = np.mean(data[...,0:options.baseline_per_event_limit], axis=-1)
@@ -201,9 +213,11 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                         plt.plot(np.arange(92),data[options.pixel_list.index(61)])
                         plt.plot(np.arange(92),data[options.pixel_list.index(62)])
                         plt.show()
-                    batch[...,evt_num%options.events_per_level]=integration[index_max]
-                    #hist.fill(integration[index_max],indices=(level,))
                     '''
+                    batch[...,batch_index]=integration[index_max] - baseline[level,:]
+                    batch_index += 1
+                    #hist.fill(integration[index_max],indices=(level,))
+
                 elif charge_extraction == 'local_max':
                     cum_sum_trace1 = data.cumsum(axis=-1)
                     cum_sum_trace1[..., 3:] = (cum_sum_trace1[..., 3:] - cum_sum_trace1[..., :-3])
@@ -216,7 +230,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     ind_with_cumsum_lt_7 = cum_sum_trace1[index_max] < prev_fit_result[:,1,0]+ 7
                     local_max[ind_with_cumsum_lt_7] = peak[ind_with_cumsum_lt_7]
                     index_max = (np.arange(0, data.shape[0]), local_max,)
-                    hist.fill(data[index_max],indices=(level,))
+                    hist.fill(data[index_max] - baseline[level,:],indices=(level,))
 
                 elif charge_extraction == 'integration_sat':
                     # first deal with normal values
@@ -238,8 +252,25 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     full_integration = integration[index_max]
                     # now deal with saturated ones:
                     sat_integration = np.apply_along_axis(contiguous_regions, 1, data_sat)
-                    full_integration = full_integration + sat_integration
+                    full_integration = full_integration + sat_integration - baseline[level, :]
                     hist.fill(full_integration,indices=(level,))
+
+                elif charge_extraction == 'full':
+
+                    temp = np.sum(data, axis=1) - baseline[level, :]
+                    hist.fill(temp, indices=(level,))
+
+                elif charge_extraction == 'baseline':
+
+                    integral = np.sum(data[:,window_start:window_start+window_width], axis=1)
+                    #batch[:,evt_num%(options.events_per_level*integral.shape[1]):evt_num%(options.events_per_level*integral.shape[1])+integral.shape[1]]=np.apply_along_axis(integrate_trace,-1,data)
+                    hist.fill(integral,indices=(level,))
+
+                if batch_index % options.events_per_level == 0:
+                    batch_index = 0
+
+
+
 
     # Update the errors
     hist._compute_errors()
