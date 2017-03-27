@@ -1,0 +1,35 @@
+# Analysis module
+analysis_module   : analyse_dark
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170322
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.run_105.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170322/scan_ac_level/
+file_list     :     [0]
+
+# Output file
+output_directory  : /data/datasets/CTA/DATA/20170322/scan_ac_level/
+histo_filename    : adc_dark.npz
+baseline_param_data : baseline_parameters.npz
+integrals_filename    : integrals.npz
+full_histo_filename   : full_mpe.npz
+
+# Event processing
+dark_analysis     : analytic
+
+# Camera Configuration
+angle_cts         : 120.
+
+# Plot configuration
+adcs_min           : -500
+adcs_max           : 2000
+adcs_binwidth      : 1
