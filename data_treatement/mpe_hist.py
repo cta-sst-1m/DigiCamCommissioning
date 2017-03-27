@@ -5,7 +5,7 @@ import logging,sys
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
-
+import matplotlib.pyplot as plt
 # noinspection PyProtectedMember
 def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', baseline=0.):
 
@@ -15,6 +15,11 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=len(options.scan_level)*options.events_per_level)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
+
+    params=None
+    if hasattr(options, 'baseline_per_event_limit'):
+        params = np.load(options.output_directory + options.baseline_param_data)['params']
+
 
     charge_extraction = options.integration_method
     if charge_extraction == 'integration' or charge_extraction == 'integration_sat':
@@ -140,26 +145,14 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
 
                 # get the data
                 data = np.array(list(event.r0.tel[telid].adc_samples.values()))
+
+                data = data[options.pixel_list]
+
                 #print(np.sum(data))
                 # subtract the pedestals
-                data = data[options.pixel_list] - baseline
                 # put in proper format
                 #rdata = data.reshape((1,) + data.shape)
                 # charge extraction type
-                if hasattr(options,'baseline_per_event_limit'):
-                    baseline = np.mean(data[...,0:options.baseline_per_event_limit],axis=-1)
-                    # get the indices where baseline is good
-                    '''
-                    dev = np.std(data[0:options.baseline_per_event_limit],axis=-1)
-                    tmp_dev = tmp_dev+dev
-                    ind_good_baseline = dev[np.abs(dev/tmp_dev*(evt_num%options.events_per_level))>1]
-                    if n_evt > 0:
-                        _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
-                    else:
-                        _tmp_baseline = baseline
-                    '''
-                    _tmp_baseline = baseline
-                    data = data-_tmp_baseline[:,None]
 
                 # charge extraction type
                 if charge_extraction == 'global_max':
@@ -176,6 +169,17 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     index_max = (np.arange(0, data.shape[0]), peak,)
                     hist.fill(data[index_max],indices=(level,))
                 elif charge_extraction == 'integration':
+                    if hasattr(options, 'baseline_per_event_limit'):
+                        baseline = np.mean(data[...,0:options.baseline_per_event_limit], axis=-1)
+                        rms = np.std(data[...,0:options.baseline_per_event_limit], axis=-1)
+                        # get the indices where baseline is good
+                        ind_good_baseline = (rms - params[:,2])/params[:,3] < 0.5
+                        if evt_num > 1:
+                            _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
+                        else:
+                            _tmp_baseline = baseline
+                        data = data - _tmp_baseline[:, None]
+                        #if level>32 :
                     integration = np.apply_along_axis(integrate_trace,1,data)
                     local_max = np.argmax(np.multiply(integration, mask_window), axis=1)
                     local_max_edge = np.argmax(np.multiply(integration, mask_windows_edge), axis=1)
@@ -186,9 +190,20 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     local_max[ind_with_lt_th] = peak[ind_with_lt_th]-window_start
                     local_max[local_max<0]=0
                     index_max = (np.arange(0, data.shape[0]), local_max,)
+                    '''
+                    print('integrated value',integration[index_max][options.pixel_list.index(44)])
+                    print('------------------------------------------')
+                    if integration[index_max][options.pixel_list.index(44)]<-5:
+                        plt.plot(np.arange(92),data[options.pixel_list.index(44)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(29)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(30)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(45)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(61)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(62)])
+                        plt.show()
                     batch[...,evt_num%options.events_per_level]=integration[index_max]
                     #hist.fill(integration[index_max],indices=(level,))
-
+                    '''
                 elif charge_extraction == 'local_max':
                     cum_sum_trace1 = data.cumsum(axis=-1)
                     cum_sum_trace1[..., 3:] = (cum_sum_trace1[..., 3:] - cum_sum_trace1[..., :-3])

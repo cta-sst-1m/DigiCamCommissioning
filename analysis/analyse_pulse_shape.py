@@ -91,9 +91,11 @@ def display_results(options):
                 good_levels[p]=l
     good_template = np.zeros((data.shape[1],data.shape[2]),dtype=float)
     integrals = np.ones((data.shape[1],),dtype=float)
+    integrals_square = np.ones((data.shape[1],),dtype=float)
     for p in range(data.shape[1]):
         good_template[p]=data[good_levels[p],p,:,0]
         integrals[p]=np.trapz(good_template[p], dx=4)
+        integrals_square[p]=np.trapz(good_template[p]*good_template[p], dx=4)
 
     plt.figure()
 
@@ -112,7 +114,7 @@ def display_results(options):
     camera_visu.axes.set_xlabel('x [mm]')
     camera_visu.axes.set_ylabel('y [mm]')
     plt.show()
-    np.savez(options.output_directory + options.integrals_filename, integrals=integrals)
+    np.savez(options.output_directory + options.integrals_filename, integrals=integrals, integrals_square=integrals_square)
     print('here')
     h = input('press a key')
     return

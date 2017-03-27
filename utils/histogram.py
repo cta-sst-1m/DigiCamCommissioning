@@ -22,7 +22,7 @@ class Histogram:
                  bin_center_min: int = 0,
                  bin_center_max: int = 1,
                  bin_width: int = 1, xlabel: str = 'x', ylabel: str = 'y', label: str = 'hist',
-                 filename: str = '', fit_only : bool = False , auto_errors = False):
+                 filename: str = '', fit_only : bool = False , auto_errors = True):
 
         """
         Initialise method
@@ -410,7 +410,6 @@ class Histogram:
                     self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]] \
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])]),
                                                    bounds=reduced_bounds)#, jac='3-point', method='trf', loss='arctan') # could improve with true jac
-
                 # noinspection PyUnresolvedReferences
                 val = out.x
                 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
@@ -437,7 +436,9 @@ class Histogram:
             except Exception as inst:
                 self.logger.error('Could not fit index %s'%idx[-1])
                 #self.logger.error(inst)
+                print(inst)
                 print('p0:', reduced_p0)
+                print()
                 print('bound min:', reduced_bounds[0])
                 print('bound max:', reduced_bounds[1])
                 fit_result = (np.ones((len(reduced_p0), 2)) * np.nan)

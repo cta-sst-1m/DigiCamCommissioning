@@ -75,10 +75,9 @@ def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
 
 
     else:
-
         if config.shape[-2] == 3:
 
-            param += [config[1, 0]]  # baseline
+            param += [-10.]  # baseline
             param += [5.6*4.3]  # gain
             #param += [config[2, 0]]  # sigma_e
             #param += [config[2, 0]*0.5]  # sigma_1
@@ -157,7 +156,7 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
         if config.shape[-2] == 3:
 
             bound_min += [config[1, 0] - 30]  # baseline-sigma
-            bound_max += [config[1, 0] + 30]  # baseline+sigma
+            bound_max += [3.5]  # baseline+sigma
             '''
             bound_min += [0.9*5.6]  # 0.8*gain
             bound_max += [1.1*5.6]  # 1.2*gain

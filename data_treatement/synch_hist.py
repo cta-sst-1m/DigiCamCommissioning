@@ -12,7 +12,11 @@ def run(hist, options, min_evt = 0 , max_evt=50000):
 
     n_evt, n_batch, batch_num, max_evt = 0, options.n_evt_per_batch, 0, options.evt_max
     batch = None
+    _tmp_baseline=None
 
+    params=None
+    if hasattr(options, 'baseline_per_event_limit'):
+        params = np.load(options.output_directory + options.baseline_param_data)['params']
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=max_evt-min_evt)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
@@ -40,7 +44,7 @@ def run(hist, options, min_evt = 0 , max_evt=50000):
                 if evt_num % int((max_evt-min_evt)/1000)==0: #TODO make this work properly
                     pbar.update(int((max_evt-min_evt)/1000))
             if evt_num > max_evt: break
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 evt_num += 1
                 if evt_num % n_batch == 0:
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
@@ -53,9 +57,22 @@ def run(hist, options, min_evt = 0 , max_evt=50000):
 
                 if evt_num > max_evt: break
                 # get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 # get rid of unwanted pixels
-                data = data[options.pixel_list]-options.prev_fit_result[...,1,0][:,None]/options.window_width
+                data = data[options.pixel_list]
+
+                if hasattr(options, 'baseline_per_event_limit'):
+                    baseline = np.mean(data[..., 0:options.baseline_per_event_limit], axis=-1)
+                    rms = np.std(data[..., 0:options.baseline_per_event_limit], axis=-1)
+                    ind_good_baseline = (rms - params[:, 2]) / params[:, 3] < 0.5
+                    if n_evt > 1:
+                        _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
+                    else:
+                        _tmp_baseline = baseline
+                    # _tmp_baseline = baseline
+                    data = data - _tmp_baseline[:, None]
+                else:
+                    data = data-options.prev_fit_result[...,1,0][:,None]/options.window_width
 
                 if evt_num==1:
                     batch = np.zeros((data.shape[0], n_batch),dtype=int)
@@ -103,11 +120,11 @@ def run(hist, options):
         for event in inputfile_reader:
             if level > len(options.scan_level) - 1:
                 break
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 if first_evt:
-                    first_evt_num = event.dl0.tel[telid].event_number
+                    first_evt_num = event.r0.tel[telid].event_number
                     first_evt = False
-                evt_num = event.dl0.tel[telid].event_number - first_evt_num
+                evt_num = event.r0.tel[telid].event_number - first_evt_num
                 if evt_num % options.events_per_level == 0:
                     level = int(evt_num / options.events_per_level)
                     if level > len(options.scan_level) - 1:
@@ -118,7 +135,7 @@ def run(hist, options):
                 pbar.update(1)
 
                 # get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 # subtract the pedestals
                 data = data[options.pixel_list]
                 # extract max

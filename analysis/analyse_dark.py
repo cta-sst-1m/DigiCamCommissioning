@@ -46,6 +46,7 @@ def create_histo(options):
         adc_hist.run(adcs, options,'MEANRMS')
         np.savez_compressed(options.output_directory + options.histo_filename, mean = adcs[0], rms = adcs[1])
     else:
+
         adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                    bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
                                    label='Dark ADC', xlabel='ADC', ylabel='entries')
@@ -56,8 +57,6 @@ def create_histo(options):
 
         # Save the histogram
         adcs.save(options.output_directory + options.histo_filename)
-
-
 
     # Delete the histograms
     del adcs
@@ -82,8 +81,6 @@ def perform_analysis(options):
 
         # Load the histogram
         adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-        print(adcs.data.shape,adcs.bin_centers.shape)
-        5./0
         # Fit the baseline and sigma_e of all pixels
         adcs.fit(fit_dark_adc.fit_func, fit_dark_adc.p0_func, fit_dark_adc.slice_func, fit_dark_adc.bounds_func, \
                  labels_func=fit_dark_adc.labels_func)  # , limited_indices=tuple(options.pixel_list))
@@ -119,10 +116,23 @@ def perform_analysis(options):
         log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
         log.info('Perform an analytic extraction of mu_XT ( ==> baseline and sigmae for full mpe )')
 
+        mpes_full = histogram.Histogram(filename=options.output_directory + options.full_histo_filename, fit_only=True)
+        mpes_full_fit_result = np.copy(mpes_full.fit_result)
+        del mpes_full
+
 
         # Load the histogram
         dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
         x = dark_hist.bin_centers
+
+        baseline = mpes_full_fit_result[...,0,0]
+        gain = mpes_full_fit_result[...,1,0]
+        sigma_e = mpes_full_fit_result[...,2,0]
+        sigma_1 = mpes_full_fit_result[...,3,0]
+
+        integ = np.load(options.output_directory + options.integrals_filename)
+        integral = integ['integrals']
+        integral_square = integ['integrals_square']
 
         for pixel in range(len(options.pixel_list)):
 
@@ -134,16 +144,16 @@ def perform_analysis(options):
                 sigma_1 = 0.48
                 sigma_e = np.sqrt(0.86 ** 2.)
 
-            dark_parameters = compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e)
+            dark_parameters = compute_dark_parameters(x, y, baseline[pixel], gain[pixel], sigma_1[pixel], sigma_e[pixel],integral[pixel],integral_square[pixel])
 
-            dark_hist.fit_result[pixel, 0, 0] = baseline
+            dark_hist.fit_result[pixel, 0, 0] = baseline[pixel]
             dark_hist.fit_result[pixel, 0, 1] = 0
             dark_hist.fit_result[pixel, 1, 0] = dark_parameters[0, 0]
             dark_hist.fit_result[pixel, 1, 1] = dark_parameters[0, 1]
             dark_hist.fit_result[pixel, 2, 0] = dark_parameters[1, 0]
             dark_hist.fit_result[pixel, 2, 1] = dark_parameters[1, 1]
 
-        dark_hist.save(options.output_directory + options.histo_filename)
+        dark_hist.save(options.output_directory + options.histo_filename.split('.npz')[0]+'_xt.npz')
         del dark_hist
 
 
@@ -170,7 +180,7 @@ def display_results(options):
 
     return
 
-def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e):
+def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,integral_square):
     '''
     In developement
     :param x:
@@ -182,14 +192,13 @@ def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e):
     :return:
     '''
 
-
     x = x - baseline
     sigma_1 = sigma_1/gain
 
     mean_adc = np.average(x, weights=y)
     sigma_2_adc = np.average((x - mean_adc) ** 2, weights=y) - 1./12.
-    pulse_shape_area = 15.11851125 * gain
-    pulse_shape_2_area = 9.25845231 * gain**2
+    pulse_shape_area = integral * gain
+    pulse_shape_2_area = integral_square * gain**2
     alpha = (mean_adc * pulse_shape_2_area)/((sigma_2_adc - sigma_e**2)*pulse_shape_area)
 
     if (1./alpha - sigma_1**2)<0 or np.isnan(1./alpha - sigma_1**2):

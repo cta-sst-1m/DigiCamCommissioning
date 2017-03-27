@@ -23,7 +23,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
     n_evt, n_batch, batch_num, max_evt = 0, options.n_evt_per_batch, 0, options.evt_max
     _tmp_baseline = None
     batch = None
-
+    tot0=0
     if not options.mc:
         log.info('Running on DigiCam data')
     else:
@@ -64,6 +64,8 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
                     # Update adc histo
                     if h_type == 'ADC':
+                        #print(batch[0,0])
+
                         hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
                     elif h_type == 'SPE':
                         hist.fill_with_batch(
@@ -72,7 +74,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                     if hasattr(options, 'window_width'):
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1] - options.window_width + 1), dtype=int)
                         if hasattr(options, 'baseline_per_event_limit'):
-                            batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=int)
+                            batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=float)
                     else:
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]), dtype=int)
                     batch_num += 1
@@ -85,7 +87,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                     if hasattr(options,'window_width'):
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width+1),dtype=int)
                         if hasattr(options, 'baseline_per_event_limit'):
-                            batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=int)
+                            batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=float)
                     else:
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]),dtype=int)
                 if hasattr(options,'window_width'):
@@ -99,12 +101,15 @@ def run(hist, options, h_type='ADC', prev_fit_result=None):
                         ind_good_baseline = (rms - params[:,2])/params[:,3] < 0.5
                         if n_evt > 1:
                             _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
+                            #_tmp_baseline[~ind_good_baseline] = 10000
+
                         else:
                             _tmp_baseline = baseline
                         #_tmp_baseline = baseline
                         data = data - _tmp_baseline[:, None]
                     if not  h_type == 'MEANRMS':
-                        batch[:,n_evt%n_batch-1,:]=np.apply_along_axis(integrate_trace,-1,data[...,options.baseline_per_event_limit:-1])
+                        batch[:,n_evt%n_batch,:]=np.apply_along_axis(integrate_trace,-1,data[...,options.baseline_per_event_limit:-1])
+                        #print(batch.shape,n_evt%n_batch)
 
                 else:
                     batch[:, n_evt%n_batch-1, :] = data

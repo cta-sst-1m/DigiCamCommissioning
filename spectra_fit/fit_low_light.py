@@ -38,7 +38,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
         mu_xt = 0.
         offset = 0.
 
-        param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
+        param = [mu, mu_xt, gain, 0., sigma_e, sigma_1, amplitude, offset]
         #print(param)
         return param
 
@@ -146,8 +146,8 @@ def bounds_func(*args, config=None, **kwargs):
         gain = config[1]
         sigma_e = config[2]
         sigma_1 = config[3]
-        param_min = [0.    , 0., 0                   , baseline[0]-0.5*gain[0]                , sigma_e[0] /2                      , sigma_1[0] /2    ,0.    ,-np.inf]
-        param_max = [np.inf, 1. , gain[0] + 10*gain[1], baseline[0]+0.2*gain[0] , sigma_e[0] *2, sigma_1[0] *2,np.inf, np.inf]
+        param_min = [0.    , 0., gain[0] - 5*gain[1]    , baseline[0]-2*gain[0], sigma_e[0] /2 , sigma_1[0] /2 ,0.,-np.inf]
+        param_max = [np.inf, 1. , gain[0] + 5*gain[1], 3. , sigma_e[0] *2, sigma_1[0] *2,np.inf, np.inf]
     #print(param_min)
     #print(param_max)
     return param_min, param_max
@@ -163,7 +163,6 @@ def fit_func(p, x, *args, **kwargs):
     #mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset, variance = p
     mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset = p
     temp = np.zeros(x.shape)
-    print(temp)
     n_peak=40
     n_peakmin = 0
     # TODO avoir si ca marche quand on utilise en high light

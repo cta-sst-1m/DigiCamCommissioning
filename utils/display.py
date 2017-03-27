@@ -265,11 +265,14 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
         reduced_axis = x
         fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1]+1E-8, 10*reduced_axis.shape[0])
         reduced_func = hist.fit_function
+        import spectra_fit.fit_low_light as tmpfct
+        reduced_func = tmpfct.fit_func
         print()
         print(fit_axis,fit_axis.shape)
         print('fit_res',hist.fit_result[index][:, 0])
         print(reduced_func(hist.fit_result[index][:, 0], fit_axis),reduced_func(hist.fit_result[index][:, 0], fit_axis).shape)
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
+
         text_fit_result += '$\chi^{2}/ndf : %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
         for i in range(hist.fit_result.shape[-2]):
             if (i > hist.fit_result_label.shape[0]-1): continue #TODO log it in debug
