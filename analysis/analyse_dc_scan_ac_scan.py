@@ -65,8 +65,16 @@ def perform_analysis(options):
 
     mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    mpes.fit_result = np.zeros((mpes.data.shape[:-1])+(4,2,))
-    mpes.fit_result_label = ['amplitude []', 'mean [ADC]', 'sigma [ADC]', 'G/G$_{dark}$ []']
+    mpes.fit_result = np.zeros((mpes.data.shape[:-1])+(5,2,))
+    mpes.fit_result_label = ['amplitude []', 'mean [ADC]', 'sigma [ADC]', 'G/G$_{dark}$ []', r'$\frac{f_{nsb}}{1-\mu_{XT}}$ [GHz]']
+
+    dc_led_histogram = histogram.Histogram(filename=options.directory + options.baseline_filename)
+    pulse_integrals = np.load(options.output_directory + options.pulse_shape_filename.split('.')[0] + '_integrals.npz')['pulse_integrals']
+    #full_mpe = histogram.Histogram(filename=options.directory + options.full_mpe_filename)
+    gain = np.ones((mpes.data.shape[0], mpes.data.shape[1], 2)) * 23 #full_mpe.fit_result[..., 2, 0]
+    gain[...,1] = 0.
+
+    level_for_pulse = 20
 
     for i in range(mpes.data.shape[0]):
         for j in range(mpes.data.shape[1]):
@@ -74,12 +82,22 @@ def perform_analysis(options):
             if np.sum(mpes.data[i,j])!=0:
 
                 mpes.fit_result[i, j, 0, 0] = np.sum(mpes.data[i, j])
+                mpes.fit_result[i, j, 0, 1] = np.sqrt(mpes.fit_result[i, j, 0, 0])
                 mpes.fit_result[i, j, 1, 0] = np.average(mpes.bin_centers, weights=mpes.data[i, j])
                 mpes.fit_result[i, j, 2, 0] = np.sqrt(np.average((mpes.bin_centers-mpes.fit_result[i, j, 0, 0])**2, weights=mpes.data[i, j]))
                 mpes.fit_result[i, j, 1, 1] = mpes.fit_result[i, j, 2, 0]/ np.sqrt(mpes.fit_result[i, j, 0, 0])
                 mpes.fit_result[i, j, 3, 0] = mpes.fit_result[i, j, 1, 0]/mpes.fit_result[0, j, 1, 0]
                 mpes.fit_result[i, j, 3, 1] = mpes.fit_result[i, j, 3, 0] * (mpes.fit_result[i, j, 1, 1]/mpes.fit_result[i, j, 1, 0] + mpes.fit_result[0, j, 1, 1]/mpes.fit_result[0, j, 1, 0])
+                mpes.fit_result[i, j, 4, 0] = (dc_led_histogram.fit_result[i, j, 1, 0] - dc_led_histogram.fit_result[0, j, 1, 0])
+                temp_1  = mpes.fit_result[i, j, 4, 0]
+                temp_1_error  = np.sqrt(dc_led_histogram.fit_result[i, j, 1, 1]**2 + dc_led_histogram.fit_result[0, j, 1, 1]**2)
+                temp_2 = (gain[i ,j, 0] * mpes.fit_result[i, j, 3, 0] * pulse_integrals[level_for_pulse, j, 0])
+                temp_2_error =  (gain[i, j, 1]/gain[i, j, 0] + mpes.fit_result[i, j, 3, 1]/mpes.fit_result[i, j, 3, 0] + pulse_integrals[level_for_pulse, j, 1]/pulse_integrals[level_for_pulse, j, 0])
+                mpes.fit_result[i, j, 4, 0] /= temp_2
+                mpes.fit_result[i, j, 4, 1] = mpes.fit_result[i, j, 4, 0] * (temp_1_error/temp_1 + temp_2_error/temp_2)
 
+
+                #mpes.fit_result[i, j, 4, 1] = mpes.fit_result[i,j, 4, 0] * ((dc_led_histogram.fit_result[i, j, 1, 1]/dc_led_histogram.fit_result[i, j, 1, 0])**2 + (pulse_integrals[i, j, 1]/pulse_integrals[i, j, 0])**2)
             else:
                 print('level %d, pixel %d not ok' %(options.scan_level[i], options.pixel_list[j]))
 
@@ -111,7 +129,7 @@ def display_results(options):
 
 
 
-    display.display_fit_result_level(mpes, options=options)
+    display.display_fit_result_level(mpes, options=options, scale='log')
 
 
     input('press button to quit')

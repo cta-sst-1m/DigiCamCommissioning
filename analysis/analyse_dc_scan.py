@@ -66,9 +66,11 @@ def perform_analysis(options):
     for i in range(amplitudes.data.shape[0]):
         for j in range(amplitudes.data.shape[1]):
 
+            amplitudes.fit_result[i,j,0,0] = np.sum(amplitudes.data[i,j])
+            amplitudes.fit_result[i,j,0,1] = np.sqrt(amplitudes.fit_result[i,j, 0, 0])
             amplitudes.fit_result[i,j,1,0] = np.average(amplitudes.bin_centers, weights=amplitudes.data[i,j])
             amplitudes.fit_result[i,j,2,0] = np.sqrt(np.average((amplitudes.bin_centers-amplitudes.fit_result[i,j,0,0])**2, weights=amplitudes.data[i,j]))
-            amplitudes.fit_result[i,j,0,0] = np.sum(amplitudes.data[i,j])
+            #amplitudes.fit_result[i,j,2,1] = np.sqrt(2./(amplitudes.fit_result[i, j, 0, 0] - 1.)) * amplitudes.fit_result[i, j, 2, 0]**2
             amplitudes.fit_result[i,j,1,1] = amplitudes.fit_result[i,j,2,0]/ np.sqrt(amplitudes.fit_result[i,j,0,0])
 
 

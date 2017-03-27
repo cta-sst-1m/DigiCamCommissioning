@@ -78,8 +78,8 @@ def run(hist, options, min_evt = 0):
 
                 if options.prev_fit_result is not None:
 
-                    data_max[data[(np.arange(0,data.shape[0]),data_max)] < 40]=0
-                    data_max[data[(np.arange(0,data.shape[0]),data_max)] > 3000]=0 #TODO need to adapt this more generic
+                    data_max[data[(np.arange(0,data.shape[0]),data_max)] < 40] = 0
+                    data_max[data[(np.arange(0,data.shape[0]),data_max)] > 3000] = 0 #TODO need to adapt this more generic
                 #if (data_max-np.argmin(data, axis=1))/data_max>0.2:
                 batch[:,batch_index]=data_max
                 batch_index += 1

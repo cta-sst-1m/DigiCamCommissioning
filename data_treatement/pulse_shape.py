@@ -6,7 +6,7 @@ from tqdm import tqdm
 from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
 
-def run(pulse_shapes, options, compute_errors=False):
+def run(pulse_shapes, options):
 
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
@@ -52,18 +52,15 @@ def run(pulse_shapes, options, compute_errors=False):
                 pbar.update(1)
 
                 # get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.dl0.tel[telid].adc_samples.values()), dtype=float)
                 #print(np.sum(data))
                 # subtract the pedestals
                 data = data[options.pixel_list]
 
-                if not compute_errors:
+                pulse_shapes[level, :, :, 0] += data/options.events_per_level
+                pulse_shapes[level, :, :, 1] += (data*data)/options.events_per_level
 
-                    pulse_shapes[level, :, :, 0] += data/options.events_per_level
+    pulse_shapes[:, :, :, 1] = np.sqrt((pulse_shapes[:, :, :, 1] - pulse_shapes[:,:,:,0]**2) /options.events_per_level)
 
-                else:
 
-                    pulse_shapes[level, :, :, 1] += (data-pulse_shapes[level, :, :, 0])**2/options.events_per_level
-
-    pulse_shapes[:, :, :, 1] = np.sqrt(pulse_shapes[:, :, :, 1]/options.events_per_level)
     return pulse_shapes

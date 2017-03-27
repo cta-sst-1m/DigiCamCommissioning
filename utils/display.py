@@ -78,7 +78,7 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
 
     return h_to_return
 
-def draw_fit_result_level(axis, hist, options, pixel=0, index=0):
+def draw_fit_result_level(axis, hist, options, pixel=0, index=0, scale='linear'):
 
     y = hist.fit_result[:, pixel, index, 0]
     yerr = hist.fit_result[:, pixel, index, 1]
@@ -88,6 +88,7 @@ def draw_fit_result_level(axis, hist, options, pixel=0, index=0):
     axis.errorbar(x, y, yerr=yerr, fmt='ok', label='pixel : %d' %(options.pixel_list[pixel]))
     axis.set_xlabel('level [DAC]')
     axis.set_ylabel(hist.fit_result_label[index])
+    axis.set_yscale(scale)
     axis.legend(loc='upper right')
 
 
@@ -654,12 +655,52 @@ def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_
 
     return fig
 
-def display_fit_result_level(hist, options):
+def display_fit_result_level(hist, options, scale='linear'):
     """
     """
 
     fig = plt.figure(figsize=(20, 20))
     counter = Counter(hist.data.shape, param_len=hist.fit_result.shape[-2])
+
+    def press(event):
+
+        sys.stdout.flush()
+
+        if event.key == '+':
+
+            counter.next_pixel()
+            axis_param.cla()
+            draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param, scale=scale)
+
+        elif event.key == '-':
+
+            counter.previous_pixel()
+            axis_param.cla()
+            draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param, scale=scale)
+
+        elif event.key == '.':
+
+            counter.next_param()
+            axis_param.cla()
+            draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param, scale=scale)
+
+        else:
+
+            print('Invalid key : %s' %event.key)
+
+    fig.canvas.mpl_connect('key_press_event', press)
+
+    axis_param = fig.add_subplot(1, 1, 1)
+    draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param)
+
+    fig.canvas.draw()
+
+    return fig
+
+def display_xy_pixel(x, y):
+
+    fig = plt.figure(figsize=(20, 20))
+    counter = Counter(x.shape)
 
     def press(event):
 
@@ -677,25 +718,14 @@ def display_fit_result_level(hist, options):
             axis_param.cla()
             draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param)
 
-        elif event.key == '.':
-
-            counter.next_param()
-            axis_param.cla()
-            draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param)
-
         else:
 
             print('Invalid key : %s' %event.key)
 
     fig.canvas.mpl_connect('key_press_event', press)
 
-    axis_param = fig.add_subplot(1, 1, 1)
-    draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param)
-
-    fig.canvas.draw()
-
-    return fig
-
+def draw_xy():
+    return
 
 class Counter():
 
