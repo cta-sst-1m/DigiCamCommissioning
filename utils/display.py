@@ -58,10 +58,10 @@ def draw_fit_result(axis, hist, index=0, limits = None, display_fit=False):
     if display_fit:
 
         gaussian = scipy.stats.norm
-        fit_param = gaussian.fit(h)
+        fit_param = gaussian.fit(h[1:-1 ])
         gaussian_fit = gaussian(fit_param[0], fit_param[1])
         x = np.linspace(min(bin_edges), max(bin_edges), 100)
-        axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*(bin_width), label='fit', color='r')
+        axis.plot(x[1:-1], gaussian_fit.pdf(x[1:-1])*np.sum(histo[1:-1])*(bin_width), label='fit', color='r')
         text_fit_result = '$\mu$ : %0.2f \n $\sigma$ : %0.2f \n entries : %d' % (fit_param[0], fit_param[1], h.shape[0])
         anchored_text = AnchoredText(text_fit_result, loc=2, prop=dict(size=18))
         axis.add_artist(anchored_text)
@@ -265,12 +265,9 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
         reduced_axis = x
         fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1]+1E-8, 10*reduced_axis.shape[0])
         reduced_func = hist.fit_function
-        import spectra_fit.fit_low_light as tmpfct
-        reduced_func = tmpfct.fit_func
-        print()
-        print(fit_axis,fit_axis.shape)
-        print('fit_res',hist.fit_result[index][:, 0])
-        print(reduced_func(hist.fit_result[index][:, 0], fit_axis),reduced_func(hist.fit_result[index][:, 0], fit_axis).shape)
+        if hist.fit_result[index][0, 0]<30.:
+            import spectra_fit.fit_low_light as tmpfct
+            reduced_func = tmpfct.fit_func
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
 
         text_fit_result += '$\chi^{2}/ndf : %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
@@ -494,7 +491,13 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
                 counter.next_param()
                 axis_param.cla()
                 image = draw_fit_result(axis_param, hist, index=counter.count_param, display_fit=True)
-
+                print(hist.fit_result_label[counter.count_param] )
+                if hist.fit_result_label[counter.count_param] == '$\sigma_e$ [ADC]':
+                    image[image < 2.] = 2.
+                    image[image > 4.] = 4.
+                elif  hist.fit_result_label[counter.count_param] == '$\sigma_1$ [ADC]':
+                    image[image < 1.6] = 1.6
+                    image[image > 2.2] = 2.2
                 if geom is not None:
                     camera_visu.image = image
                     camera_visu.colorbar.set_label(hist.fit_result_label[counter.count_param])

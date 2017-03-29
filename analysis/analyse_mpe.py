@@ -79,8 +79,10 @@ def perform_analysis(options):
     dark_fit_result = np.copy(dark.fit_result)
     del dark
     del mpes_full
-    mpes_full_fit_result[...,2,0]=dark_fit_result[...,2,0]
-    mpes_full_fit_result[...,2,1]=dark_fit_result[...,2,1]
+    #mpes_full_fit_result[...,2,0]=dark_fit_result[...,2,0]
+    #mpes_full_fit_result[...,2,1]=dark_fit_result[...,2,1]
+    mpes_full_fit_result[...,0,0]=dark_fit_result[...,1,0]
+    mpes_full_fit_result[...,0,1]=dark_fit_result[...,1,1]
     mpes_full_fit_result = mpes_full_fit_result.reshape((1,) + mpes_full_fit_result.shape)
     mpes_full_fit_result = np.repeat(mpes_full_fit_result, nlevel, axis=0)
     log = logging.getLogger(sys.modules['__main__'].__name__+__name__)
@@ -93,20 +95,21 @@ def perform_analysis(options):
 
     ## Now perform the mu and mu_XT fits
     for pixel,real_pix in enumerate(options.pixel_list):#enumerate(options.pixel_list):
-        if real_pix!=44:continue
+        #if real_pix>44:continue
         _tmp_level = -1
         #if hasattr(options,'pixel_list') and pixel not in options.pixel_list:
         #    continue
 
         force_xt = False
         if pixel > 0: log.debug('Pixel #' + str(pixel - 1)+' treated')
+        best_fit_level = -1
         for level in range(mpes.data.shape[0]):
             pbar.update(1)
             if np.isnan(mpes_full_fit_result[0,pixel,0,0]): continue
             if np.nonzero(mpes.data[level, pixel])[0].shape[0] == 1: continue
             #if std_dev(mpes.bin_centers, mpes.data[level, pixel]) > 400: continue
             if mpes.data[level, pixel, -1] > 0.02 * np.sum(mpes.data[level, pixel]): continue
-            if np.sum(mpes.data[level, pixel])<1e-8 or np.sum(mpes.data[level, pixel])<options.events_per_level/10:continue
+            if np.sum(mpes.data[level, pixel])<1e-8 or np.sum(mpes.data[level, pixel])<options.events_per_level/2:continue
             if _tmp_level!= level-1: continue
             #print(np.sum(mpes.data[level, pixel]),std_dev(mpes.bin_centers, mpes.data[level, pixel]))
             #print(mpes.data[level, pixel])
@@ -114,20 +117,16 @@ def perform_analysis(options):
             _tmp_level = level
             fixed_param = []
             _fit_spectra = fit_low_light
-            if level > 0:
-                print('####################### MU :',mpes.fit_result[level - 1, pixel, 0, 0] )
-            print('pixel %d, level %d'%(pixel,level))
             successful = False
             while not successful:
-
                 #if level > 0 :
                 #    print('level:',level-1,mpes.fit_result[level - 1, pixel, 0, 0],mpes.fit_result[level - 1, pixel, 1, 0],mpes.fit_result[level - 1, pixel, 0, 1],mpes.fit_result[level - 1, pixel, 1, 1])
 
                 if level > 0 and (mpes.fit_result[level - 1, pixel, 0, 0] > 30. or _fit_spectra is fit_high_light):
                    #mpes.save(options.output_directory + options.histo_filename)
                     #sys.exit()
-                   best_fit_level = np.argmin(
-                       np.abs(mpes.fit_chi2_ndof[0:level:1, :, 0] / mpes.fit_chi2_ndof[0:level:1, :, 1] - 1.))
+                   if best_fit_level < 0:
+                       print('problem the dark was not evaluated befor')
 
                    fixed_xt = mpes.fit_result[best_fit_level, pixel, 1, 0]
 
@@ -138,15 +137,19 @@ def perform_analysis(options):
                                   [5, (3, 0)],  # sigma_1
                                   [7, 0.]  # offset
                                   ]
-
-                   print('fit_highlight')
-
                    _fit_spectra = fit_high_light
 
                 elif (level > 0 and mpes.fit_result[level - 1, pixel, 0, 0] > 6.) or force_xt:
                     # get chi2ndof closest from 1:
-                    best_fit_level = np.argmin(np.abs(mpes.fit_chi2_ndof[0:level:1,:,0]/mpes.fit_chi2_ndof[0:level:1,:,1]-1.))
+                    if best_fit_level<0:
+                        first_good_level = np.where(mpes.fit_result[0:level:1, pixel, 0, 0]>0.5)[0][0]
+                        #print(np.abs(mpes.fit_result[first_good_level:level:1, pixel, 1,1] / mpes.fit_result[first_good_level:level:1, pixel, 1,0]))
+                        best_fit_level = first_good_level+np.nanargmin(np.abs(mpes.fit_result[first_good_level:level:1, pixel, 1,1] / mpes.fit_result[first_good_level:level:1, pixel, 1,0]))
+                        #print('bestfit',best_fit_level, np.nanmin(np.abs(mpes.fit_result[first_good_level:level:1, pixel, 1,1] / mpes.fit_result[first_good_level:level:1, pixel, 1,0])))
                     fixed_xt = mpes.fit_result[best_fit_level, pixel, 1, 0]
+
+                    #print(best_fit_level,fixed_xt)
+
                     fixed_param = [
                         # in this case assign the cross talk estimation with smallest error
                         [1, fixed_xt],
@@ -156,7 +159,6 @@ def perform_analysis(options):
                         [5, (3, 0)],  # sigma_1
                         [7, 0.]  # offset
                     ]
-                    print('fit_fixed_xt')
                 else:
                     fixed_param = [
                         [2, (1, 0)],  # gain

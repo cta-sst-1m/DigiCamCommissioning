@@ -22,7 +22,14 @@ def p0_func(y, x, *args, config=None, **kwargs):
     if config is not None:
 
         ## Load from previous result
-        baseline = config[0, 0]
+
+        baseline = 0.
+        if np.where(y != 0)[0].shape[0] > 2:
+            baseline = x[np.where(y != 0)[0][0]] + 4.*4 # baseline
+            if baseline>config[0, 0]:
+                baseline = config[0, 0]-config[1, 0]/2
+        #baseline = config[0, 0]
+
         gain = config[1, 0]
         sigma_e = config[2, 0]
         sigma_1 = config[3, 0]
@@ -38,7 +45,7 @@ def p0_func(y, x, *args, config=None, **kwargs):
         mu_xt = 0.
         offset = 0.
 
-        param = [mu, mu_xt, gain, 0., sigma_e, sigma_1, amplitude, offset]
+        param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
         #print(param)
         return param
 
@@ -116,7 +123,7 @@ def slice_func(y, x, *args, **kwargs):
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal
-def bounds_func(*args, config=None, **kwargs):
+def bounds_func(y,x,*args, config=None, **kwargs):
     """
     return the boundaries for the parameters (essentially none for a gaussian)
     :param args:
@@ -147,7 +154,12 @@ def bounds_func(*args, config=None, **kwargs):
         sigma_e = config[2]
         sigma_1 = config[3]
         param_min = [0.    , 0., gain[0] - 5*gain[1]    , baseline[0]-2*gain[0], sigma_e[0] /2 , sigma_1[0] /2 ,0.,-np.inf]
-        param_max = [np.inf, 1. , gain[0] + 5*gain[1], 3. , sigma_e[0] *2, sigma_1[0] *2,np.inf, np.inf]
+        param_max = [np.inf, 1. , gain[0] + 5*gain[1], baseline[0]+3., sigma_e[0] *2, sigma_1[0] *2,np.inf, np.inf]
+
+
+        #if np.where(y != 0)[0].shape[0] > 2:
+        #    if x[np.where(y != 0)[0][0]] + 4.*4  < baseline[0]:
+        #        param_min[3]  = x[np.where(y != 0)[0][0]] + 4  # baseline
     #print(param_min)
     #print(param_max)
     return param_min, param_max

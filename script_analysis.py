@@ -67,7 +67,6 @@ if __name__ == '__main__':
     # Start the loggers
     logger.initialise_logger( options )
     # load the analysis module
-    print('--------------------------',options.analysis_module)
     analysis_module = __import__('analysis.%s'%options.analysis_module,
                                  locals=None,
                                  globals=None,

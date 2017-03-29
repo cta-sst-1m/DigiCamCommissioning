@@ -222,7 +222,7 @@ def integral():
     plt.plot(pes, gain)
     plt.show()
     plt.figure()
-    plt.plot(pes, integ,label='Integral')
+    #plt.plot(pes, integ,label='Integral')
     plt.plot(pes, integ_2,label='Integral until 0')
     plt.plot(pes, meas,label='Peak amplitude')
     plt.ylim(10.,10000.)

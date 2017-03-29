@@ -421,12 +421,11 @@ class Histogram:
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])])
                     weight_matrix = 1. #TODO changed to one since pull study showed previous config is fine
                     cov = np.sqrt(np.diag(inv(np.dot(np.dot(out.jac.T, weight_matrix), out.jac))))
-
                     fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
                 except np.linalg.linalg.LinAlgError as inst:
                     _idx = idx if isinstance(idx,int) else idx[-1]
                     if force_quiet:
-                        self.logger.debug('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
+                        self.logger.warning('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
                     else:
                         self.logger.warning('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
 
