@@ -56,11 +56,12 @@ def run(pulse_shapes, options):
                 #print(np.sum(data))
                 # subtract the pedestals
                 data = data[options.pixel_list]
+                data = data - np.mean(data[:,0:options.n_bins_before_signal], axis=-1)[...,None]
+
 
                 pulse_shapes[level, :, :, 0] += data/options.events_per_level
                 pulse_shapes[level, :, :, 1] += (data*data)/options.events_per_level
 
     pulse_shapes[:, :, :, 1] = np.sqrt((pulse_shapes[:, :, :, 1] - pulse_shapes[:,:,:,0]**2) /options.events_per_level)
 
-
-    return pulse_shapes
+    return

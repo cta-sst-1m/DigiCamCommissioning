@@ -27,8 +27,8 @@ dark_histo_filename    :
 
 # Event processing
 n_evt_per_batch   : 1000
-events_per_level  : 10000
-evt_min           : 40000 # TODO maybe change this to level_min and level_max
+events_per_level  : 50000
+evt_min           : 80000 # TODO maybe change this to level_min and level_max
 evt_max           : 100000
 
 # Camera Configuration

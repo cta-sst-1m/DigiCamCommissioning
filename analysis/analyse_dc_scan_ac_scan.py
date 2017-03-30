@@ -42,21 +42,21 @@ def create_histo(options):
     # Define the histograms
     mpes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                bin_width=options.adcs_binwidth, data_shape=(len(options.scan_level),len(options.pixel_list),),
-                               label='MPE',xlabel='Peak ADC',ylabel = '$\mathrm{N_{entries}}$')
+                               label='MPE',xlabel='ADC',ylabel = '$\mathrm{N_{entries}}$')
 
     # Get the reference sampling time
     peaks = histogram.Histogram(filename = options.output_directory + options.synch_histo_filename)
 
     # Construct the histogram
-    baseline = histogram.Histogram(fit_only=True, filename=options.directory + options.baseline_filename)
-    mpe_hist.run(mpes, options, peak_positions=peaks.data, baseline=baseline.fit_result[:,:,1,0])
+    nsb = histogram.Histogram(fit_only=True, filename=options.directory + options.baseline_filename)
+    mpe_hist.run(mpes, options, peak_positions=peaks.data, baseline=nsb.fit_result[:,:,0,0])
 
 
     # Save the histogram
     mpes.save(options.output_directory + options.histo_filename)
 
     # Delete the histograms
-    del mpes,peaks, baseline
+    del mpes,peaks
 
     return
 
@@ -65,43 +65,43 @@ def perform_analysis(options):
 
     mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    mpes.fit_result = np.zeros((mpes.data.shape[:-1])+(5,2,))
-    mpes.fit_result_label = ['amplitude []', 'mean [ADC]', 'sigma [ADC]', 'G/G$_{dark}$ []', r'$\frac{f_{nsb}}{1-\mu_{XT}}$ [GHz]']
+    mpes.fit_result_label = ['mean [ADC]', 'G/G$_{dark}$ []']
+    mpes.fit_result = np.zeros((mpes.data.shape[:-1])+(len(mpes.fit_result_label),2,))
 
-    dc_led_histogram = histogram.Histogram(filename=options.directory + options.baseline_filename)
-    pulse_integrals = np.load(options.output_directory + options.pulse_shape_filename.split('.')[0] + '_integrals.npz')['pulse_integrals']
+    #nsb = histogram.Histogram(filename=options.directory + options.nsb_filename)
+    #pulse_shape = histogram.Histogram(filename=options.directory + options.pulse_shape_filename)
     #full_mpe = histogram.Histogram(filename=options.directory + options.full_mpe_filename)
-    gain = np.ones((mpes.data.shape[0], mpes.data.shape[1], 2)) * 23 #full_mpe.fit_result[..., 2, 0]
-    gain[...,1] = 0.
-
-    level_for_pulse = 20
-
-    for i in range(mpes.data.shape[0]):
-        for j in range(mpes.data.shape[1]):
-
-            if np.sum(mpes.data[i,j])!=0:
-
-                mpes.fit_result[i, j, 0, 0] = np.sum(mpes.data[i, j])
-                mpes.fit_result[i, j, 0, 1] = np.sqrt(mpes.fit_result[i, j, 0, 0])
-                mpes.fit_result[i, j, 1, 0] = np.average(mpes.bin_centers, weights=mpes.data[i, j])
-                mpes.fit_result[i, j, 2, 0] = np.sqrt(np.average((mpes.bin_centers-mpes.fit_result[i, j, 0, 0])**2, weights=mpes.data[i, j]))
-                mpes.fit_result[i, j, 1, 1] = mpes.fit_result[i, j, 2, 0]/ np.sqrt(mpes.fit_result[i, j, 0, 0])
-                mpes.fit_result[i, j, 3, 0] = mpes.fit_result[i, j, 1, 0]/mpes.fit_result[0, j, 1, 0]
-                mpes.fit_result[i, j, 3, 1] = mpes.fit_result[i, j, 3, 0] * (mpes.fit_result[i, j, 1, 1]/mpes.fit_result[i, j, 1, 0] + mpes.fit_result[0, j, 1, 1]/mpes.fit_result[0, j, 1, 0])
-                mpes.fit_result[i, j, 4, 0] = (dc_led_histogram.fit_result[i, j, 1, 0] - dc_led_histogram.fit_result[0, j, 1, 0])
-                temp_1  = mpes.fit_result[i, j, 4, 0]
-                temp_1_error  = np.sqrt(dc_led_histogram.fit_result[i, j, 1, 1]**2 + dc_led_histogram.fit_result[0, j, 1, 1]**2)
-                temp_2 = (gain[i ,j, 0] * mpes.fit_result[i, j, 3, 0] * pulse_integrals[level_for_pulse, j, 0])
-                temp_2_error =  (gain[i, j, 1]/gain[i, j, 0] + mpes.fit_result[i, j, 3, 1]/mpes.fit_result[i, j, 3, 0] + pulse_integrals[level_for_pulse, j, 1]/pulse_integrals[level_for_pulse, j, 0])
-                mpes.fit_result[i, j, 4, 0] /= temp_2
-                mpes.fit_result[i, j, 4, 1] = mpes.fit_result[i, j, 4, 0] * (temp_1_error/temp_1 + temp_2_error/temp_2)
+    #gain = np.ones((mpes.data.shape[0], mpes.data.shape[1], 2)) * 23 #full_mpe.fit_result[..., 2, 0]
+    #gain[...,1] = 0.
 
 
-                #mpes.fit_result[i, j, 4, 1] = mpes.fit_result[i,j, 4, 0] * ((dc_led_histogram.fit_result[i, j, 1, 1]/dc_led_histogram.fit_result[i, j, 1, 0])**2 + (pulse_integrals[i, j, 1]/pulse_integrals[i, j, 0])**2)
+    log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
+    pbar = tqdm(total=mpes.data.shape[0])
+    tqdm_out = TqdmToLogger(log, level=logging.INFO)
+
+    for level in range(mpes.data.shape[0]):
+
+        log.debug('--|> Moving to DC level %d [DAC]' %options.scan_level[level])
+
+        for pixel in range(mpes.data.shape[1]):
+
+            n_entries = np.sum(mpes.data[level, pixel])
+
+            if n_entries!=0:
+
+                mpes.fit_result[level, pixel, 0, 0] = np.average(mpes.bin_centers, weights=mpes.data[level, pixel])
+                std = np.sqrt(np.average((mpes.bin_centers-mpes.fit_result[level, pixel, 0, 0])**2, weights=mpes.data[level, pixel]))
+                mpes.fit_result[level, pixel, 0, 1] = std / np.sqrt(n_entries)
+                mpes.fit_result[level, pixel, 1, 0] = mpes.fit_result[level, pixel, 0, 0] / mpes.fit_result[0, pixel, 0, 0]
+                mpes.fit_result[level, pixel, 1, 1] = np.abs(mpes.fit_result[level, pixel, 1, 0]) * np.sqrt((mpes.fit_result[level, pixel, 0, 1]/mpes.fit_result[level, pixel, 0, 0])**2 + (mpes.fit_result[0, pixel, 0, 1]/mpes.fit_result[0, pixel, 0, 0])**2)
+
             else:
-                print('level %d, pixel %d not ok' %(options.scan_level[i], options.pixel_list[j]))
+                log.debug('level %d, pixel %d is empty' %(options.scan_level[level], options.pixel_list[pixel]))
+
+        pbar.update(1)
 
     mpes.save(options.output_directory + options.histo_filename)
+
 
 
 
@@ -130,8 +130,7 @@ def display_results(options):
 
 
     display.display_fit_result_level(mpes, options=options, scale='log')
+    display.display_fit_result_level(mpes, options=options, scale='linear')
 
-
-    input('press button to quit')
 
     return

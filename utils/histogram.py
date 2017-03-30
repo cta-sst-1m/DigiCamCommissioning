@@ -425,7 +425,7 @@ class Histogram:
                                            axis=1)
 
             except Exception as inst:
-                self.logger.error('Could not fit index %s'%idx[-1])
+                self.logger.error('Could not fit index ??? ')#%s'%idx[-1])
                 self.logger.error(inst)
                 self.logger.debug('p0:', reduced_p0)
                 self.logger.debug('bound min:', reduced_bounds[0])

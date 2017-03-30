@@ -78,18 +78,33 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
 
     return h_to_return
 
-def draw_fit_result_level(axis, hist, options, pixel=0, index=0, scale='linear'):
+def draw_fit_result_level(axis, hist, options, pixel=0, index=0, scale='linear', dark_x=False):
 
     y = hist.fit_result[:, pixel, index, 0]
     yerr = hist.fit_result[:, pixel, index, 1]
-    x = np.array(options.scan_level[0:len(y)])
+    if dark_x:
+        x = hist.fit_result[:, pixel, -1, 0]
+        xerr = hist.fit_result[:, pixel, -1, 1]
+        axis.set_xlabel(hist.fit_result_label[-1])
+        if hist.fit_result_label[index]=='G/G$_{dark}$ []':
 
+            x_model = np.logspace(np.log10(np.nanmin(x[x>0])), np.log10(np.nanmax(x[x>0])), 1000)
+            r_bias = 1E4
+            c_cell = 85 * 1E-15
+            model = 1. / (1. + r_bias*x_model*1E9*c_cell)
+            axis.plot(x_model, model, label='model : $R_{bias} = $ %d k$\Omega$, $C_{cell} =$ %d fF' % (r_bias/1E3, c_cell*1E15))
 
-    axis.errorbar(x, y, yerr=yerr, fmt='ok', label='pixel : %d' %(options.pixel_list[pixel]))
-    axis.set_xlabel('level [DAC]')
+        axis.set_xscale('log')
+
+    else:
+        x = np.array(options.scan_level[0:len(y)])
+        xerr = np.zeros(len(x))
+        axis.set_xlabel('level [DAC]')
+
+    axis.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='ok', label='pixel : %d' %(options.pixel_list[pixel]))
     axis.set_ylabel(hist.fit_result_label[index])
     axis.set_yscale(scale)
-    axis.legend(loc='upper right')
+    axis.legend(loc='best')
 
 
     return
@@ -161,45 +176,54 @@ def draw_chi2(axis, hist, display_fit):
     # Get the data and assign limits
 
     if len(hist.fit_chi2_ndof.shape)>2:
-        h = np.copy(hist.fit_chi2_ndof[0, :, 0] / hist.fit_chi2_ndof[0, :, 1])
-
+        h = hist.fit_chi2_ndof[0, :, 0] / hist.fit_chi2_ndof[0, :, 1]
     else:
-        h = np.copy(hist.fit_chi2_ndof[:,0]/ hist.fit_chi2_ndof[:,1])
+        h = hist.fit_chi2_ndof[:,0]/ hist.fit_chi2_ndof[:,1]
 
-    mask = (~np.isnan(h))
+    limit = 100
+
+    h_to_return = h
+    mask = (~np.isnan(h) * np.isfinite(h) * (h<=limit))
+    h_to_return[~mask] = limit
     h = h[mask]
 
-    histo = axis.hist(h, bins='auto', histtype='step', align='left', label='All pixels', color='k', linewidth=1)
 
-    bin_edges = histo[1][0:-1]
-    bin_width = bin_edges[1] - bin_edges[0]
-    histo = histo[0]
+    if np.sum(mask)>0:
 
-    if display_fit:
+        histo = axis.hist(h, bins='auto', histtype='step', align='left', label='All pixels', color='k', linewidth=1)
 
-        gaussian = scipy.stats.norm
-        fit_param = gaussian.fit(h)
-        gaussian_fit = gaussian(fit_param[0], fit_param[1])
-        x = np.linspace(min(bin_edges), max(bin_edges), 100)
-        axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*bin_width, label='fit', color='r')
-        text_fit_result = '$\mu$ = %0.2f \n $\sigma$ = %0.2f' % (fit_param[0], fit_param[1])
-        axis.text(bin_edges[-2], max(histo), text_fit_result)
+        bin_edges = histo[1][0:-1]
+        bin_width = bin_edges[1] - bin_edges[0]
+        histo = histo[0]
 
 
 
+        if display_fit:
 
-    #axis.step(np.arange(limits[0] + bin_width / 2, limits[1] + 1.5 * bin_width, bin_width), hh, label='All pixels',
-    #          color='k', lw='1')
-    axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok')
-    # Beautify
-    axis.set_xlabel('$\chi^2 / ndf$')
-    axis.set_ylabel('$\mathrm{N_{pixel}/%.2f}$' % bin_width)
-    axis.xaxis.get_label().set_ha('right')
-    axis.xaxis.get_label().set_position((1, 0))
-    axis.yaxis.get_label().set_ha('right')
-    axis.yaxis.get_label().set_position((0, 1))
-    axis.legend()
-    return h
+            gaussian = scipy.stats.norm
+            fit_param = gaussian.fit(h)
+            gaussian_fit = gaussian(fit_param[0], fit_param[1])
+            x = np.linspace(min(bin_edges), max(bin_edges), 100)
+            axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*bin_width, label='fit', color='r')
+            text_fit_result = '$\mu$ = %0.2f \n $\sigma$ = %0.2f' % (fit_param[0], fit_param[1])
+            axis.text(bin_edges[-2], max(histo), text_fit_result)
+
+
+
+
+        #axis.step(np.arange(limits[0] + bin_width / 2, limits[1] + 1.5 * bin_width, bin_width), hh, label='All pixels',
+        #          color='k', lw='1')
+        axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok')
+        # Beautify
+        axis.set_xlabel('$\chi^2 / ndf$')
+        axis.set_ylabel('$\mathrm{N_{pixel}/%.2f}$' % bin_width)
+        axis.xaxis.get_label().set_ha('right')
+        axis.xaxis.get_label().set_position((1, 0))
+        axis.yaxis.get_label().set_ha('right')
+        axis.yaxis.get_label().set_position((0, 1))
+        axis.legend()
+
+    return h_to_return
 
 
 def draw_pulse_shape(axis, pulse_shape, options, index, color='k'):
@@ -252,20 +276,29 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
 
     #pixel_label[-1]= options.pixel_list[pixel_label[-1]] if not hasattr(options,'display_pixel' ) else options.display_pixel
     #pixel_label = tuple(pixel_label)
-    _tmp = list(hist.data.shape)
-    _tmp2 = _tmp.pop()
-    slice=[np.zeros(tuple(_tmp),dtype=int),np.ones(tuple(_tmp),dtype=int)*-1]
-    if draw_fit:
-        slice = [hist.fit_slices[..., 0], hist.fit_slices[..., 1]]
+    #_tmp = list(hist.data.shape)
+    #_tmp2 = _tmp.pop()
+    #slice=[np.zeros(tuple(_tmp),dtype=int),np.ones(tuple(_tmp),dtype=int)*-1]
+    #if draw_fit:
+    #    slice = [hist.fit_slices[..., 0], hist.fit_slices[..., 1]]
     # Get the data and assign limits
-    h = np.copy(hist.data[index][slice[0][index]:slice[1][index]:1])
-    h_err = np.copy(hist.errors[index][slice[0][index]:slice[1][index]:1])
+    #h = np.copy(hist.data[index][slice[0][index]:slice[1][index]:1])
+    #h_err = np.copy(hist.errors[index][slice[0][index]:slice[1][index]:1])
+    #x = np.copy(hist.bin_centers[slice[0][index]:slice[1][index]:1])
+
+
+    h = hist.data[index]
+    h_err = hist.errors[index]
+    x = hist.bin_centers
+
 
     #print(slice)
     h_to_return = h
 
     ### Avoid NANs
-    mask = (~np.isnan(h) * (h > 0))
+    mask = (~np.isnan(h))
+
+
 
     if np.sum(mask)==0:
         mask = [True**len(h)]
@@ -273,7 +306,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     #print(index)
     h = h[mask]
     h_err = h_err[mask]
-    x = hist.bin_centers[slice[0][index]:slice[1][index]:1][mask]
+    x = x[mask]
     axis.step(x, h, color=color, where='mid')
     axis.errorbar(x, h, yerr=h_err, fmt='ok', label=pixel_label)
     text_fit_result = ''
@@ -296,7 +329,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
 
     axis.set_xlabel(hist.xlabel)
     axis.set_ylabel(hist.ylabel)
-    axis.set_ylim(bottom=1)
+    #axis.set_ylim(bottom=1)
     axis.xaxis.get_label().set_ha('right')
     axis.xaxis.get_label().set_position((1, 0))
     axis.yaxis.get_label().set_ha('right')
@@ -655,7 +688,7 @@ def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_
 
     return fig
 
-def display_fit_result_level(hist, options, scale='linear'):
+def display_fit_result_level(hist, options, scale='linear', dark_x=False):
     """
     """
 
@@ -669,29 +702,27 @@ def display_fit_result_level(hist, options, scale='linear'):
         if event.key == '+':
 
             counter.next_pixel()
-            axis_param.cla()
-            draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param, scale=scale)
 
         elif event.key == '-':
 
             counter.previous_pixel()
-            axis_param.cla()
-            draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param, scale=scale)
 
         elif event.key == '.':
 
             counter.next_param()
-            axis_param.cla()
-            draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param, scale=scale)
 
         else:
 
             print('Invalid key : %s' %event.key)
 
+        axis_param.cla()
+        draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param,
+                              scale=scale, dark_x=dark_x)
+
     fig.canvas.mpl_connect('key_press_event', press)
 
     axis_param = fig.add_subplot(1, 1, 1)
-    draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param)
+    draw_fit_result_level(axis_param, hist, options=options, pixel=counter.count_pixel, index=counter.count_param, dark_x=dark_x)
 
     fig.canvas.draw()
 

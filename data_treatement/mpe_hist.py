@@ -55,15 +55,12 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
             shift = window_start  # window_width - int(np.floor(window_width/2))+window_start
             missing = mask_window.shape[1] - (window_width - 1)
             mask_window = mask_window[..., shift:]
-            print(mask_window.shape[1], missing)
             missing = mask_window.shape[1] - missing
             mask_window = mask_window[..., :-missing]
-            print(mask_window.shape[1], missing)
             mask_windows_edge = mask_windows_edge[..., shift:]
             mask_windows_edge = mask_windows_edge[..., :-missing]
             # mask_window = np.append(mask_window,np.zeros((mask_window.shape[0],missing),dtype=bool),axis=1)
             # mask_windows_edge = np.append(mask_windows_edge,np.zeros((mask_windows_edge.shape[0],missing),dtype=bool),axis=1)
-            print(shift)
 
     def integrate_trace(d):
         return np.convolve(d, np.ones((window_width), dtype=int), 'valid')

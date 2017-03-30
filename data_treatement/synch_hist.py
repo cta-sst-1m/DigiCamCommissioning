@@ -14,7 +14,7 @@ def run(hist, options, min_evt = 0):
     batch = None
 
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
-    pbar = tqdm(total=max_evt-min_evt)
+    pbar = tqdm(total=max_evt)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
     for file in options.file_list:
 
