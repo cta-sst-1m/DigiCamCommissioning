@@ -1,0 +1,42 @@
+# Analysis module
+analysis_module : analyse_trigger
+
+# Logging
+verbose           : False
+mc                : True
+log_file_basename : 20161214
+
+# Input files
+mc            :     True
+file_basename :     xt_0_06_dark_scan_seed_%d.hdf5
+directory     :     /home/alispach/data/digicam_commissioning/trigger/mc/
+nsb_level     :     [0, 0.03, 0.075, 0.165, 0.66]#, 3, 10]#, 40, 80, 100, 150, 200, 300]
+scan_level    :     [0, 1, 2, 3, 4]#, 1, 2]#, 1, 2, 3, 4, 5, 6]
+file_list     :     [0]#, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
+# Output files
+output_directory  : /home/alispach/data/digicam_commissioning/trigger/mc/
+histo_filename    : trigger.npz
+trigger_spectrum_filename : spectrum_trigger
+
+# Camera Configuration
+#n_pixels          : 1296
+#angle_cts         : 120
+n_clusters : 1 # only 1 is working
+window_width : 100 # bins
+baseline_bins : 1024 # bins to compute baseline
+evt_min : 0
+evt_max : 250
+n_evt_per_batch : 100000 #TODO make this work
+events_per_level : 50
+# Trigger Configuration
+#threshold : [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 400, 600, 1000, 1785]
+baseline_window_width : 1024
+#threshold : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36 40, 45, 50]
+threshold_min : 0
+threshold_max : 70
+threshold_step : 1
+cluster_size : 9
+compression_factor : 4
+clipping_patch : 255
+blinding : True

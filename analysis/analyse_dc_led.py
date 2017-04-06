@@ -17,7 +17,7 @@ from utils import display, histogram, geometry
 from ctapipe import visualization
 
 
-__all__ = ["create_histo", "perform_analysis", "display_results"]
+__all__ = ["create_histo", "perform_analysis", "display_results", 'save']
 
 
 def create_histo(options):
@@ -71,17 +71,35 @@ def create_histo(options):
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     xt = 0.08
+    xt_error = 0.
 
 
 
     for pixel in range(dc_led.data.shape[0]):
 
+        b = nsb.fit_result[:, pixel, 0, 0] - nsb.fit_result[0, pixel, 0, 0]
+        delta_b = np.sqrt((nsb.fit_result[:, pixel, 0, 1] /nsb.fit_result[:, pixel, 0, 0])**2 + (nsb.fit_result[0, pixel, 0, 1]/nsb.fit_result[0, pixel, 0, 0])**2)
+        d = (1. - xt)
+        delta_d = xt_error
+        a = b * d
+        delta_a = np.abs(a) * np.sqrt((delta_b/b)**2 + (delta_d/d)**2)
+        c = pulse_shape.fit_result[options.ac_level_for_pulse_shape_integral, pixel, 3, 0] * mpes.fit_result[:, pixel, 1, 0] * full_mpe.fit_result[pixel, 1, 0]
+        delta_c = np.abs(c) * np.sqrt((pulse_shape.fit_result[options.ac_level_for_pulse_shape_integral, pixel, 3, 1]/pulse_shape.fit_result[options.ac_level_for_pulse_shape_integral, pixel, 3, 0])**2  + (mpes.fit_result[:, pixel, 1, 1]/mpes.fit_result[:, pixel, 1, 0])**2 + (full_mpe.fit_result[pixel, 1, 1]/full_mpe.fit_result[pixel, 1, 0])**2)
+        f_nsb = a/c
+        delta_f_nsb = np.abs(f_nsb) * np.sqrt((delta_a/a)**2 + (delta_c/c)**2)
+
+        dc_led.data[pixel] = f_nsb * 1E3
+        #dc_led.errors[pixel] = delta_f_nsb * 1E3
+        dc_led.errors[pixel] = np.ones(dc_led.data[pixel].shape)
+
+        '''
         dc_led.data[pixel] = nsb.fit_result[:, pixel, 0, 0] - nsb.fit_result[0, pixel, 0, 0]
         dc_led.data[pixel] /= mpes.fit_result[:, pixel, 1, 0] * full_mpe.fit_result[pixel, 1, 0]
         dc_led.data[pixel] /= pulse_shape.fit_result[options.ac_level_for_pulse_shape_integral, pixel, 3, 0]
         dc_led.data[pixel] *= 1E3 * (1. - xt)
         #dc_led.errors[pixel] = np.sqrt(nsb.fit_result[:, pixel, 0, 1]**2 + nsb.fit_result[0, pixel, 0, 1]**2)
         dc_led.errors[pixel] = np.ones(dc_led.data[pixel].shape)
+        '''
         """
         if options.pixel_list[pixel]==627:
             print(nsb.fit_result[:, pixel, 0, 0])
@@ -181,22 +199,38 @@ def display_results(options):
     return
 
 
-def convert_dac_to_nsb(options):
+def save(options): # convert f to dac
 
-    dc_led = histogram.Histogram(filename=options.output_directory + options.dc_led_filename)
+    dc_led = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+
+    dac_limits = [0, 1000]
 
     def inverse_func(param, f):
 
-        return 1./param[1] * np.log(f/param[0])
+        return (1./param[1] * np.log(f/param[0])).astype(int)
 
     dac = np.zeros((dc_led.fit_result.shape[0], len(options.frequency_list)))
 
-    for pixel in range(dac.shape[0]):
+    if np.any(np.array(options.frequency_list)>1E4) or np.any(np.array(options.frequency_list)<1E1):
 
-        dac[i, :] = inverse_func(dc_led.fit_result[pixel, :, 0], np.array(options.frequency_list))
+        pass
 
-    return dac
+    else:
 
+        for pixel in range(dac.shape[0]):
+
+            dac[pixel, :] = inverse_func(dc_led.fit_result[pixel, :, 0], np.array(options.frequency_list))
+
+            if np.any(dac[pixel, :]<dac_limits[0]) or np.any(dac[pixel, :]>dac_limits[1]) or np.any(np.isnan(dac[pixel, :])):
+
+                dac[pixel, :] = np.zeros(dac.shape[1])
+
+    coeff = np.zeros((dc_led.data.shape[0], 2))
+    coeff[:, 0] = dc_led.fit_result[:, 0, 0]
+    coeff[:, 1] = dc_led.fit_result[:, 1, 0]
+
+    np.savetxt(fname=options.output_directory + 'coeff.txt', X=coeff)
+    np.savetxt(fname=options.output_directory + options.frequency_filename, X=dac, fmt='%d')
 
 
 

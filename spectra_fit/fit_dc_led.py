@@ -54,7 +54,7 @@ def bounds_func(*args, config=None, **kwargs):
     """
 
     param_min = [0., 0.]
-    param_max = [np.inf, np.inf]
+    param_max = [np.inf, 1]
 
     return param_min, param_max
 
