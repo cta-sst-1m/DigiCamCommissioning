@@ -111,7 +111,6 @@ if __name__ == '__main__':
 
 
 
-            #print(options.pixel_list)
 
         else:
 

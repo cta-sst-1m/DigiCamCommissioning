@@ -3,25 +3,34 @@ import h5py
 import logging, sys
 
 
-class telescope:
+class telescope():
+
     def __init__(self, id,):
+
         self.eventNumber = 0
         self.adc_samples = {}
         self.id = id
-class dl0:
+
+class dl0():
+
     def __init__(self,id_list = [0], event_id=0):
+
         self.tels_with_data = []
         self.event_id = event_id
         self.tel = {}
+
         for id in id_list:
+
             self.tels_with_data.append(id)
             self.tel[id]=telescope(id)
 
     def set_data(self,telid,evtnum,adcs):
+
         self.tel[telid].eventNumber = evtnum
         self.tel[telid].adc_samples = {i: adcs[i] for i in range(len(adcs))}
 
-class ToyReader: # create a reader as asked
+class ToyReader(): # create a reader as asked
+
     def __init__(self, filename='../../digicamtoy/data_calibration_cts/toy_data_', id_list = [0], max_events=50000, n_pixel=1296, events_per_level=1000, seed=0, level_start=0):
         self.count = 0
         self.event_id = 0
@@ -35,8 +44,8 @@ class ToyReader: # create a reader as asked
         self.events_per_level = events_per_level
         self.seed = seed
         self.level = level_start
-        self.n_traces_tot = self.hdf5_file['level_%d'%self.level]['trace'].shape[0]
-        self.n_samples = self.hdf5_file['level_%d'%self.level]['trace'].shape[1]
+        self.n_traces_tot = self.hdf5_file['dc_level_%d_ac_level_0'%self.level]['trace'].shape[0]
+        self.n_samples = self.hdf5_file['dc_level_%d_ac_level_0'%self.level]['trace'].shape[1]
         np.random.seed(seed=self.seed)
         self.log = logging.getLogger(sys.modules['__main__'].__name__)
 
@@ -45,16 +54,18 @@ class ToyReader: # create a reader as asked
         if self.events_per_level>self.evt_max:
 
 
-            print('events_per_level %d must be <= than evt_max %d' %(self.events_per_level, self.evt_max))
+            log.error('events_per_level %d must be <= than evt_max %d' %(self.events_per_level, self.evt_max))
 
 
         return
 
 
     def __iter__(self):
+
         return self
 
     def __next__(self):
+
          return self.next()
 
 
@@ -66,8 +77,15 @@ class ToyReader: # create a reader as asked
 
             i = 0
 
-            data = self.hdf5_file['level_%d' % self.level]['trace']
-            random_sample = np.random.randint(low=0, high=self.n_traces_tot, size=self.n_pixel)
+            data = self.hdf5_file['dc_level_%d_ac_level_0' % self.level]['trace']
+
+            if self.n_traces_tot<self.n_pixel:
+                self.log.error('Could not find trace in because file contains %d traces and asked for %d pixels' %(self.n_traces_tot, self.n_pixel))
+
+            random_sample = np.arange(0, self.n_traces_tot, 1)
+            np.random.shuffle(random_sample)
+            random_sample = random_sample[0:self.n_pixel]
+            #random_sample = np.random.randint(low=0, high=self.n_traces_tot, size=self.n_pixel)
             while i<self.n_pixel:
 
                 adcs.append(data[random_sample[i]])
@@ -83,7 +101,7 @@ class ToyReader: # create a reader as asked
             self.count += 1
             if not self.count%self.events_per_level:
 
-                self.log.info('\t\t-|> Level %d cointains %d traces for %d pixels' %(self.level, self.count/(self.level+1), self.n_pixel))
+                self.log.debug('\t\t-|> DC level %d cointains %d traces for %d pixels' %(self.level, self.count/(self.level+1), self.n_pixel))
                 self.level += 1
 
         else:
