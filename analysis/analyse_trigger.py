@@ -44,16 +44,17 @@ def create_histo(options):
     #print(temp)
     #Clusters_patch_list = temp['patches_in_cluster'][0:options.n_clusters]
 
-    triggers = histogram.Histogram(data=np.zeros((len(options.scan_level), options.n_clusters, len(options.threshold))), \
+    triggers = histogram.Histogram(data=np.zeros((len(options.scan_level), len(options.threshold))), \
                                  bin_centers=np.array(options.threshold), label='Trigger', \
                                  xlabel='Threshold [ADC]', ylabel='trigger rate [Hz]')
 
 
 
-    trigger_spectrum = trigger.run(triggers, options=options)
+    #trigger_spectrum = trigger.run(triggers, options=options)
+    trigger.run(triggers, options=options)
     triggers.save(options.output_directory + options.histo_filename)
 
-    np.save(arr=trigger_spectrum.ravel(), file=options.output_directory + options.trigger_spectrum_filename)
+    #np.save(arr=trigger_spectrum.ravel(), file=options.output_directory + options.trigger_spectrum_filename)
 
     return
 
@@ -147,7 +148,8 @@ def display_results(options):
     axis_1.set_title('window width : %d samples' %options.window_width)
     for i, level in enumerate((options.scan_level)):
 
-        axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level, 0], yerr=triggers.errors[level, 0], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='-.')
+        #axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level, 0], yerr=triggers.errors[level, 0], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='-.')
+        axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level], yerr=triggers.errors[level], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='None', fmt='o')
         axis_1.plot(data_digicam[i]['x'], data_digicam[i]['y'], label=data_digicam[i]['label'], color=colors[i])
 
     axis_1.axhline(y=500, color = 'k', label='safe threshold', linestyle='-.')
