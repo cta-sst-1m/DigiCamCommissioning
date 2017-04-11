@@ -3,7 +3,7 @@
 # external modules
 
 # internal modules
-import data_treatement.pulse_shape
+from data_treatement import pulse_shape
 from utils import display, histogram, geometry
 import logging,sys
 import numpy as np
@@ -11,6 +11,9 @@ import logging
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 import matplotlib.pyplot as plt
+
+from ctapipe import visualization
+import scipy
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
 

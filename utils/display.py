@@ -846,12 +846,18 @@ class Counter():
 def display_by_pixel(hist,options):
     print(np.max(hist),options.pixel_list)
     h = np.zeros((1296,),dtype=float)
+    h1 = np.zeros((12,),dtype=float)
     for module in options.cts.camera.Modules:
         for pix in module.pixelsID_inModule:
             if module.pixels[pix-1].ID in options.pixel_list:
+                if hist[options.pixel_list.index(module.pixels[pix-1].ID)]>0.05:
+                    h1[(pix - 1)]=h1[(pix - 1)]+hist[options.pixel_list.index(module.pixels[pix-1].ID)]
                 h[(module.ID - 1) * 12 + (pix - 1)]=hist[options.pixel_list.index(module.pixels[pix-1].ID)]
 
 
     plt.figure()
-    plt.step(np.arange(0,1296),h)
+    plt.step(np.arange(0,1296),h, where='mid')
+    plt.show()
+    plt.figure()
+    plt.step(np.arange(0,12),h1, where='mid')
     plt.show()

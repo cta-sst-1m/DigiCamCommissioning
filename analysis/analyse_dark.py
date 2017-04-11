@@ -11,6 +11,8 @@ import logging,sys
 import scipy.stats
 import numpy as np
 
+from scipy import stats
+
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
 
@@ -35,19 +37,26 @@ def create_histo(options):
 
     :return:
     """
-
+    adcs = None
     # Define the histograms
-    adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
-                               bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list  ),),
-                               label='Dark ADC',xlabel='ADC',ylabel = 'entries')
+    if options.dark_analysis == 'mean_rms':
+        adcs = [np.zeros((len(options.pixel_list), options.evt_max)),
+                np.zeros((len(options.pixel_list), options.evt_max))]
+        # Get the adcs
+        adc_hist.run(adcs, options,'MEANRMS')
+        np.savez_compressed(options.output_directory + options.histo_filename, mean = adcs[0], rms = adcs[1])
+    else:
 
-    # Get the adcs
-    adc_hist.run(adcs, options,'ADC')
+        adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+                                   bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
+                                   label='Dark ADC', xlabel='ADC', ylabel='entries')
+
+        # Get the adcs
+        adc_hist.run(adcs, options,'ADC')
 
 
-
-    # Save the histogram
-    adcs.save(options.output_directory + options.histo_filename)
+        # Save the histogram
+        adcs.save(options.output_directory + options.histo_filename)
 
     # Delete the histograms
     del adcs
@@ -72,7 +81,6 @@ def perform_analysis(options):
 
         # Load the histogram
         adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-
         # Fit the baseline and sigma_e of all pixels
         adcs.fit(fit_dark_adc.fit_func, fit_dark_adc.p0_func, fit_dark_adc.slice_func, fit_dark_adc.bounds_func, \
                  labels_func=fit_dark_adc.labels_func)  # , limited_indices=tuple(options.pixel_list))
@@ -84,15 +92,47 @@ def perform_analysis(options):
 
         # Delete the histograms
         del adcs
+    elif  options.dark_analysis == 'mean_rms':
+        log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
+        log.info('Get the distribution of mean and RMS in the dark')
+
+        # Load the histogram
+        adcs = np.load(options.output_directory + options.histo_filename)
+        params = np.zeros((len(options.pixel_list),4),dtype=float)
+        #print(stats.mode(adcs['mean'], axis=-1 ))
+        tmp = stats.mode(adcs['mean'], axis=-1 )[0]
+        print(tmp.shape)
+        params[...,0]  = tmp[0]
+        params[...,1]  = np.std( adcs['mean'], axis=-1 )
+        params[...,2]  = stats.mode(adcs['rms'], axis=-1 )[0][0]
+        params[...,3]  = np.std( adcs['rms'], axis=-1 )
+        np.savez_compressed(options.output_directory + options.histo_filename, mean = adcs['mean'], rms = adcs['rms'], params = params)
+
+
+
+
     elif  options.dark_analysis == 'analytic':
 
         log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
         log.info('Perform an analytic extraction of mu_XT ( ==> baseline and sigmae for full mpe )')
 
+        mpes_full = histogram.Histogram(filename=options.output_directory + options.full_histo_filename, fit_only=True)
+        mpes_full_fit_result = np.copy(mpes_full.fit_result)
+        del mpes_full
+
 
         # Load the histogram
         dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
         x = dark_hist.bin_centers
+
+        baseline = mpes_full_fit_result[...,0,0]
+        gain = mpes_full_fit_result[...,1,0]
+        sigma_e = mpes_full_fit_result[...,2,0]
+        sigma_1 = mpes_full_fit_result[...,3,0]
+
+        integ = np.load(options.output_directory + options.pulse_shape_filename)
+        integral = integ['pulse_integrals']
+        integral_square = integ['pulse_integrals_square']
 
         for pixel in range(len(options.pixel_list)):
 
@@ -104,16 +144,16 @@ def perform_analysis(options):
                 sigma_1 = 0.48
                 sigma_e = np.sqrt(0.86 ** 2.)
 
-            dark_parameters = compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e)
+            dark_parameters = compute_dark_parameters(x, y, baseline[pixel], gain[pixel], sigma_1[pixel], sigma_e[pixel],integral[pixel],integral_square[pixel])
 
-            dark_hist.fit_result[pixel, 0, 0] = baseline
+            dark_hist.fit_result[pixel, 0, 0] = baseline[pixel]
             dark_hist.fit_result[pixel, 0, 1] = 0
             dark_hist.fit_result[pixel, 1, 0] = dark_parameters[0, 0]
             dark_hist.fit_result[pixel, 1, 1] = dark_parameters[0, 1]
             dark_hist.fit_result[pixel, 2, 0] = dark_parameters[1, 0]
             dark_hist.fit_result[pixel, 2, 1] = dark_parameters[1, 1]
 
-        dark_hist.save(options.output_directory + options.histo_filename)
+        dark_hist.save(options.output_directory + options.histo_filename.split('.npz')[0]+'_xt.npz')
         del dark_hist
 
 
@@ -133,14 +173,14 @@ def display_results(options):
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     #. Perform some plots
-    display.display_hist(adcs, options=options, geom=geom,draw_fit=True)
+    display.display_hist(adcs, options=options, geom=geom,draw_fit=False)
     #display.display_fit_result(adcs, geom=geom, display_fit=True)
     display.display_fit_result(adcs, display_fit=True)
     input('press button to quit')
 
     return
 
-def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e):
+def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,integral_square):
     '''
     In developement
     :param x:
@@ -152,14 +192,13 @@ def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e):
     :return:
     '''
 
-
     x = x - baseline
     sigma_1 = sigma_1/gain
 
     mean_adc = np.average(x, weights=y)
     sigma_2_adc = np.average((x - mean_adc) ** 2, weights=y) - 1./12.
-    pulse_shape_area = 15.11851125 * gain
-    pulse_shape_2_area = 9.25845231 * gain**2
+    pulse_shape_area = integral * gain
+    pulse_shape_2_area = integral_square * gain**2
     alpha = (mean_adc * pulse_shape_2_area)/((sigma_2_adc - sigma_e**2)*pulse_shape_area)
 
     if (1./alpha - sigma_1**2)<0 or np.isnan(1./alpha - sigma_1**2):

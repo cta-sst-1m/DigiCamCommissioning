@@ -22,7 +22,7 @@ class Histogram:
                  bin_center_min: int = 0,
                  bin_center_max: int = 1,
                  bin_width: int = 1, xlabel: str = 'x', ylabel: str = 'y', label: str = 'hist',
-                 filename: str = '', fit_only : bool = False):
+                 filename: str = '', fit_only : bool = False , auto_errors = True):
 
         """
         Initialise method
@@ -45,6 +45,7 @@ class Histogram:
         :param label: the base label for the histograms
         """
         # Initialise the logger
+        self.auto_errors = auto_errors
         self.logger = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
         if filename:
             if fit_only:
@@ -85,7 +86,7 @@ class Histogram:
             self.data = data
             self.underflow = np.zeros(data_shape)
             self.overflow = np.zeros(data_shape)
-            self._compute_errors()
+            if self.auto_errors: self._compute_errors()
 
         # Initialisation of fit results and labels
         self.fit_result = None
@@ -117,7 +118,7 @@ class Histogram:
                                 bin_centers=self.bin_centers,
                                 bin_edges=self.bin_edges,
                                 bin_width=np.array([self.bin_width]),
-                                errors=self.errors, #TODO maybe dont store errors and recompute them while loading to avoid large files (self.errors should return errors(self) ?)
+                                errors=self.errors,
                                 underflow=self.underflow,
                                 overflow=self.overflow,
                                 fit_result=self.fit_result,
@@ -125,6 +126,7 @@ class Histogram:
                                 fit_slices = self.fit_slices,
                                 fit_chi2_ndof=self.fit_chi2_ndof,
                                 fit_axis=self.fit_axis,
+                                auto_errors=np.array([self.auto_errors]),
                                 xlabel=np.array([self.xlabel]),
                                 ylabel=np.array([self.ylabel]),
                                 label=np.array([self.label]),
@@ -147,12 +149,13 @@ class Histogram:
             raise FileNotFoundError
 
         try:
-            file = np.load(filename)#, mmap_mode='r+') #TODO deal with mmap_mode (.npz does not work since decrompression is needed)
+            file = np.load(filename)
             self.data = file['data']
             self.bin_centers = file['bin_centers']
             self.bin_edges = file['bin_edges']
             self.bin_width = file['bin_width'][0]
             self.errors = file['errors']
+            self.auto_errors = file['auto_errors'][0]
             self.underflow = file['underflow']
             self.overflow = file['overflow']
             self.fit_slices = file['fit_slices'] if 'fit_slices' in file.keys() else None
@@ -224,7 +227,7 @@ class Histogram:
         return
 
 
-    def fill(self, value, indices=None):
+    def fill(self, value, indices=None, fill_errors = False):
         """
         Update the Histogram array with an array of values
         :param value:
@@ -245,10 +248,17 @@ class Histogram:
                              range(np.indices(value.shape).shape[0])], )
         dim_indices += (hist_indices.reshape(np.prod(value.shape)),)
 
-        if value[..., 0].shape == self.data[..., 0].shape or not indices:
-            self.data[dim_indices] += 1
+        if not fill_errors:
+            if value[..., 0].shape == self.data[..., 0].shape or not indices:
+                self.data[dim_indices] += 1
+            else:
+                self.data[indices][dim_indices] += 1
         else:
-            self.data[indices][dim_indices] += 1
+            if value[..., 0].shape == self.errors[..., 0].shape or not indices:
+                self.errors[dim_indices] += 1
+            else:
+                self.errors[indices][dim_indices] += 1
+
 
     # noinspection PyTypeChecker
     def fill_with_batch(self, batch, indices=None):
@@ -304,7 +314,7 @@ class Histogram:
             self.underflow[indices] = underflow
             self.overflow[indices] = overflow
         # compute the poisson error on the data
-        self._compute_errors()
+        if self.auto_errors : self._compute_errors()
 
     @staticmethod
     def _residual(function, p, x, y, y_err):
@@ -400,7 +410,6 @@ class Histogram:
                     self.errors[idx][slice_list[0]:slice_list[1]:slice_list[2]] \
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])]),
                                                    bounds=reduced_bounds)#, jac='3-point', method='trf', loss='arctan') # could improve with true jac
-
                 # noinspection PyUnresolvedReferences
                 val = out.x
                 # noinspection PyUnresolvedReferences,PyUnresolvedReferences
@@ -412,12 +421,11 @@ class Histogram:
                         [np.nonzero(self.data[idx][slice_list[0]:slice_list[1]:slice_list[2]])])
                     weight_matrix = 1. #TODO changed to one since pull study showed previous config is fine
                     cov = np.sqrt(np.diag(inv(np.dot(np.dot(out.jac.T, weight_matrix), out.jac))))
-
                     fit_result = np.append(val.reshape(val.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
                 except np.linalg.linalg.LinAlgError as inst:
                     _idx = idx if isinstance(idx,int) else idx[-1]
                     if force_quiet:
-                        self.logger.debug('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
+                        self.logger.warning('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
                     else:
                         self.logger.warning('Could not compute error in the fit of hist %s: np.linalg.linalg.LinAlgError'%_idx)
 
@@ -425,11 +433,13 @@ class Histogram:
                                            axis=1)
 
             except Exception as inst:
-                self.logger.error('Could not fit index ??? ')#%s'%idx[-1])
-                self.logger.error(inst)
-                self.logger.debug('p0:', reduced_p0)
-                self.logger.debug('bound min:', reduced_bounds[0])
-                self.logger.debug('bound max:', reduced_bounds[1])
+                self.logger.error('Could not fit index %s'%idx[-1])
+                #self.logger.error(inst)
+                print(inst)
+                print('p0:', reduced_p0)
+                print()
+                print('bound min:', reduced_bounds[0])
+                print('bound max:', reduced_bounds[1])
                 fit_result = (np.ones((len(reduced_p0), 2)) * np.nan)
 
         # restore the fixed_params in the fit_result

@@ -5,7 +5,7 @@
 # internal modules
 from data_treatement import synch_hist
 from utils import display, histogram, geometry
-#from spectra_fit import fit_synch
+from spectra_fit import fit_synch
 import logging,sys
 import numpy as np
 

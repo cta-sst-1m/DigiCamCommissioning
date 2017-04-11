@@ -1,5 +1,5 @@
 # Analysis module
-analysis_module : analyse_module_mts
+analysis_module : analyse_module
 
 # Steering
 create_histo      : False

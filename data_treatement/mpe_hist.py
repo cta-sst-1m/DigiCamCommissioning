@@ -5,7 +5,7 @@ import logging,sys
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
-
+import matplotlib.pyplot as plt
 # noinspection PyProtectedMember
 def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', baseline=0.):
 
@@ -15,6 +15,11 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     pbar = tqdm(total=len(options.scan_level)*options.events_per_level)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
+
+    params=None
+    if hasattr(options, 'baseline_per_event_limit'):
+        params = np.load(options.output_directory + options.baseline_param_data)['params']
+
 
     charge_extraction = options.integration_method
     if charge_extraction == 'integration' or charge_extraction == 'integration_sat' or charge_extraction == 'baseline':
@@ -55,12 +60,15 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
             shift = window_start  # window_width - int(np.floor(window_width/2))+window_start
             missing = mask_window.shape[1] - (window_width - 1)
             mask_window = mask_window[..., shift:]
+            #print(mask_window.shape[1], missing)
             missing = mask_window.shape[1] - missing
             mask_window = mask_window[..., :-missing]
+            #print(mask_window.shape[1], missing)
             mask_windows_edge = mask_windows_edge[..., shift:]
             mask_windows_edge = mask_windows_edge[..., :-missing]
             # mask_window = np.append(mask_window,np.zeros((mask_window.shape[0],missing),dtype=bool),axis=1)
             # mask_windows_edge = np.append(mask_windows_edge,np.zeros((mask_windows_edge.shape[0],missing),dtype=bool),axis=1)
+            #print(shift)
 
     def integrate_trace(d):
         return np.convolve(d, np.ones((window_width), dtype=int), 'valid')
@@ -115,9 +123,9 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
         for event in inputfile_reader:
             if level > len(options.scan_level) - 1:
                 break
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 if first_evt:
-                    first_evt_num = event.dl0.tel[telid].camera_event_number
+                    first_evt_num = event.r0.tel[telid].camera_event_number
                     batch_index = 0
                     batch = np.zeros((len(options.pixel_list), options.events_per_level),dtype=int)
                     if charge_extraction=='baseline':
@@ -125,8 +133,8 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                         #batch = np.zeros((len(options.pixel_list*(1+options.n_bins-options.window_width)), options.events_per_level),dtype=int)
 
                     first_evt = False
-                evt_num = event.dl0.tel[telid].camera_event_number - first_evt_num
-                if evt_num % options.events_per_level == 0 and evt_num!=0:
+                evt_num = event.r0.tel[telid].camera_event_number - first_evt_num
+                if evt_num % options.events_per_level == 0:
                     batch_index = 0
                     if charge_extraction == 'integration':
                         #print(batch)
@@ -143,19 +151,18 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
 
                         log.debug('--|> Moving to DAC Level %d' % (options.scan_level[level]))
                 if options.events_per_level<=1000:
-
                     pbar.update(1)
-
                 else:
-
                     if evt_num % int(options.events_per_level/1000)== 0:
                         pbar.update(int(options.events_per_level/1000))
 
                 # get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
+
+                data = data[options.pixel_list]
+
                 #print(np.sum(data))
                 # subtract the pedestals
-                data = data[options.pixel_list]
                 # put in proper format
                 #rdata = data.reshape((1,) + data.shape)
                 # charge extraction type
@@ -175,6 +182,17 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     index_max = (np.arange(0, data.shape[0]), peak,)
                     hist.fill(data[index_max] - baseline[level, :], indices=(level,))
                 elif charge_extraction == 'integration':
+                    if hasattr(options, 'baseline_per_event_limit'):
+                        baseline = np.mean(data[...,0:options.baseline_per_event_limit], axis=-1)
+                        rms = np.std(data[...,0:options.baseline_per_event_limit], axis=-1)
+                        # get the indices where baseline is good
+                        ind_good_baseline = (rms - params[:,2])/params[:,3] < 0.5
+                        if evt_num > 1:
+                            _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
+                        else:
+                            _tmp_baseline = baseline
+                        data = data - _tmp_baseline[:, None]
+                        #if level>32 :
                     integration = np.apply_along_axis(integrate_trace,1,data)
                     local_max = np.argmax(np.multiply(integration, mask_window), axis=1)
                     local_max_edge = np.argmax(np.multiply(integration, mask_windows_edge), axis=1)
@@ -185,13 +203,20 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                     local_max[ind_with_lt_th] = peak[ind_with_lt_th]-window_start
                     local_max[local_max<0]=0
                     index_max = (np.arange(0, data.shape[0]), local_max,)
-                    #print(baseline[level,:].shape)
-                    #print(baseline[level,1])
-                    #print(integration[index_max].shape)
-                    #print(integration[index_max][1])
-                    batch[...,batch_index]=integration[index_max]  - baseline[level,:]#(0 if baseline is None else baseline[level, :])#np.tile(baseline, data.shape[1]).reshape(baseline.shape[0], data.shape[1])
+                    '''
+                    print('integrated value',integration[index_max][options.pixel_list.index(44)])
+                    print('------------------------------------------')
+                    if integration[index_max][options.pixel_list.index(44)]<-5:
+                        plt.plot(np.arange(92),data[options.pixel_list.index(44)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(29)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(30)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(45)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(61)])
+                        plt.plot(np.arange(92),data[options.pixel_list.index(62)])
+                        plt.show()
+                    '''
+                    batch[...,batch_index]=integration[index_max] - baseline[level,:]
                     batch_index += 1
-
                     #hist.fill(integration[index_max],indices=(level,))
 
                 elif charge_extraction == 'local_max':

@@ -18,13 +18,13 @@ def p0_func(y, x, *args, config=None, **kwargs):
     :return: starting points for []
     """
 
-    if config==None:
+    if config is None:
 
         mu = mu_xt = gain = baseline = sigma_e = sigma_1 = amplitude = offset = np.nan
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
 
     else:
-        mu = 0.001
+        mu = 10.
         mu_xt = 0.08 #config[1, 0]
         gain = config[1, 0]
         baseline = config[0, 0]
@@ -39,8 +39,6 @@ def p0_func(y, x, *args, config=None, **kwargs):
     param[4] = np.sqrt(np.average((x - np.average(x, weights=y))**2, weights=y))/ param[2]
     param[5] = param[4]
     param[6] = np.sum(y)
-
-
     return param
 
 
@@ -69,10 +67,17 @@ def bounds_func(*args, config=None, **kwargs):
     :return:
     """
 
-    param_min = [0., 0., 0., -np.inf, 0., 0., 0., -np.inf]
-    param_max = [np.inf, 1, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf]
-
-
+    baseline = config[0]
+    gain = config[1]
+    sigma_e = config[2]
+    sigma_1 = config[3]
+    if config is None:
+        param_min = [0., 0., 0., -np.inf, 0., 0., 0., -np.inf]
+        param_max = [np.inf, 1, np.inf, np.inf, np.inf, np.inf, np.inf, np.inf]
+    else:
+        param_min = [0., 0., 0, baseline[0] - 0.5 * gain[0], 0., 0., 0., -np.inf]
+        param_max = [np.inf, 1., np.inf, baseline[0] + 0.2 * gain[0], np.inf, np.inf,
+                 np.inf, np.inf]
     return param_min, param_max
 
 
@@ -84,7 +89,7 @@ def fit_func(p, x,*args,**kwargs):
     :return: G(x)
     """
     [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset] = p
-    return amplitude * utils.pdf.gaussian(x, sigma_e * gain ,  mu * (1+mu_xt) * gain + baseline)
+    return utils.pdf.gaussian([sigma_e,mu * (1 + mu_xt) * gain,amplitude],x )
 
 
 def jac_func(x, *args, **kwargs):

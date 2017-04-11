@@ -75,10 +75,15 @@ def p0_func(y, x, *args, n_peaks=22, config=None, **kwargs):
 
 
     else:
-
         if config.shape[-2] == 3:
 
-            param += [config[1, 0]]  # baseline
+
+
+            if np.where(y != 0)[0].shape[0] < 2:
+                param+=[0.]
+            else:
+
+                param += [x[np.where(y != 0)[0][0]] + 3.]  # baseline
             param += [5.6*4.3]  # gain
             #param += [config[2, 0]]  # sigma_e
             #param += [config[2, 0]*0.5]  # sigma_1
@@ -126,7 +131,7 @@ def slice_func(y, x, *args,n_peaks=22,config=None, **kwargs):
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal
-def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
+def bounds_func(y,x,*args,n_peaks = 22, config=None, **kwargs):
     """
     return the boundaries for the parameters (essentially none for a gaussian)
     :param args:
@@ -156,8 +161,12 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
 
         if config.shape[-2] == 3:
 
-            bound_min += [config[1, 0] - 20]  # baseline-sigma
-            bound_max += [config[1, 0] + 30]  # baseline+sigma
+            if np.where(y != 0)[0].shape[0] < 2:
+                bound_min += [0.]  # baseline-sigma
+                bound_max += [0.]  # baseline+sigma
+            else:
+                bound_min += [x[np.where(y != 0)[0][0]]]  # baseline-sigma
+                bound_max += [x[np.where(y != 0)[0][0]+30]]  # baseline+sigma
             '''
             bound_min += [0.9*5.6]  # 0.8*gain
             bound_max += [1.1*5.6]  # 1.2*gain
@@ -181,8 +190,8 @@ def bounds_func(y,*args,n_peaks = 22, config=None, **kwargs):
             bound_max += [np.inf] * n_peaks
         else:
 
-            bound_min += [config[1, 0] - 20]  # baseline-sigma
-            bound_max += [config[1, 0] + 20]  # baseline+sigma
+            bound_min += [config[1, 0] - 30]  # baseline-sigma
+            bound_max += [config[1, 0] + 30]  # baseline+sigma
             #bound_min += [config[0, 0] - 2 * config[2, 0]]  # baseline-sigma
             #bound_max += [config[0, 0] + 2 * config[2, 0]]  # baseline+sigma
             '''

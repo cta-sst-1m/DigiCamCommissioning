@@ -894,7 +894,8 @@ def generate_geometry_0(n_pixels=1296, pixel_list=None):
         return CameraGeometry(0, pix_id[0:n_pixels:1], pix_x[0:n_pixels:1] * u.mm, pix_y[0:n_pixels:1] * u.mm, np.ones(n_pixels) * 400., neighbor_pixels[0:n_pixels:1], 'hexagonal')
 
     else:
-        return CameraGeometry(0, pix_id, np.array(pix_x)[pixel_list] * u.mm, np.array(pix_y)[pixel_list] * u.mm, np.ones(len(pixel_list)) * 400., np.array(neighbor_pixels)[pixel_list], 'hexagonal')
+
+        return CameraGeometry(0, pix_id[pixel_list], np.array(pix_x)[pixel_list] * u.mm, np.array(pix_y)[pixel_list] * u.mm, np.ones(len(pixel_list)) * 400., np.array(neighbor_pixels)[pixel_list], 'hexagonal')
 
 def find_cts_pixels(angle=240.):
 

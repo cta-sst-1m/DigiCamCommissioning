@@ -19,11 +19,17 @@ def p0_func(y, x, *args, config=None, **kwargs):
     :return: starting points for []
     """
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
-
     if config is not None:
 
         ## Load from previous result
-        baseline = config[0, 0]
+
+        baseline = 0.
+        if np.where(y != 0)[0].shape[0] > 2:
+            baseline = x[np.where(y != 0)[0][0]] + 4.*4 # baseline
+            if baseline>config[0, 0]:
+                baseline = config[0, 0]-config[1, 0]/2
+        #baseline = config[0, 0]
+
         gain = config[1, 0]
         sigma_e = config[2, 0]
         sigma_1 = config[3, 0]
@@ -31,16 +37,16 @@ def p0_func(y, x, *args, config=None, **kwargs):
         ## Compute estimate
 
         amplitude = np.sum(y)
-        mean = np.average(x,weights=y)-baseline
+        mean = (np.average(x,weights=y)-baseline)/gain
         #start = y.flat[np.abs(x - (baseline - gain/2.)).argmin()]
         #end = y.flat[np.abs(x - (baseline + gain/2.)).argmin()]
         #print(baseline,gain,start,end,np.sum(y[start:end]),amplitude)
-        mu = mean #- np.log(float(np.sum(y[start:end]))/amplitude)
+        mu = max(0,mean) #- np.log(float(np.sum(y[start:end]))/amplitude)
         mu_xt = 0.
         offset = 0.
 
         param = [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset]
-        #print('param',param)
+        #print(param)
         return param
 
     else :
@@ -117,7 +123,7 @@ def slice_func(y, x, *args, **kwargs):
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal
-def bounds_func(*args, config=None, **kwargs):
+def bounds_func(y,x,*args, config=None, **kwargs):
     """
     return the boundaries for the parameters (essentially none for a gaussian)
     :param args:
@@ -133,6 +139,7 @@ def bounds_func(*args, config=None, **kwargs):
         return param_min, param_max
 
     else:
+        '''
         mu = config[0]
         mu_xt = config[1]
         gain = config[2]
@@ -141,10 +148,20 @@ def bounds_func(*args, config=None, **kwargs):
         sigma_1 = config[5]
         amplitude = config[6]
         offset = config[7] # TODO remove this guy
+        '''
+        baseline = config[0]
+        gain = config[1]
+        sigma_e = config[2]
+        sigma_1 = config[3]
+        param_min = [0.    , 0., gain[0] - 5*gain[1]    , baseline[0]-2*gain[0], sigma_e[0] /2 , sigma_1[0] /2 ,0.,-np.inf]
+        param_max = [np.inf, 1. , gain[0] + 5*gain[1], baseline[0]+3., sigma_e[0] *2, sigma_1[0] *2,np.inf, np.inf]
 
-        param_min = [0.    , 0., 0                   , 0.                , 0.                       , 0.     ,0.    ,-np.inf]
-        param_max = [np.inf, 1 , gain[0] + 10*gain[1], baseline[0]+5*baseline[1], sigma_e[0] + 5*sigma_e[1], np.inf ,np.inf, np.inf]
 
+        #if np.where(y != 0)[0].shape[0] > 2:
+        #    if x[np.where(y != 0)[0][0]] + 4.*4  < baseline[0]:
+        #        param_min[3]  = x[np.where(y != 0)[0][0]] + 4  # baseline
+    #print(param_min)
+    #print(param_max)
     return param_min, param_max
 
 
@@ -160,7 +177,6 @@ def fit_func(p, x, *args, **kwargs):
     temp = np.zeros(x.shape)
     n_peak=40
     n_peakmin = 0
-    bin_width = x[1] - x[0]
     # TODO avoir si ca marche quand on utilise en high light
     if len(x)>0:
         n_peak = int(float(x[-1] - baseline) / gain * 1.5)
@@ -168,7 +184,7 @@ def fit_func(p, x, *args, **kwargs):
 
     x = x - baseline
     for n in range(n_peakmin,n_peak):
-        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + bin_width**2/12.) # * gain
+        sigma_n = np.sqrt(sigma_e ** 2 + n * sigma_1 ** 2 + 1./12.) # * gain
         param_gauss = [sigma_n, n*gain, 1.]
         temp += utils.pdf.generalized_poisson(n, mu, mu_xt) * utils.pdf.gaussian(param_gauss, x)
 

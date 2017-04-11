@@ -23,7 +23,7 @@ def p0_func(y, x, *args, **kwargs):
     if np.sum(y)==0 : return [np.nan, np.nan, np.nan]
     if np.average(x, weights=y) == 0 and np.average((x - np.average(x, weights=y)) ** 2, weights=y) == 0:
         return [np.nan, np.nan, np.nan]
-    return [np.sum(y), np.average(x, weights=y), np.sqrt(np.average((x - np.average(x, weights=y) - bin_width**2/12.) ** 2, weights=y))]
+    return [np.sum(y), np.average(x, weights=y), np.sqrt(np.average((x - np.average(x, weights=y) - 1./12.) ** 2, weights=y))]
 
 
 # noinspection PyUnusedLocal,PyUnusedLocal,PyUnusedLocal
