@@ -3,7 +3,7 @@
 # external modules
 
 # internal modules
-from data_treatement import mpe_hist
+from data_treatement import mpe_hist, adc_hist
 from analysis import analyse_hvoff
 from utils import display, histogram, geometry
 from spectra_fit import fit_hv_off
@@ -44,37 +44,44 @@ def create_histo(options):
 
 
 
-    amplitudes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+    nsb = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                bin_width=options.adcs_binwidth,
                                data_shape=(len(options.scan_level), len(options.pixel_list), ),
-                               label='MPE', xlabel='ADC', ylabel='$\mathrm{N_{entries}}$')
+                               label='DC LED', xlabel='ADC', ylabel='$\mathrm{N_{entries}}$')
 
-    mpe_hist.run(amplitudes, options)
-    amplitudes.save(options.output_directory + options.histo_filename)
+    mpe_hist.run(nsb, options)
+    nsb.save(options.output_directory + options.histo_filename)
 
-    del amplitudes
+    del nsb
 
     return
 
 
 def perform_analysis(options):
 
-    amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    nsb = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
-    amplitudes.fit_result = np.zeros((amplitudes.data.shape[:-1])+(3,2,))
-    amplitudes.fit_result_label = ['amplitude', 'mean [ADC]','sigma [ADC]']
-    for i in range(amplitudes.data.shape[0]):
-        for j in range(amplitudes.data.shape[1]):
+    nsb.fit_result_label = ['mean [ADC]']
+    nsb.fit_result = np.zeros((nsb.data.shape[:-1])+(len(nsb.fit_result_label),2,))
 
-            amplitudes.fit_result[i,j,0,0] = np.sum(amplitudes.data[i,j])
-            amplitudes.fit_result[i,j,0,1] = np.sqrt(amplitudes.fit_result[i,j, 0, 0])
-            amplitudes.fit_result[i,j,1,0] = np.average(amplitudes.bin_centers, weights=amplitudes.data[i,j])
-            amplitudes.fit_result[i,j,2,0] = np.sqrt(np.average((amplitudes.bin_centers-amplitudes.fit_result[i,j,0,0])**2, weights=amplitudes.data[i,j]))
-            #amplitudes.fit_result[i,j,2,1] = np.sqrt(2./(amplitudes.fit_result[i, j, 0, 0] - 1.)) * amplitudes.fit_result[i, j, 2, 0]**2
-            amplitudes.fit_result[i,j,1,1] = amplitudes.fit_result[i,j,2,0]/ np.sqrt(amplitudes.fit_result[i,j,0,0])
+    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
+    pbar = tqdm(total=nsb.data.shape[0])
+    tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
+    for level in range(nsb.data.shape[0]):
 
-    amplitudes.save(options.output_directory + options.histo_filename)
+        log.debug('--|> Moving to  level %d [DAC]' %options.scan_level[level])
+
+        for pixel in range(nsb.data.shape[1]):
+
+            n_entries = np.sum(nsb.data[level, pixel])
+            nsb.fit_result[level, pixel, 0, 0] = np.average(nsb.bin_centers, weights=nsb.data[level, pixel])
+            std = np.sqrt(np.average((nsb.bin_centers-nsb.fit_result[level, pixel, 0, 0])**2, weights=nsb.data[level, pixel]))
+            nsb.fit_result[level, pixel, 0, 1] = std/ np.sqrt(n_entries)
+
+        pbar.update(1)
+
+    nsb.save(options.output_directory + options.histo_filename)
 
     return
 
@@ -88,19 +95,19 @@ def display_results(options):
     :return:
     """
 
-    amplitudes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    nsb = histogram.Histogram(filename=options.output_directory + options.histo_filename)
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     try:
 
-        display.display_hist(amplitudes, geom=geom, options=options, display_parameter=True, draw_fit=True)
+        display.display_hist(nsb, geom=geom, options=options, display_parameter=True)
 
     except:
 
-        display.display_hist(amplitudes, geom=geom, options=options)
+        display.display_hist(nsb, geom=geom, options=options)
 
 
-    display.display_fit_result_level(amplitudes, options=options)
+    display.display_fit_result_level(nsb, options=options)
 
 
 

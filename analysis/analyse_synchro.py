@@ -132,7 +132,7 @@ def display_results(options):
 
     # Perform some plots
 
-    display.display_hist(peaks, options=options, geom=geom,draw_fit=False, scale='linear')
+    display.display_hist(peaks, options=options, geom=geom, draw_fit=False, scale='linear')
 
     #display.display_hist(peaks,  geom)
 

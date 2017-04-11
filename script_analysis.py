@@ -10,6 +10,7 @@ from utils.geometry import generate_geometry_0, generate_geometry
 from utils import logger
 import numpy as np
 from cts_core.cameratestsetup import CTS
+from cts_core.camera import Camera
 
 if __name__ == '__main__':
     """
@@ -67,6 +68,7 @@ if __name__ == '__main__':
     # Start the loggers
     logger.initialise_logger( options )
     # load the analysis module
+    print('--------------------------',options.analysis_module)
     analysis_module = __import__('analysis.%s'%options.analysis_module,
                                  locals=None,
                                  globals=None,
@@ -75,14 +77,48 @@ if __name__ == '__main__':
 
 
     if hasattr(options,'angle_cts'):
-        cts_path = '/data/software/CTS/'
-        #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
+        #cts_path = '/data/software/CTS/'
+        cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
         options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
 
     if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
         # TODO add usage of digicam and cts geometry to define the list
         options.pixel_list = np.arange(0, options.n_pixels, 1)
+
+    if hasattr(options, 'n_clusters'):
+
+        if options.n_clusters==1:
+
+            camera = Camera(options.cts_directory + 'config/camera_config.cfg')
+            patches_in_cluster = np.load(options.cts_directory + 'config/cluster.p')['patches_in_cluster']
+
+            patch_index = 300
+            patches_in_cluster = patches_in_cluster[patch_index]
+
+            #print(patches_in_cluster)
+            options.pixel_list = []
+            options.cluster_list = [patch_index]
+
+            for patch in patches_in_cluster:
+
+                for pixel in camera.Patches[patch].pixels:
+
+                    options.pixel_list.append(pixel.ID)
+
+            for pixel in camera.Patches[patch_index].pixels:
+                options.pixel_list.append(pixel.ID)
+
+
+
+
+        else:
+
+            exit()
+
+    if not hasattr(options, 'threshold'):
+
+        options.threshold = np.arange(options.threshold_min, options.threshold_max, options.threshold_step)
 
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)

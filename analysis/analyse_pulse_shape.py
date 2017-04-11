@@ -41,84 +41,63 @@ def create_histo(options):
     :return:
     """
 
-    pulse_shapes = np.zeros((len(options.scan_level), len(options.pixel_list), options.n_bins, 2))
-    pulse_shapes = pulse_shape.run(pulse_shapes, options=options)
-    np.savez(options.output_directory + options.histo_filename, pulse_shape=pulse_shapes)
+    pulse_shape_temp = np.zeros((len(options.scan_level), len(options.pixel_list), options.n_bins, 2))
+    data_treatement.pulse_shape.run(pulse_shape_temp, options=options)
+
+    pulse_shape = histogram.Histogram(data=pulse_shape_temp[..., 0],\
+                                      bin_centers=np.arange(0, options.n_bins, 1) * options.sampling_time, \
+                                      label='Pulse shape', xlabel='t [ns]', ylabel='amplitude [ADC]')
+
+    pulse_shape.errors = pulse_shape_temp[..., 1]
+    pulse_shape.fit_result_label = ['amplitude', 'full_integral [ADC]', 'full_square_integral [ADC$^2$]', 'full_integral_normalized [ns]', 'full_square_integral_normalized [ns$^2$]']
+    pulse_shape.fit_result = np.zeros(pulse_shape.data.shape[0:-1] + (len(pulse_shape.fit_result_label),2))
+
+
+    pulse_shape.save(options.output_directory + options.histo_filename)
+
+    del pulse_shape
+
     return
 
-def integrate_trace(d,window_width):
-
-    integrated_trace = np.convolve(d, np.ones((window_width), dtype=int), 'same')
-
-    return integrated_trace
 
 def perform_analysis(options):
 
-    #mpes_full = histogram.Histogram(filename=options.output_directory + options.full_histo_filename, fit_only=True)
-    #mpes_full_fit_result = np.copy(mpes_full.fit_result)
-    pulses = np.load(options.output_directory + options.histo_filename)['pulse_shape']
-    pulse_integrals = np.zeros((pulses.shape[0], pulses.shape[1], 2))
-    pulse_integrals_square = np.zeros((pulses.shape[0], pulses.shape[1], 2))
+    pulse_shape = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
+    def integrate_trace(d, window_width):
 
-    pulse_shape = pulses[:, :, : ,0]
-    pulse_shape_error = pulses[:, :, : ,1]
+        integrated_trace = np.convolve(d, np.ones((window_width), dtype=int), 'same')
+
+        return integrated_trace
 
     integrate_trace_n = lambda x: integrate_trace(x, options.window_width)
 
+    log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
+    pbar = tqdm(total=pulse_shape.data.shape[0])
+    tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
-    print(pulse_shape_error[0,6, 8])
+    for level in range(pulse_shape.data.shape[0]):
 
-    n_bins = options.baseline_per_event_limit
-    first_bins = pulse_shape[...,0:n_bins]
-    baseline = np.mean(first_bins, axis=-1)
-    baseline_error = np.std(first_bins, axis=-1)/np.sqrt(n_bins)
-    pulse_shape = pulse_shape - baseline[...,None]
-    pulse_shape_error = np.sqrt(pulse_shape_error**2 + baseline_error[...,None]**2)
-    pulse_shape = np.apply_along_axis(integrate_trace_n, -1, pulse_shape)
-    pulse_shape_error = np.sqrt(np.apply_along_axis(integrate_trace_n, -1, pulse_shape_error**2))
-    pulse_shape_max = np.max(pulse_shape, axis=-1)
+        log.debug('--|> Moving to AC level %d [DAC]' %options.scan_level[level])
 
-    argmax = np.argmax(pulse_shape, axis=-1)
-    for i in range(pulse_shape.shape[0]):
-        for j in range(pulse_shape.shape[1]):
+        for pixel in range(pulse_shape.data.shape[1]):
 
-            pulse_shape_max_error = pulse_shape_error[i,j, argmax[i,j]]
+            pulse_shape.data[level, pixel] = np.apply_along_axis(integrate_trace_n, -1, pulse_shape.data[level, pixel])
+            pulse_shape.errors[level, pixel] = np.sqrt(np.apply_along_axis(integrate_trace_n, -1, pulse_shape.errors[level, pixel]**2))
+            pulse_shape.fit_result[level, pixel, 0, 0] = np.max(pulse_shape.data[level, pixel])
+            pulse_shape.fit_result[level, pixel, 0, 1] = pulse_shape.errors[level, pixel, np.argmax(pulse_shape.data[level, pixel])]
+            pulse_shape.fit_result[level, pixel, 1, 0] = np.sum(pulse_shape.data[level, pixel])
+            pulse_shape.fit_result[level, pixel, 1, 1] = np.sqrt(np.sum(pulse_shape.errors[level, pixel]**2))
+            pulse_shape.fit_result[level, pixel, 2, 0] = np.sum(pulse_shape.data[level, pixel]**2)
+            pulse_shape.fit_result[level, pixel, 2, 1] = 0.
+            pulse_shape.fit_result[level, pixel, 3, 0] = np.sum(pulse_shape.data[level, pixel] / pulse_shape.fit_result[level, pixel, 0, 0])
+            pulse_shape.fit_result[level, pixel, 3, 1] = 0.
+            pulse_shape.fit_result[level, pixel, 4, 0] = np.sum((pulse_shape.data[level, pixel] / pulse_shape.fit_result[level, pixel, 0, 0])**2)
+            pulse_shape.fit_result[level, pixel, 4, 1] = 0.
 
-    pulse_shape = np.divide(pulse_shape, pulse_shape_max[...,None])
-    pulse_shape_error = pulse_shape * (pulse_shape_error/np.multiply(pulse_shape, pulse_shape_max[...,None]) + (pulse_shape_max_error/pulse_shape_max)[...,None])
+        pbar.update(1)
 
-    pulse = np.zeros(pulse_shape.shape + (2,))
-    pulse[..., 0] = pulse_shape
-    pulse[..., 1] = pulse_shape_error
-
-    pulse_integrals[..., 0] = np.sum(pulse_shape, axis=-1) * options.sampling_time
-    pulse_integrals[..., 1] = np.sqrt(np.sum(pulse_shape_error**2, axis=-1)) * options.sampling_time
-
-
-
-    pulse_integrals_square[..., 0] = np.sum(pulse_shape**2, axis=-1) * options.sampling_time
-    pulse_integrals_square[..., 1] = np.sqrt(np.sum(pulse_shape_error**2, axis=-1)) * options.sampling_time
-
-
-    '''
-    print (pulses[...,1])
-    ps = pulses[..., 0]
-    ps = ps - np.mean(ps[..., 0:5], axis=-1).reshape(np.mean(ps[..., 0:5], axis=-1).shape + (1,))
-    integrate_trace_7 = lambda x: integrate_trace(x, options.window_width)
-    ps = np.apply_along_axis(integrate_trace_7, -1, ps)
-    ps = np.divide(ps, np.max(ps, axis=-1).reshape(np.max(ps, axis=-1).shape + (1,)))
-    pulses[..., 1] = pulses[...,0] * ( pulses)
-        np.divide(pulses[...,1], np.max(ps, axis=-1).reshape(np.max(ps, axis=-1).shape + (1,))) #TODO compute this !
-    pulses[..., 0][..., 0:ps.shape[-1]] = ps
-    pulses[..., 0][..., ps.shape[-1]:-1] = 0.
-    pulses[..., 0][..., -1] = 0.
-    #pulse_integrals[...,0] = np.sum(pulses[...,0] ,axis=-1)
-    #print(pulses[35, 0, :, 0])
-'''
-    np.savez(options.output_directory + options.histo_filename, pulse_shape=pulse,
-             pulse_integrals=pulse_integrals,pulse_integrals_square=pulse_integrals_square)
-
+    pulse_shape.save(options.output_directory + options.histo_filename)
 
     return
 
@@ -131,11 +110,17 @@ def display_results(options):
 
     :return:
     """
-    _file = np.load(options.output_directory + options.histo_filename)
-    #data = np.load(options.output_directory + options.histo_filename)['pulse_shape']
-    data_substracted = _file['pulse_shape']
-    pulse_integrals = _file['pulse_integrals']
-    pulse_integrals_square = _file['pulse_integrals_square']
+
+    pulse_shape = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+
+
+    display.display_hist(pulse_shape, options=options, scale='linear')
+    display.display_fit_result_level(pulse_shape, options=options, scale='linear')
+
+    '''
+    data = np.load(options.output_directory + options.pulse_shape_filename)['pulse_shape']
+    data_substracted = np.load(options.output_directory + options.pulse_shape_filename.split('.')[0] + '_substracted.npz')['pulse_shape']
+    pulse_integrals = np.load(options.output_directory + options.pulse_shape_filename.split('.')[0] + '_integrals.npz')['pulse_integrals']
 
 
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
@@ -144,24 +129,31 @@ def display_results(options):
 
 
     #display.display_pulse_shape(data, options=options, geom=geom)
-    display.display_pulse_shape(data_substracted, options=options, geom=geom)
+    display.display_pulse_shape(data_substracted, options=options)
 
     import matplotlib.pyplot as plt
 
-    plt.figure()
 
+    pixel_id = 9
+    pixel_index = np.where(np.array(options.pixel_list)==pixel_id)
 
-    plt.show()
     plt.figure()
-    plt.plot(np.arange(data_substracted.shape[1]),pulse_integrals)
+    plt.errorbar(np.array(options.scan_level), pulse_integrals[:, pixel_index, 0], yerr=pulse_integrals[:,pixel_index,1], label='pixel : %d' %pixel_id, fmt='ok')
+    plt.xlabel('AC level [DAC]')
+    plt.ylabel('integral [ns] ($n_{bins}=$ %d)' %options.window_width)
+    plt.legend(loc='best')
     plt.show()
-    fig,ax=plt.subplots(1,1)
-    camera_visu = visualization.CameraDisplay(geom, ax=ax, title='', norm='lin', cmap='viridis',
-                                              allow_pick=True)
-    camera_visu.image = pulse_integrals
-    camera_visu.add_colorbar()
-    camera_visu.axes.set_xlabel('x [mm]')
-    camera_visu.axes.set_ylabel('y [mm]')
+
+    print (np.max(data[:, pixel_index, :, 0], axis=-2).shape)
+    print (data[:, pixel_index, :, 0].shape)
+    print (np.array(options.scan_level).shape)
+
+    plt.figure()
+    plt.errorbar(np.array(options.scan_level), np.max(data[:, pixel_index, :, 0], axis=-2), label='pixel : %d' %pixel_id, fmt='ok')
+    plt.xlabel('AC level [DAC]')
+    plt.ylabel('amplitude [ADC] ($n_{bins}=$ %d)' %options.window_width)
+    plt.legend(loc='best')
     plt.show()
-    h = input('press a key')
+    '''
+
     return
