@@ -1,0 +1,28 @@
+# Analysis module
+analysis_module : analyse_ac_led
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170322
+
+# Input files
+mc            :     False
+scan_level    :     [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 640, 680, 720, 760, 800, 840, 880, 920, 960, 1000]
+# Output files
+# Output files
+output_directory  : /data/datasets/CTA/DATA/20170322/scan_ac_level/
+histo_filename    : ac_led.npz
+mpe_histo_filename   : mpe.npz
+
+# Camera Configuration
+angle_cts         : 120.
+
+# Plot configuration
+adcs_min           : -500
+adcs_max           : 19000
+adcs_binwidth      : 4

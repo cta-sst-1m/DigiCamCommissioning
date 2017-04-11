@@ -88,6 +88,7 @@ def fit_func(p, x,*args,**kwargs):
     :param x: x
     :return: G(x)
     """
+    #, sigma_e * gain, mu * (1 + mu_xt) * gain
     [mu, mu_xt, gain, baseline, sigma_e, sigma_1, amplitude, offset] = p
     return utils.pdf.gaussian([sigma_e,mu * (1 + mu_xt) * gain,amplitude],x )
 
