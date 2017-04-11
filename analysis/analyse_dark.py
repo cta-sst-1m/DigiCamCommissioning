@@ -173,7 +173,7 @@ def display_results(options):
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     #. Perform some plots
-    display.display_hist(adcs, options=options, geom=geom,draw_fit=True)
+    display.display_hist(adcs, options=options, geom=geom,draw_fit=False)
     #display.display_fit_result(adcs, geom=geom, display_fit=True)
     display.display_fit_result(adcs, display_fit=True)
     input('press button to quit')

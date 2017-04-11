@@ -47,6 +47,14 @@ def create_histo(options):
     return
 
 
+def poly(p,x):
+    # get the roots
+    #p3 = np.poly1d([p[0], p[1], p[2], p[3]])
+    #roots=np.roots(p3)
+    #if np.max(roots[np.isreal(roots)])<1e-8: return 1e8
+    return p[4]+p[3]*(x)+p[2]*(x)*(x)+p[1]*(x)*(x)*(x)+p[0]*(x)*(x)*(x)*(x)
+
+
 def perform_analysis(options):
     """
     Perform a simple gaussian fit of the ADC histograms
@@ -66,13 +74,19 @@ def perform_analysis(options):
     chi2ndof = mpes.fit_chi2_ndof[..., 0] / mpes.fit_chi2_ndof[..., 1]
     chi2ndof = np.swapaxes(chi2ndof,0,1)
     for pixel in range(ac_led.data.shape[0]):
-        y = ac_led.data[pixel,1:-1]
-        yerr = ac_led.errors[ pixel,1:-1]
-        chi2 = chi2ndof[pixel,1:-1]
-        x = np.array(options.scan_level,dtype = np.float)[1:-1]
+        y = ac_led.data[pixel,0:-1]
+        y = y - y[0]
+        yerr = ac_led.errors[ pixel,0:-1]
+        chi2 = chi2ndof[pixel,0:-1]
+        chi2[0]=0.
+        ac_led.errors[pixel,0]=1e-6
+        x = np.array(options.scan_level,dtype = np.float)[0:-1]
         index_keep =~np.isnan(y) * ~np.isnan(yerr)
         index_keep = index_keep * (chi2<50)
         index_keep = index_keep * (y>1.)
+        if not np.all(index_keep==False):
+            index_keep[0]=True
+        print(index_keep)
         y = y[index_keep]
         yerr = yerr[index_keep]
         x = x[index_keep]
@@ -82,11 +96,13 @@ def perform_analysis(options):
         deg = int(4)
 
         '''
-        residual = lambda p, x, y, y_err: (y - (p[4]+p[3]*(x)+p[2]*(x)*(x)+p[1]*(x)*(x)*(x)+p[0]*(x)*(x)*(x)*(x))) / y_err
-        out = scipy.optimize.least_squares(residual, [1.,1.,1.,1.,1.], args=(x,y,yerr),bounds=([-np.inf,-np.inf,-np.inf,-np.inf,-np.inf],[np.inf,np.inf,np.inf,np.inf,np.inf]))
+        residual = lambda p, x, y, y_err: (y - poly(p,x)) / y_err
+        out = scipy.optimize.least_squares(residual, [3.,-3.,-3.,3.,-3.], args=(x,y,yerr),bounds=([0,-np.inf,-np.inf,0.,-np.inf],[np.inf,0.,0.,np.inf,0.]))
         weight_matrix = np.diag(1. / yerr)
-        cov = inv(np.dot(np.dot(out.jac.T,weight_matrix), out.jac))
+        #print(out)
+        cov = inv(np.dot(np.dot(out.jac.T,1.), out.jac))
         '''
+        #ac_led.fit_result[pixel, :, 0]= np.polynomial.legendre.legfit(x, y, deg=deg, w=1. / yerr, full=True)[0]
         ac_led.fit_result[pixel, :, 0], ac_led.fit_result[pixel, :, 2:7:1] = np.polyfit(x, y, deg=deg, w=1. / yerr, cov=True)
         ac_led.fit_result[pixel, :, 1] = np.sqrt(np.diag(ac_led.fit_result[pixel, :, 2:7:1]))
     ac_led.fit_result_label=['a0','a1','a2','a3','a4']
@@ -111,24 +127,35 @@ def display_results(options):
 
     # Define Geometry
     geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
-
+    pixelssss = []
+    for i in [518,552,553,554,555,588,589,590,591,592,624,625,626,627,660,661,662,663,664,697,698]:
+        pixelssss+=[options.pixel_list.index(i)]
 
     import matplotlib.pyplot as plt
-    '''
-    fig,ax=plt.subplots(2,3)
-    camera_visu = visualization.CameraDisplay(geom, ax=ax[0,0], title='', norm='lin', cmap='viridis',
+
+    fig,ax=plt.subplots(2,1)
+    plt.subplot(1,2,1)
+    camera_visu = visualization.CameraDisplay(geom, ax=ax[0], title='', norm='lin', cmap='viridis',
                                               allow_pick=False)
 
-    #camera_visu.add_colorbar()
-    image = np.log(np.abs(ac_led.fit_result[:, 0, 0]))*np.abs(ac_led.fit_result[:, 0, 0])/(ac_led.fit_result[:, 0, 0])
+    camera_visu.add_colorbar()
+    #mpes.fit_result[-1, :, 1, 0][np.isnan(mpes.fit_result[-1, :, 1, 0])]=
+    mpes.fit_result[..., 1, 0][mpes.fit_result[..., 1, 1]!=0]= np.nan
+    cross_talk = np.nanmean(mpes.fit_result[..., 1, 0],axis=0)
+    image = cross_talk
+    #image = mpes.fit_result[..., 1, 0]
+
+
     print(image[0])
     image[np.isnan(image)]=0
-    image[image>-15]=-15
-    image[image<-17]=-17
-
+    image[image>0.12]=0.12
+    image[image<0]=0
 
     camera_visu.image = image
+    plt.subplot(1,2,2)
+    plt.hist(image,bins=50)
 
+    '''
     camera_visu2 = visualization.CameraDisplay(geom, ax=ax[0 ,1], title='', norm='lin', cmap='viridis',
                                               allow_pick=False)
     image2 = np.log(np.abs(ac_led.fit_result[:, 1, 0]))*np.abs(ac_led.fit_result[:, 1, 0])/(ac_led.fit_result[:, 1, 0])
@@ -154,50 +181,83 @@ def display_results(options):
 
     plt.show()
     '''
+
     h = input('see some pixels')
-    for pixel in range(528):
-        y = ac_led.data[pixel][1:-1]
-        yerr = ac_led.errors[pixel][1:-1]
-        x = np.array(options.scan_level, dtype=np.float)[1:-1]
+    for pixel in [250, 272, 273, 274, 275, 296, 297, 298, 299, 300, 320, 321, 322, 323, 344, 345, 346, 347, 348, 369, 370]:
+        #if options.pixel_list[pixel]!=661:continue
+        y = ac_led.data[pixel][0:-1]
+        yerr = ac_led.errors[pixel][0:-1]
+        yerr2 = ac_led.errors[pixel][0:-1]
+        x = np.array(options.scan_level, dtype=np.float)[0:-1]
+        x2 = np.array(options.scan_level, dtype=np.float)[0:-1]
+        y2 = np.copy(y)
+        y = y - y[0]
         index_keep = ~np.isnan(y) * ~np.isnan(yerr)
 
-        chi2 = chi2ndof[pixel, 1:-1]
-        index_keep = index_keep * (chi2 < 50.)
-        index_keep = index_keep * (y>1.)
+        chi2 = chi2ndof[pixel, 0:-1]
+        #index_keep = index_keep * (chi2 < 10.)
+        index_keep = index_keep
         y = y[index_keep]
         yerr = yerr[index_keep]
         x = x[index_keep]
-        function = np.polyval #lambda p,xx : p[4]+p[3]*(xx)+p[2]*(xx)*(xx)+p[1]*(xx)*(xx)*(xx)+p[0]*(xx)*(xx)*(xx)*(xx)
+        function = np.polyval#lambda p,xx : p[4]+p[3]*(xx)+p[2]*(xx)*(xx)+p[1]*(xx)*(xx)*(xx)+p[0]*(xx)*(xx)*(xx)*(xx)
 
         x1 = np.arange(x[0],options.scan_level[-1],1, dtype=np.float)
         if x.shape[0] == 0: return
         deg = int(4)
         param, covariance = ac_led.fit_result[pixel, :, 0], ac_led.fit_result[pixel, :, 2:7:1]
+
         param_err = ac_led.fit_result[pixel, :, 1]
         xx = np.vstack([x1 ** (deg - i) for i in range(deg + 1)]).T
         yi = np.dot(xx, param)
         C_yi = np.dot(xx, np.dot(covariance, xx.T))
         sig_yi = np.sqrt(np.diag(C_yi))
-        y_fit = function(param, x1)
+
+        y_fit = function(param,x1)
+
         y_fit_max = function(param + param_err, x1)
         y_fit_min = function(param - param_err, x1)
-        ax = plt.subplot(1, 2, 1)
+
+        ax = plt.subplot(1, 3, 1)
         ax.cla()
         plt.errorbar(x, y, yerr=yerr, fmt='ok')
         # ax.set_yscale('log')
         ax.set_ylabel('$N_{\gamma}$')
         ax.set_xlabel('LED DAC %d'%options.pixel_list[pixel])
         ax.set_yscale('log')
-        # plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
+        #
+        plt.plot(x1,y_fit)
+
+        plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
         plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
-        ax1 = plt.subplot(1, 2, 2)
+
+         # Use a poly1d to represent the polynomial.
+        inv_p = lambda y : np.max( np.real((np.poly1d(param) - y).roots))
+        inv_p_min = lambda y : np.max( np.real((np.poly1d(param-param_err) - y).roots))
+        inv_p_max = lambda y : np.max( np.real((np.poly1d(param+param_err) - y).roots))
+        ax0 = plt.subplot(1, 3, 2)
+
+        ax0.cla()
+        yy, yy_min,yy_max = [],[],[]
+        for xx in np.arange(0,3000):
+            yy.append(inv_p(xx))
+            yy_min.append(inv_p_min(xx))
+            yy_max.append(inv_p_max(xx))
+
+        plt.fill_between(np.arange(0,3000), yy_min, yy_max, alpha=0.5, facecolor='red', label='polyfit confidence level')
+        plt.plot(np.arange(0,3000),yy)
+
+        ax0.set_xlabel('$N_{\gamma}$')
+        ax0.set_ylabel('LED DAC %d'%options.pixel_list[pixel])
+        ax0.set_xscale('log')
+        ax1 = plt.subplot(1, 3, 3)
         ax1.cla()
         ax1.set_ylabel('$N_{\gamma}$, $68\%$ C.L. (relative)')
         ax1.set_xlabel('LED DAC')
         # plt.plot(x1, (y_fit_max - y_fit_min) / yi, label='polyfit + 1 $\sigma$')
         # plt.plot(x1, y_fit_min, label='polyfit - 1 $\sigma$')
-        # plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
-        plt.fill_between(x1, 2 * sig_yi / yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+        #plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+        plt.fill_between(x1, 2 * np.max(np.append(y_fit_max / yi,y_fit_min / yi),axis=-1), alpha=0.5, facecolor='red', label='polyfit confidence level')
         print('param ', param, ' ± ', param_err)
 
         plt.show()

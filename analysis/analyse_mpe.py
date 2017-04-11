@@ -100,9 +100,10 @@ def perform_analysis(options):
         #if hasattr(options,'pixel_list') and pixel not in options.pixel_list:
         #    continue
 
-        force_xt = False
+        force_xt = True #False
+        best_fit_level = 0#-1
+
         if pixel > 0: log.debug('Pixel #' + str(pixel - 1)+' treated')
-        best_fit_level = -1
         for level in range(mpes.data.shape[0]):
             pbar.update(1)
             if np.isnan(mpes_full_fit_result[0,pixel,0,0]): continue
@@ -129,7 +130,7 @@ def perform_analysis(options):
                        print('problem the dark was not evaluated befor')
 
                    fixed_xt = mpes.fit_result[best_fit_level, pixel, 1, 0]
-
+                   fixed_xt = 0.082
                    fixed_param = [[1, fixed_xt],
                                   [2, (1, 0)],  # gain
                                   [3, (0, 0)],  # baseline
@@ -148,6 +149,7 @@ def perform_analysis(options):
                         #print('bestfit',best_fit_level, np.nanmin(np.abs(mpes.fit_result[first_good_level:level:1, pixel, 1,1] / mpes.fit_result[first_good_level:level:1, pixel, 1,0])))
                     fixed_xt = mpes.fit_result[best_fit_level, pixel, 1, 0]
 
+                    fixed_xt = 0.082
                     #print(best_fit_level,fixed_xt)
 
                     fixed_param = [
