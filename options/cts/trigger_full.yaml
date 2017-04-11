@@ -31,10 +31,10 @@ n_pixels          : 1296
 window_width : 50 # bins
 baseline_bins : 1024 # bins to compute baseline
 evt_min : 0
-evt_max : 20
+evt_max : 500
 n_evt_per_batch : 10000000000000000 #TODO make this work
-events_per_level : 20
-crate : [True, True, False]
+events_per_level : 500
+crate : [True, False, False]
 pdp : [True, False, False]
 
 ## MC config
@@ -46,7 +46,7 @@ baseline_window_width : 1024
 #threshold_min : 0
 #threshold_max : 30
 #threshold_step : 3
-threshold : [0, 10, 30, 40]
+threshold : [0, 1, 2, 3, 4, 5, 10, 11, 12]
 cluster_size : 7
 compression_factor : 4
 clipping_patch : 255

@@ -148,8 +148,10 @@ def display_results(options):
     axis_1.set_title('window width : %d samples' %options.window_width)
     for i, level in enumerate((options.scan_level)):
 
+        up_lims = (triggers.data[level]==0)
+        triggers.data[level][up_lims] = 1.
         #axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level, 0], yerr=triggers.errors[level, 0], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='-.')
-        axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level], yerr=triggers.errors[level], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='None', fmt='o')
+        axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level], yerr=triggers.errors[level], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='None', fmt='o', uplims=up_lims)
         axis_1.plot(data_digicam[i]['x'], data_digicam[i]['y'], label=data_digicam[i]['label'], color=colors[i])
 
     axis_1.axhline(y=500, color = 'k', label='safe threshold', linestyle='-.')
