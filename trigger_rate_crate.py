@@ -96,6 +96,7 @@ def plot(datas,labels,colors=colors,xlim=[0,100]):
     ax1.set_xlim(xlim_min, xlim_max)
     ax2.set_xlim(xlim_min * 4. / 5.6, xlim_max * 4. / 5.6)
     ax1.legend()
+    
     plt.show()
 
 
