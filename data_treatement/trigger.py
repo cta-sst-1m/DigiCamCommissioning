@@ -166,7 +166,7 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
 
     return
 
-def compute_cluster_trace(data, camera, options, log):
+def compute_cluster_trace(data, camera, options, log=None):
 
     cluster_trace = np.zeros((len(camera.Clusters_7), data.shape[-1]))
     patch_trace = np.zeros((len(camera.Patches), data.shape[-1]))

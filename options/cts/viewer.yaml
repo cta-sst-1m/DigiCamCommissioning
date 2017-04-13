@@ -2,27 +2,26 @@
 analysis_module : visualise_data
 
 ## Logging
-verbose           : True
 mc                : False
 
 ## Input files
 
-file_basename : no_name_0_000.%d.crate_intersil.fits.fz
+file : no_name_0_000.10.crate_intersil.fits.fz
 directory     :     /home/alispach/data/digicam_commissioning/trigger/20170411/
-file_list     :     [10, 11, 12]
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
+telescope_id : -1
+
 ## Camera Configuration
-view_type : patch #pixel #cluster_7 #cluster_7 #patch #pixel
-camera_view : max #, mean, median, mode, std
-n_pixels          : 1296
-#angle_cts         : 120
+pixel_start : 700
+view_type : pixel # pixel #cluster_7 #cluster_7 #patch #pixel
+camera_view : sum #, mean, sum, std, max, mode
 event_min : 0
-event_max : 100
+event_max : 10000
+scale : lin
 
 ## Trigger parameters
 baseline_window_width : 10
-cluster_size : 7
 clusters : all
 compression_factor : 4
 clipping_patch : 255

@@ -36,8 +36,8 @@ def perform_analysis(options):
 def display_results(options):
     """
     """
-
-    visualise_trace.visualise(options)
+    viewer = visualise_trace.EventViewer(options)
+    viewer.draw()
 
     return
 

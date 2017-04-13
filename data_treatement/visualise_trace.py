@@ -1,146 +1,194 @@
 import numpy as np
 from ctapipe.io import zfits
-from utils.peakdetect import spe_peaks_in_event_list
 from utils.toy_reader import ToyReader
-import logging
-import sys
-from utils.logger import TqdmToLogger
 from ctapipe import visualization
 from utils import geometry
 from data_treatement import trigger
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
+from matplotlib.ticker import FormatStrFormatter, MultipleLocator
 from cts_core.camera import Camera
+from matplotlib.widgets import CheckButtons, Button
+from matplotlib.offsetbox import AnchoredText
+from itertools import cycle
 
 
+class EventViewer():
 
-from tqdm import tqdm
+    def __init__(self, options):
 
+        plt.ioff()
+        self.options = options
+        self.filename = options.directory + options.file
+        self.mc = options.mc
+        self.baseline_window_width = options.baseline_window_width
+        self.scale = options.scale
 
-def visualise(options):
-    """
-    Fill the adcs Histogram out of darkrun/baseline runs
-    :param h_type: type of Histogram to produce: ADC for all samples adcs or SPE for only peaks
-    :param hist: the Histogram to fill
-    :param options: see analyse_spe.py
-    :param prev_fit_result: fit result of a previous step needed for the calculations
-    :return:
-    """
-    log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
-    event_number = options.event_min
+        if self.mc:
 
-    if not options.mc:
-        log.info('Viewing on DigiCam data')
-    else:
-        log.info('Viewing on MC data')
-
-
-    tqdm_out = TqdmToLogger(log, level=logging.INFO)
-
-    geom = geometry.generate_geometry_0()
-    camera = Camera(options.cts_directory + 'config/camera_config.cfg', options.cts_directory + 'config/cluster.p')
-    fig_camera = plt.figure(figsize=(20, 10))
-    axis_camera = fig_camera.add_subplot(121)
-    #fig_readout = plt.figure(figsize=(15, 10))
-    axis_readout = fig_camera.add_subplot(122)
-    #axis_histogram = fig.add_subplot(121)
-    #axis_camera = fig.add_subplot(122)
-    camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis',
-                                              allow_pick=True)
-    camera_visu.add_colorbar()
-    camera_visu.colorbar.set_label('%s [ADC]'%options.camera_view)
-    camera_visu.axes.set_xlabel('')
-    camera_visu.axes.set_ylabel('')
-    camera_visu.axes.set_xticks([])
-    camera_visu.axes.set_yticks([])
-
-    event_clicked_on = event_clicked()
-
-
-    for file in options.file_list:
-        # Open the file
-        _url = options.directory + options.file_basename % file
-
-        if not options.mc:
-
-            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=options.event_max)
+            self.event_iterator = ToyReader(filename=self.filename, id_list=[0], max_events=options.event_max)
 
         else:
 
-            inputfile_reader = ToyReader(filename=_url, id_list=[0],
-                                         max_events=options.event_max,
-                                         )
-
-        log.debug('--|> Moving to file %s' % _url)
-        # Loop over event in this file
-        #file_iterator = inputfile_reader.__iter__()
-        for event in inputfile_reader:
-
-            event_number += 1
-            if event_number > options.event_max:
-
-                break
-
-            for telid in event.dl0.tels_with_data:
-
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+            self.event_iterator = zfits.zfits_event_source(url=self.filename, max_events=options.event_max)
 
 
-                def draw_pulse_shape(pix_id):
-                    event_clicked_on.ind[-1] = pix_id
-                    axis_readout.cla()
-                    axis_readout.step(4*np.arange(0, data.shape[-1], 1), data[pix_id], label='%s %d' %(options.view_type, pix_id))
-                    axis_readout.set_xlabel('t [ns]')
-                    axis_readout.set_ylabel('[ADC]')
-                    axis_readout.legend(loc='upper right')
-                    #axis_readout.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+        self.telescope_id = options.telescope_id
+        self.event_id = 1
+        self.pixel_id = options.pixel_start
+        self.data = np.array(
+            list(self.event_iterator.__next__().dl0.tel[self.telescope_id].adc_samples.values()))
 
-                if not options.view_type=='pixel':
+        self.event_clicked_on = Event_Clicked(options)
+        self.geometry = geometry.generate_geometry_0()
+        self.camera = Camera(options.cts_directory + 'config/camera_config.cfg',
+                             options.cts_directory + 'config/cluster.p')
 
-                    baseline = np.mean(data[..., 0:options.baseline_window_width], axis=1)
-                    data = data - baseline[:, np.newaxis]
+        self.view_type = options.view_type
+        self.view_types = ['pixel', 'patch', 'cluster_7']#, 'cluster_9']
+        self.iterator_view_type = cycle(self.view_types)
+        self.camera_view = options.camera_view
+        self.camera_views = ['sum', 'mean', 'max', 'std']
+        self.iterator_camera_view = cycle(self.camera_views)
+        self.figure = plt.figure(figsize=(20, 10))
+        self.axis_next_event_button = self.figure.add_axes([0.03, 0.9, 0.1, 0.05], zorder=np.inf)
+        self.axis_next_camera_view_button = self.figure.add_axes([0.03, 0.03, 0.1, 0.05], zorder=np.inf)
+        self.axis_next_view_type_button = self.figure.add_axes([0.35, 0.03, 0.1, 0.05], zorder=np.inf)
+        self.axis_readout = self.figure.add_subplot(122)
+        self.axis_camera = self.figure.add_subplot(121)
+        self.axis_camera.axis('off')
+
+        self.camera_visu = visualization.CameraDisplay(self.geometry, ax=self.axis_camera, title='', norm=self.scale,
+                                                       cmap='viridis',
+                                                       allow_pick=True)
+        self.camera_visu.add_colorbar(orientation='horizontal', pad=0.03, fraction=0.05)
+        self.camera_visu.colorbar.set_label('%s [ADC]' % self.camera_view)
+        self.camera_visu.axes.set_xlabel('')
+        self.camera_visu.axes.set_ylabel('')
+        self.camera_visu.axes.set_xticks([])
+        self.camera_visu.axes.set_yticks([])
+
+    def next(self, event=None):
+
+        self.data = np.array(list(self.event_iterator.__next__().dl0.tel[self.telescope_id].adc_samples.values()))
+        self.update()
+        self.event_id += 1
+
+    def next_camera_view(self, event=None):
+
+        self.camera_view = next(self.iterator_camera_view)
+        self.update()
+
+    def next_view_type(self, event=None):
+
+        self.view_type = next(self.iterator_view_type)
+        self.update()
+
+    def update(self):
+
+        self.draw_readout(self.pixel_id)
+        self.draw_camera()
+
+    def draw(self):
+
+        self.next()
+        button_next_event = Button(self.axis_next_event_button, 'next')
+        button_next_camera_view = Button(self.axis_next_camera_view_button, 'view')
+        button_next_view_type = Button(self.axis_next_view_type_button, 'type')
+        button_next_event.on_clicked(self.next)
+        button_next_camera_view.on_clicked(self.next_camera_view)
+        button_next_view_type.on_clicked(self.next_view_type)
+        plt.show()
+
+    def draw_readout(self, pix):
+
+        x = 4 * np.arange(0, self.data.shape[-1], 1)
+        y = self.compute_trace()[pix]
+        self.pixel_id = pix
+        self.event_clicked_on.ind[-1] = self.pixel_id
+        self.axis_readout.cla()
+        self.axis_readout.step(x, y,
+                          label='%s %d' % (self.view_type, self.pixel_id))
+        self.axis_readout.set_xlabel('t [ns]')
+        self.axis_readout.set_ylabel('[ADC]')
+        self.axis_readout.legend(loc='upper right')
+        self.axis_readout.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+        self.axis_readout.yaxis.set_major_locator(MultipleLocator(1))
 
 
-                    cluster_trace, patch_trace = trigger.compute_cluster_trace(data, camera, options, log)
+    def draw_camera(self):
 
-                    for pixel_id in range(data.shape[0]):
+        self.camera_visu.image = self.compute_image()
+        self.camera_visu.on_pixel_clicked = self.draw_readout
+        self.camera_visu.colorbar.set_label('%s [ADC]' % self.camera_view)
+        self.camera_visu._on_pick(self.event_clicked_on)
+        anchored_text = AnchoredText('%s #%d' % ('MC' if self.mc else 'data',self.event_id), loc=1, prop=dict(size=14))
+        self.axis_camera.add_artist(anchored_text)
 
-                        if options.view_type == 'patch':
+    def compute_trace(self):
 
-                            data[pixel_id] = patch_trace[camera.Pixels[pixel_id].patch]
+        image = self.data
 
-                        elif options.view_type=='cluster_7':
+        if self.view_type in self.view_types:
 
-                            data[pixel_id] = cluster_trace[camera.Pixels[pixel_id].patch]
+            if not self.view_type=='pixel':
 
-                        elif options.view_type == 'cluster_9':
+                baseline = np.mean(image[..., 0:self.baseline_window_width], axis=1)
+                image = image - baseline[:, np.newaxis]
 
-                            log.error('Cluster 19 not implemented')
-                            break
+                cluster_trace, patch_trace = trigger.compute_cluster_trace(image, self.camera, self.options)
 
-                #else:
+                for pixel_id in range(self.data.shape[0]):
 
-                   # log.error('Incorrect view typ %s' %options.view_type)
+                    if self.view_type == 'patch':
 
-                if options.camera_view=='max':
+                        image[pixel_id] = patch_trace[self.camera.Pixels[pixel_id].patch]
 
-                    camera_visu.image = np.max(data, axis=1)
-                elif options.camera_view=='mean':
+                    elif self.view_type == 'cluster_7':
 
-                    camera_visu.image = np.mean(data, axis=1)
+                        image[pixel_id] = cluster_trace[self.camera.Pixels[pixel_id].patch]
 
-                camera_visu.on_pixel_clicked = draw_pulse_shape
-                camera_visu._on_pick(event_clicked_on)
-                axis_camera.set_title('display mode : %s, #%d' %(options.view_type, event_number))
-                #fig.canvas.mpl_connect('key_press_event', on_key)
-                input("Press enter to go to next event")
-    return
+                    elif self.view_type == 'cluster_9':
 
-class event_clicked():
+                        print('Cluster 19 not implemented')
 
-    def __init__(self):
+                        image = np.zeros(self.data.shape)
 
-        self.ind = [0, 700]
+        return image
+
+    def compute_image(self):
+
+        image = self.compute_trace()
+
+
+        if self.camera_view in self.camera_views:
+
+            if self.camera_view == 'mean':
+
+                image = np.mean(image, axis=1)
+
+            elif self.camera_view == 'std':
+
+                image = np.std(image, axis=1)
+
+            elif self.camera_view == 'max':
+
+                image = np.max(image, axis=1)
+
+            elif self.camera_view == 'sum':
+
+                image = np.sum(image, axis=1)
+
+        else:
+
+            print('Cannot compute for camera type : %s' % self.camera_view)
+
+        return image
+
+
+class Event_Clicked():
+
+    def __init__(self, options):
+        self.ind = [0, options.pixel_start]
 
 
 
