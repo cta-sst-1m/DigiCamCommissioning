@@ -48,13 +48,29 @@ def create_histo(options):
                                  bin_centers=np.array(options.threshold), label='Trigger', \
                                  xlabel='Threshold [ADC]', ylabel='trigger rate [Hz]')
 
+    cluster_hist = histogram.Histogram(bin_center_min=0, bin_center_max=options.clipping_patch*7
+,
+                               bin_width=1, data_shape=(len(options.scan_level), 432,),
+                               label='Cluster 7 spectrum',xlabel='ADC',ylabel = '$N_{entries}$')
+
+    patch_hist = histogram.Histogram(bin_center_min=0, bin_center_max=options.clipping_patch,
+                               bin_width=1, data_shape=(len(options.scan_level), 432,),
+                               label='Patch spectrum',xlabel='ADC', ylabel = '$N_{entries}$')
+
+    max_cluster_hist = []
+    #max_cluster_hist = histogram.Histogram(bin_center_min=0, bin_center_max=options.clipping_patch*7,
+    #                           bin_width=1, data_shape=(len(options.scan_level), ),
+    #                           label='Cluster 7 max spectrum',xlabel='ADC', ylabel = '$N_{entries}$')
 
 
     #trigger_spectrum = trigger.run(triggers, options=options)
-    trigger.run(triggers, options=options)
+    trigger.run(triggers, options=options, cluster_hist=cluster_hist, patch_hist=patch_hist, max_cluster_hist=max_cluster_hist)
     triggers.save(options.output_directory + options.histo_filename)
+    cluster_hist.save(options.output_directory + options.cluster_histo_filename)
+    patch_hist.save(options.output_directory + options.patch_histo_filename)
+    #max_cluster_hist.save(options.output_directory + options.max_cluster_histo_filename)
 
-    #np.save(arr=trigger_spectrum.ravel(), file=options.output_directory + options.trigger_spectrum_filename)
+    np.savez(options.output_directory + options.max_cluster_histo_filename, hist=max_cluster_hist)
 
     return
 
@@ -69,6 +85,12 @@ def perform_analysis(options):
     :return:
     """
 
+    # Load the histogram
+    triggers = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    cluster_histo = histogram.Histogram(filename=options.output_directory + options.cluster_histo_filename)
+    patch_histo = histogram.Histogram(filename=options.output_directory + options.patch_histo_filename)
+    #max_cluster_histo = histogram.Histogram(filename=options.output_directory + options.max_cluster_histo_filename)
+
     print('Nothing implemented')
 
     return
@@ -81,17 +103,41 @@ def display_results(options):
     :return:
     """
 
-    # Load the histogram
+    # Load the histograms
     triggers = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    cluster_histo = histogram.Histogram(filename=options.output_directory + options.cluster_histo_filename)
+    patch_histo = histogram.Histogram(filename=options.output_directory + options.patch_histo_filename)
+    #max_cluster_histo = histogram.Histogram(filename=options.output_directory + options.max_cluster_histo_filename)
+
+    max_cluster_histo = np.load(options.output_directory + options.max_cluster_histo_filename)['hist']
+    #print(max_cluster_histo)
+    #print ('hello')
+
+    import matplotlib.pyplot as plt
+
+
+    plt.figure()
+    plt.hist(max_cluster_histo, bins=np.arange(np.min(max_cluster_histo), np.max(max_cluster_histo) + 1, 1), align='left', label='Dark Intersil sector 1')
+    plt.xlabel('Max of all clusters [ADC]')
+    plt.ylabel('$N_{entries}$')
+    plt.legend(loc='best')
+
+    plt.figure()
+    plt.errorbar(triggers.bin_centers, triggers.data[0]*(4*options.window_width*1E-9*options.events_per_level), yerr=triggers.errors[0]*(4*options.window_width*1E-9*options.events_per_level), label='Dark Intersil sector 1')
+    plt.xlabel('Threshold [ADC]')
+    plt.ylabel('$N_{trigger}$')
+    plt.legend(loc='best')
+
 
     # Define Geometry
     #geom = geometry.generate_geometry_0(pixel_list=np.arange(0, 432, 1))
 
-    #display.display_hist(dc_led, options, geom=geom, scale='linear')
+    display.display_hist(cluster_histo, options, scale='log')
+    display.display_hist(patch_histo, options, scale='log')
+    #display.display_hist(max_cluster_histo, options, scale='log')
     #display.display_hist(triggers, options, scale='log')
 
-    trigger_spectrum = np.load(options.output_directory + options.trigger_spectrum_filename + '.npy')
-    import matplotlib.pyplot as plt
+    #trigger_spectrum = np.load(options.output_directory + options.trigger_spectrum_filename + '.npy')
 
     v0 = {'x': [0.0 , 1.0 , 4.0 , 6.0 , 8.0 , 11.0 , 16.0 , 21.0 , 23.0 , 25.0 , 26.0 , 27.0 , 28.0 , 29.0 , 30.0 , 31.0 , 32.0 , 33.0 , 34.0 , 35.0 , 36.0 , 37.0 , 38.0 , 39.0 , 40.0 , 41.0 , 42.0 , 43.0 , 45.0 , 50.0 , 60.0 , 70.0 , 80.0 , 90.0 , 100.0],
           'y': [4901960.80512 , 4901960.768 , 4858981.78278 , 4298339.43079 , 2339967.12702 , 440778.369779 , 231105.753395 , 161552.48678 , 129761.650883 , 92422.8745562 , 65835.9695502 , 37090.1808282 , 14632.2879061 , 4470.84865196 , 1228.91032738 , 295.885599599 , 85.0389470857 , 19.3789749345 , 4.4520041414 , 1.22618061309 , 0.527915533515 , 0.317995357268 , 0.183362285273 , 0.18904744481 , 0.176583493282 , 0.195209850589 , 0.134878302986 , 0.157440325038 , 0.120506609788 , 0.116666666667 , 0.026935301406 , 0.0331510028178 , 0.016570008285 , 0.0166426734791 , 0.0166006789678],
@@ -148,10 +194,10 @@ def display_results(options):
     axis_1.set_title('window width : %d samples' %options.window_width)
     for i, level in enumerate((options.scan_level)):
 
-        up_lims = (triggers.data[level]==0)
-        triggers.data[level][up_lims] = 1.
+        #up_lims = (triggers.data[level]==0)
+        #triggers.data[level][up_lims] = 1.
         #axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level, 0], yerr=triggers.errors[level, 0], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='-.')
-        axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level], yerr=triggers.errors[level], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='None', fmt='o', uplims=up_lims)
+        axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level], yerr=triggers.errors[level], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), color=colors[i], linestyle='None', fmt='o')
         axis_1.plot(data_digicam[i]['x'], data_digicam[i]['y'], label=data_digicam[i]['label'], color=colors[i])
 
     axis_1.axhline(y=500, color = 'k', label='safe threshold', linestyle='-.')
