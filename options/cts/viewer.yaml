@@ -13,12 +13,14 @@ cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 telescope_id : -1
 
 ## Camera Configuration
-pixel_start : 700
+pixel_start : 20
 view_type : pixel # pixel #cluster_7 #cluster_7 #patch #pixel
-camera_view : sum #, mean, sum, std, max, mode
+camera_view : mean #, mean, sum, std, max, mode
 event_min : 0
 event_max : 10000
-scale : lin
+scale : lin # log not working
+n_bins : 50
+bin_start : 9
 
 ## Trigger parameters
 baseline_window_width : 10

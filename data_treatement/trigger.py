@@ -182,13 +182,14 @@ def compute_cluster_trace(data, camera, options, log=None):
 
                 for pixel in patch.pixels:
 
+                    #print(patch.ID, pixel.ID)
                     patch_trace[patch.ID] += data[pixel.ID]
 
 
                 patch_trace[patch.ID] /= options.compression_factor
                 patch_trace[patch.ID] = np.clip(patch_trace[patch.ID], 0., options.clipping_patch).astype(int)
 
-                cluster_trace[cluster_index] += patch_trace[patch.ID]
+                cluster_trace[cluster.ID] += patch_trace[patch.ID]
 
 
 

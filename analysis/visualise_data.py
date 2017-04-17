@@ -38,6 +38,7 @@ def display_results(options):
     """
     viewer = visualise_trace.EventViewer(options)
     viewer.draw()
+    viewer.save()
 
     return
 
