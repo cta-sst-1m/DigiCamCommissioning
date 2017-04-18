@@ -77,8 +77,8 @@ if __name__ == '__main__':
 
 
     if hasattr(options,'angle_cts'):
-        #cts_path = '/data/software/CTS/'
-        cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
+        cts_path = '/data/software/CTS/'
+        #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
         options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
 
@@ -116,6 +116,7 @@ if __name__ == '__main__':
 
             exit()
 
+
     if hasattr(options, 'threshold'):
 
         if hasattr(options, 'threshold_min'):
@@ -127,7 +128,7 @@ if __name__ == '__main__':
         if options.clusters=='all' or options.clusters is None:
 
             options.clusters = [i for i in range(432)]
-
+            
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
     log.info('\t\t-|> Will run %s with the following configuration:'%options.analysis_module)

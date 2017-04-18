@@ -1,0 +1,38 @@
+# Analysis module
+analysis_module   : analyse_shower
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170317
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.test_shower.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170413/
+file_list     :     [9]
+
+# Output file
+output_directory  : /data/datasets/CTA/DATA/20170413/
+histo_filename    : shower.npz
+shower_filename   : shower_plot.npz
+full_histo_filename   : full_mpe.npz
+synch_histo_filename    : peaks.npz
+baseline_param_data : baseline_parameters.npz
+
+# Event processing
+integration_method : integration
+evt_per_shower    : 1000
+first_event       : 434
+window_width : 7
+window_start : 3
+baseline_per_event_limit : 50
+shower_ids        : [4,6,8,16,21,33,43,64,79,76,81]
+
+# Camera Configuration
+angle_cts         : 120.
+
