@@ -182,7 +182,7 @@ def display_results(options):
     plt.show()
     '''
 
-    h = input('see some pixels')
+    #h = input('see some pixels')
     for pixel in [250, 272, 273, 274, 275, 296, 297, 298, 299, 300, 320, 321, 322, 323, 344, 345, 346, 347, 348, 369, 370]:
         #if options.pixel_list[pixel]!=661:continue
         y = ac_led.data[pixel][0:-1]
@@ -218,19 +218,21 @@ def display_results(options):
         y_fit_max = function(param + param_err, x1)
         y_fit_min = function(param - param_err, x1)
 
-        ax = plt.subplot(1, 3, 1)
+        ax = plt.subplot(1, 1, 1)
         ax.cla()
-        plt.errorbar(x, y, yerr=yerr, fmt='ok')
+        plt.errorbar(x, y, yerr=yerr, fmt='ok', label='pixel : %d'%options.pixel_list[pixel])
         # ax.set_yscale('log')
-        ax.set_ylabel('$N_{\gamma}$')
-        ax.set_xlabel('LED DAC %d'%options.pixel_list[pixel])
+        ax.set_ylabel('$N_{\gamma}$ [p.e.]')
+        ax.set_xlabel('LED DAC')
         ax.set_yscale('log')
         #
-        plt.plot(x1,y_fit)
+        plt.plot(x1,y_fit, label='fit')
 
-        plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
+        #plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
         plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
-
+        plt.legend(loc='best')
+        plt.show()
+"""
          # Use a poly1d to represent the polynomial.
         inv_p = lambda y : np.max( np.real((np.poly1d(param) - y).roots))
         inv_p_min = lambda y : np.max( np.real((np.poly1d(param-param_err) - y).roots))
@@ -264,3 +266,4 @@ def display_results(options):
         input('bla')
 
     return
+"""

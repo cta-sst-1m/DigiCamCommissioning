@@ -14,7 +14,7 @@ from itertools import cycle
 import matplotlib.gridspec as gridspec
 from matplotlib.colors import LogNorm
 import matplotlib as mpl
-
+import matplotlib.animation as animation
 
 class EventViewer():
 
@@ -37,13 +37,17 @@ class EventViewer():
             self.event_iterator = zfits.zfits_event_source(url=self.filename, max_events=options.event_max)
 
 
-        self.telescope_id = options.telescope_id
+
         self.event_id = 0
         self.first_call = True
         self.time = options.bin_start
-        self.n_bins = options.n_bins
         self.pixel_id = options.pixel_start
-        self.data = np.array(list(self.event_iterator.__next__().dl0.tel[self.telescope_id].adc_samples.values()))
+        r0_container = self.event_iterator.__next__().r0
+        self.telescope_id = r0_container.tels_with_data[0]
+        self.data = np.array(list(r0_container.tel[self.telescope_id].adc_samples.values()))
+        self.n_bins = self.data.shape[-1]
+
+        #print('hello')
 
         self.event_clicked_on = Event_Clicked(options)
         self.geometry = geometry.generate_geometry_0()
@@ -105,14 +109,23 @@ class EventViewer():
         self.radio_button_next_camera_view.set_active(self.camera_views.index(self.camera_view))
         #self.slider_time = Slider(self.axis_slider_time, '', 0, options.n_bins - 1, valinit=self.time, valfmt='%d')
 
-    def next(self, event=None):
+    def next(self, event=None, index=None):
+
+        #print(self.event_iterator.__next__())
+
+        if index is None:
+            index = self.event_id
 
         if not self.first_call:
-            self.data = np.array(list(self.event_iterator.__next__().dl0.tel[self.telescope_id].adc_samples.values()))
+
+            for i in range(self.event_id-index + 1):
+                self.data = np.array(list(self.event_iterator.__next__().r0.tel[self.telescope_id].adc_samples.values()))
+                #self.event_id += 1
+
 
         self.update()
         self.first_call = False
-        self.event_id += 1
+        self.event_id += 1 + (0 if index is None else self.event_id - index)
 
     def next_camera_view(self, camera_view, event=None):
 
@@ -271,10 +284,41 @@ class EventViewer():
         self.axis_next_event_button.set_visible(visible)
 
 
+    def animate_pixel_scan(self, pixel_list, filename='test.mp4'):
+
+        self.set_buttons_visible(visible=False)
+
+        metadata = dict(title='AC Scan', artist='Digicam Film Studio')
+        writer = animation.FFMpegWriter(fps=5, metadata=metadata)
 
 
 
+        #next_event = lambda i: self.next(event=None, index=i)
 
+        with writer.saving(self.figure, filename, 500):
+
+            #print(pixel_list)
+            #print(len(pixel_list))
+
+            for pixel in pixel_list:
+
+                try:
+
+                    self.pixel_id = pixel
+                    self.next()
+                    writer.grab_frame()
+
+                except:
+
+                    break
+
+        self.set_buttons_visible(visible=True)
+
+
+                    #ani = animation.FuncAnimation(self.figure, next_event, np.arange(0, 10, 1), blit=True, interval=10,
+        #                        repeat=False)
+
+        #ani.save(filename, metada={'studio': 'DigiCam Films Production'})
 
 
 

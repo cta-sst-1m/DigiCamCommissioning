@@ -6,21 +6,25 @@ mc                : False
 
 ## Input files
 
-file : no_name_0_000.10.crate_intersil.fits.fz
-directory     :     /home/alispach/data/digicam_commissioning/trigger/20170411/
+file : CameraDigicam@localhost.localdomain_0_000.1.ac_scan.fits.fz
+#file : CameraDigicam@localhost.localdomain_0_000.9.test_shower.fits.fz
+#file : no_name_0_000.10.crate_intersil.fits.fz
+#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170411/
+directory     :     /home/alispach/data/digicam_commissioning/cts/mapping_check/
+#directory     :     /home/alispach/data/digicam_commissioning/cts/shower/
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
-telescope_id : -1
+telescope_id : 1
 
 ## Camera Configuration
-pixel_start : 20
+angle_cts : 120
+pixel_start : 0
 view_type : pixel # pixel #cluster_7 #cluster_7 #patch #pixel
-camera_view : mean #, mean, sum, std, max, mode
+camera_view : time #, mean, sum, std, max, mode
 event_min : 0
 event_max : 10000
 scale : lin # log not working
-n_bins : 50
-bin_start : 9
+bin_start : 19
 
 ## Trigger parameters
 baseline_window_width : 10

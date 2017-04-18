@@ -64,7 +64,7 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
         axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*(bin_width), label='fit', color='r')
         text_fit_result = '$\mu$ : %0.2f \n $\sigma$ : %0.2f \n entries : %d' % (fit_param[0], fit_param[1], h.shape[0])
         anchored_text = AnchoredText(text_fit_result, loc=2, prop=dict(size=18))
-        axis.add_artist(anchored_text)
+        #axis.add_artist(anchored_text)
 
 
     axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %options.scan_level[level])
@@ -328,7 +328,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
             text_fit_result += hist.fit_result_label[i] + ' : %0.2f $\pm$ %0.2f' % (hist.fit_result[index][i, 0], hist.fit_result[index][i, 1])
             text_fit_result += '\n'
         anchored_text = AnchoredText(text_fit_result, loc=3, prop=dict(size=8))
-        axis.add_artist(anchored_text)
+        #axis.add_artist(anchored_text)
         #axis.text(0.7, 0.7, text_fit_result, horizontalalignment='left', verticalalignment='center',
         #              transform=axis.transAxes, fontsize=10)
 
@@ -340,7 +340,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
     axis.set_yscale(scale, nonposy='clip')
-    axis.legend(loc='upper right')
+    axis.legend(loc='upper left')
 
 
     return h_to_return

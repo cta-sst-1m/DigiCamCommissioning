@@ -38,7 +38,8 @@ def display_results(options):
     """
     viewer = visualise_trace.EventViewer(options)
     viewer.draw()
-    viewer.save()
+    #viewer.save()
+    viewer.animate_pixel_scan(pixel_list=options.pixel_list, filename='test.mp4')
 
     return
 
