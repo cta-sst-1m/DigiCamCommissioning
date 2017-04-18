@@ -1,0 +1,41 @@
+# Analysis module
+analysis_module : analyse_synchro
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170413
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.test_shower.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170413/
+file_list     :     [9]
+#4,5,6,7,8,9
+
+# Output files
+output_directory  : /data/datasets/CTA/DATA/20170413/
+histo_filename    : peaks.npz
+dark_histo_filename    : adc_dark.npz
+baseline_param_data : baseline_parameters.npz
+
+
+# Event processingp
+window_width      : 7
+baseline_per_event_limit : 50
+evt_max           : 4965
+evt_min           : 0
+n_evt_per_batch   : 100
+
+
+# Camera Configuration
+angle_cts         : 120.
+
+# Plot configuration
+sample_max           : 92
+
+

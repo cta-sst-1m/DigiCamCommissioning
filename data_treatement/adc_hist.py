@@ -30,7 +30,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     else:
         log.info('Running on MC data')
     params=None
-    if hasattr(options, 'baseline_per_event_limit'):
+    if hasattr(options, 'baseline_per_event_limit') and not h_type=='MEANRMS':
         params = np.load(options.output_directory + options.baseline_param_data)['params']
 
 

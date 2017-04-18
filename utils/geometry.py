@@ -1777,7 +1777,7 @@ def find_cts_pixels(angle=240.):
 
     return pix_id[mask]
 
-def generate_geometry(cts, available_board=None):
+def generate_geometry(cts, available_board=None, all_camera= False):
     """
     Generate the SST-1M geometry from the CTS configuration
     :param cts: a CTS instance
@@ -1794,11 +1794,16 @@ def generate_geometry(cts, available_board=None):
             pix_x.append(pix.center[0])
             pix_y.append(pix.center[1])
             pix_id.append(pix.ID)
+        elif all_camera:
+            pix_x.append(pix.center[0])
+            pix_y.append(pix.center[1])
+            pix_id.append(pix.ID)
+
 
     neighbors_pix = find_neighbor_pixels(pix_x, pix_y, 30.)
     geom = CameraGeometry(0, pix_id, pix_x * u.mm, pix_y * u.mm, np.ones(1296) * 400., neighbors_pix, 'hexagonal')
-    print(pix_id)
     return geom, pix_id
+
 
     '''
 

@@ -20,37 +20,49 @@ data_1 += [[705.811872968,467.455945760,444.195793216,106.391106976,401.58603072
 
 
 data_2 = []
-data_2 += [[5,10,15,20,25,30,35,40]]
-data_2 += [[404008293,9373104,4837759,4207519,3246574,5519876,1559280,301]]
-data_2 += [[93.121154128,30.274769496,20.012270576,20.692336952,20.196262232,48.895958104,47.560179536,139.314085048]]
+data_2 += [[5,10,15,20,25,30,35,40,200,100,150]]
+data_2 += [[113758836,5732173,47232,2166,146,57,56,34,1e-9,4,1]]
+data_2 += [[30.074786769,31.170055432,30.954493936,60.430008728,70.508250416,130.075363824,200.144434464,210.590972840,634.365704768,882.296421152,227.9448120]]
+
 
 data_3 = []
-data_3 += [[40,35,30,25,20,15,15,10,5,0]]
-data_3 += [[204,1578936,6911811,5567420,7664965,9833482,7795891,20363559,27910327,24152084]]
-data_3 += [[131.819300096,49.919709520,62.109608488,34.970017952,37.977594856,38.433611448,30.76793376,70.508486504,11.021567320,10.413762928]]
+data_3 += [[5,10,15,20,25,30,35,40]]
+data_3 += [[404008293,9373104,4837759,4207519,3246574,5519876,1559280,301]]
+data_3 += [[93.121154128,30.274769496,20.012270576,20.692336952,20.196262232,48.895958104,47.560179536,139.314085048]]
 
 data_4 = []
-data_4 += [[]]
-data_4 += [[]]
-data_4 += [[]]
+data_4 += [[150,20,15,10,5,25,30,35,7,8,6,1,27,9,50]]
+data_4 += [[4,7064,326556,36072365,147205348,876,104,53,44341034,59700382,106337529,51243134,286,84254522,30]]
+data_4 += [[1132.54651400,30.338796624,30.394805240,30.810795168,30.226575928,80.499492760,60.366143048,
+            60.87811032,10.094250800,16.556873968,22.411948040,10.453599344,60.470089776,34.706044744,63.981699160]]
 
 
-dataset = [data_0,data_1,data_2,data_3]
-colors=['k','b','g','r','y']
-labels = ['Dark run, config ((1,1,0),(2,1,0))',
-          'Dark run ((1,0,0),(2,0,2))',
-          'Dark run ((0,1,0),(0,1,2))',
-          'Dark run ((0,1,0),(1,1,1))']
+
+dataset = [data_0,data_3,data_1,data_2,data_4]
+colors=['k','b','m','r','k']
+style=['--','-','-','-','-']
+'''
+labels = ['Dark run, config ((1,1,0),(2,1,1)) (light off)',
+          'Dark run ((1,0,0),(2,1,2)) analog (light on) ',
+          'Dark run ((0,1,0),(1,2,1)) intersil (dark room)',
+          'Dark run ((0,1,0),(1,1,2)) intersil (dark room)']
+'''
+labels = ['Dark run, analog PDP ON, intersil PDP OFF (light off)',
+          'Dark run, intersil PDP OFF (dark room not tight)',
+          'Dark run, analog PDP ON (dark room not tight) ',
+          'Dark run, intersil PDP ON (dark room)',
+          'Dark run, 3 crate PDP ON (dark room)']
 
 def rate_calc(data):
     data = np.array(data)
+    print(type(data[2]))
     samples = data[2]/4e-9
     p = data[1]/data[2]*4e-9
     q = 1.-p
     data = np.append(data,(data[1]/data[2]).reshape(1,data.shape[1]),axis=0)
     data = np.append(data,(np.sqrt(samples*p*q)/data[2]).reshape(1,data.shape[1]),axis=0)
+    data[4][data[1]<1e-8]=1.
     data = np.append(data,(data[0]*4./5.6).reshape(1,data.shape[1]),axis=0)
-    print(data.shape)
     sort0 = data[0,:].argsort()
     for i,d in enumerate(data):
         data[i]=data[i,sort0]
@@ -65,8 +77,9 @@ def plot(datas,labels,colors=colors,xlim=[0,100]):
     xlim_max = xlim[1]
     for i,data in enumerate(datas):
         data = np.array(data)
-        print(data.shape)
-        ax1.errorbar(data[0], data[3], yerr=data[4], fmt='%s'%colors[i], label=labels[i])
+        ax1.plot(data[0], data[3],color='%s'%colors[i], linestyle='%s'%style[i] ,label=labels[i])
+        #ax1.errorbar(data[0], data[3], yerr=data[4], fmt='%s'%colors[i], label=labels[i])
+        ax1.fill_between(data[0], data[3]-data[4],data[3]+data[4], alpha= 0.5, edgecolor='%s'%colors[i], facecolor='%s'%colors[i])
         data0str = '%s - x: ['%labels[i]
         opt = ''
         for jj in data[0]:
@@ -95,6 +108,8 @@ def plot(datas,labels,colors=colors,xlim=[0,100]):
     ax2.grid(True, color='r')
     ax1.set_xlim(xlim_min, xlim_max)
     ax2.set_xlim(xlim_min * 4. / 5.6, xlim_max * 4. / 5.6)
+    ax1.set_ylim(1e-3,250.e6)
+    ax2.set_ylim(1e-3,250.e6)
     ax1.legend()
 
     plt.show()
@@ -105,5 +120,4 @@ if __name__ == '__main__':
     dataset_np = []
     for d in dataset:
         dataset_np += [rate_calc(d)]
-    plt.figure()
     plot(dataset_np, labels=labels)

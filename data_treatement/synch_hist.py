@@ -69,7 +69,7 @@ def run(hist, options, min_evt = 0):
                     baseline = np.mean(data[..., 0:options.baseline_per_event_limit], axis=-1)
                     rms = np.std(data[..., 0:options.baseline_per_event_limit], axis=-1)
                     ind_good_baseline = (rms - params[:, 2]) / params[:, 3] < 0.5
-                    if n_evt > 1:
+                    if evt_num>1:
                         _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
                     else:
                         _tmp_baseline = baseline
