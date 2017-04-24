@@ -64,7 +64,7 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
         axis.plot(x, gaussian_fit.pdf(x)*np.sum(histo)*(bin_width), label='fit', color='r')
         text_fit_result = '$\mu$ : %0.2f \n $\sigma$ : %0.2f \n entries : %d' % (fit_param[0], fit_param[1], h.shape[0])
         anchored_text = AnchoredText(text_fit_result, loc=2, prop=dict(size=18))
-        #axis.add_artist(anchored_text)
+        axis.add_artist(anchored_text)
 
 
     axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %options.scan_level[level])
@@ -248,7 +248,7 @@ def draw_pulse_shape(axis, pulse_shape, options, index, color='k'):
     axis.errorbar(x, y, yerr=yerr, fmt='ok', label=pixel_label)
     axis.legend(loc='upper right')
     axis.set_xlabel('t [ns]')
-    axis.set_ylabel('ADC')
+    axis.set_ylabel('LSB')
 
     return h
 
@@ -297,7 +297,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     h_to_return = h
 
     ### Avoid NANs
-    mask = (~np.isnan(h))
+    mask = (~np.isnan(h) * (h>=1) * (x<500))
 
 
 
@@ -327,8 +327,8 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
             if 'Amplitude' in hist.fit_result_label[i]: continue
             text_fit_result += hist.fit_result_label[i] + ' : %0.2f $\pm$ %0.2f' % (hist.fit_result[index][i, 0], hist.fit_result[index][i, 1])
             text_fit_result += '\n'
-        anchored_text = AnchoredText(text_fit_result, loc=3, prop=dict(size=8))
-        #axis.add_artist(anchored_text)
+        anchored_text = AnchoredText(text_fit_result, loc=4, prop=dict(size=18))
+        axis.add_artist(anchored_text)
         #axis.text(0.7, 0.7, text_fit_result, horizontalalignment='left', verticalalignment='center',
         #              transform=axis.transAxes, fontsize=10)
 
@@ -340,13 +340,13 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     axis.yaxis.get_label().set_ha('right')
     axis.yaxis.get_label().set_position((0, 1))
     axis.set_yscale(scale, nonposy='clip')
-    axis.legend(loc='upper left')
+    axis.legend(loc='upper right')
 
 
     return h_to_return
 
 
-def display_fit_result(hist, geom = None, limits=[0,4095], display_fit=False):
+def display_fit_result(hist, options, geom = None, limits=[0,4095], display_fit=False):
     """
     A function to display a vaiable both as an histogram and as a camera view
 
@@ -396,6 +396,8 @@ def display_fit_result(hist, geom = None, limits=[0,4095], display_fit=False):
         camera_visu.image = h
         camera_visu.add_colorbar()
         camera_visu.colorbar.set_label(hist.fit_result_label[counter.count_param])
+        camera_visu.axes.get_xaxis().set_visible(False)
+        camera_visu.axes.get_yaxis().set_visible(False)
 
     else: # TODO check this case
         axis_param = fig.add_subplot(1, 1, 1)

@@ -211,7 +211,8 @@ def display_results(options):
         xx = np.vstack([x1 ** (deg - i) for i in range(deg + 1)]).T
         yi = np.dot(xx, param)
         C_yi = np.dot(xx, np.dot(covariance, xx.T))
-        sig_yi = np.sqrt(np.diag(C_yi))
+        n_sigma = 5
+        sig_yi = n_sigma * np.sqrt(np.diag(C_yi))
 
         y_fit = function(param,x1)
 
@@ -229,7 +230,7 @@ def display_results(options):
         plt.plot(x1,y_fit, label='fit')
 
         #plt.fill_between(x1, y_fit_max, y_fit_min, alpha=0.5, facecolor='blue', label='polyfit confidence level')
-        plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='polyfit confidence level')
+        plt.fill_between(x1, yi + sig_yi, yi - sig_yi, alpha=0.5, facecolor='red', label='%d $\sigma$ confidence level' %n_sigma)
         plt.legend(loc='best')
         plt.show()
 """

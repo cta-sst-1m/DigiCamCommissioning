@@ -6,11 +6,21 @@ mc                : False
 
 ## Input files
 
-file : CameraDigicam@localhost.localdomain_0_000.1.ac_scan.fits.fz
+#file : CameraDigicam@localhost.localdomain_0_000.1.ac_scan.fits.fz
 #file : CameraDigicam@localhost.localdomain_0_000.9.test_shower.fits.fz
 #file : no_name_0_000.10.crate_intersil.fits.fz
+#file : CameraDigicam@localhost.localdomain_0_000.2.trigInt_TTR.fits.fz
+#file : CameraDigicam@localhost.localdomain_0_000.0.thr_50.fits.fz
+#file : CameraDigicam@localhost.localdomain_0_000.7.thr_50_vert.fits.fz
+#file  : CameraDigicam@localhost.localdomain_0_000.5.thr_15.fits.fz
+#file  : CameraDigicam@localhost.localdomain_0_000.11.thr_250.fits.fz
+file : CameraDigicam@localhost.localdomain_0_000.0.thr_50_vert.fits.fz
+
+directory     :     /home/alispach/data/digicam_commissioning/trigger/20170421/
+#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170419/
+#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170413/
 #directory     :     /home/alispach/data/digicam_commissioning/trigger/20170411/
-directory     :     /home/alispach/data/digicam_commissioning/cts/mapping_check/
+#directory     :     /home/alispach/data/digicam_commissioning/cts/mapping_check/
 #directory     :     /home/alispach/data/digicam_commissioning/cts/shower/
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
@@ -19,12 +29,17 @@ telescope_id : 1
 ## Camera Configuration
 angle_cts : 120
 pixel_start : 0
-view_type : pixel # pixel #cluster_7 #cluster_7 #patch #pixel
-camera_view : time #, mean, sum, std, max, mode
+view_type : cluster_7 # pixel, cluster_7, patch
+camera_view : stacked #, mean, sum, std, max, mode, baseline_substracted, stacked
 event_min : 0
 event_max : 10000
 scale : lin # log not working
-bin_start : 19
+bin_start : 9
+movie_filename : high_threshold_cluster_7_vert.mp4
+n_frames : 500
+limits_colormap : #[1, 100]
+limits_readout : #2000, 2300]
+threshold : 50
 
 ## Trigger parameters
 baseline_window_width : 10

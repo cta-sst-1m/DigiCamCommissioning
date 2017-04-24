@@ -195,7 +195,7 @@ def label_func(*args, ** kwargs):
     List of labels for the parameters
     :return:
     """
-    label = ['$\mu$ [p.e.]', '$\mu_{XT}$ [p.e.]', 'Gain [ADC/p.e.]','Baseline [ADC]','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]', 'Amplitude', 'Offset [ADC]']
+    label = ['$\mu$ [p.e.]', '$\mu_{XT}$ [p.e.]', 'Gain [LSB/p.e.]','Baseline [LSB]','$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]', 'Amplitude', 'Offset [LSB]']
     return np.array(label)
 
 if __name__ == '__main__':

@@ -37,9 +37,14 @@ def display_results(options):
     """
     """
     viewer = visualise_trace.EventViewer(options)
-    viewer.draw()
     #viewer.save()
-    viewer.animate_pixel_scan(pixel_list=options.pixel_list, filename='test.mp4')
+    #viewer.animate_pixel_scan(pixel_list=options.pixel_list, filename='test.mp4')
+    #viewer.animate_muon_scan(filename=options.movie_filename, n_frames=options.n_frames)
+    viewer.draw()
+
+
+    #viewer.heat_map_animation(filename=options.movie_filename, n_frames=options.n_frames, limits_colormap=options.limits_colormap)
+
 
     return
 

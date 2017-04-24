@@ -102,6 +102,6 @@ def label_func(*args, ** kwargs):
     List of labels for the parameters
     :return:
     """
-    label = ['#mu', 'P(XT)', 'Gain','Baseline','$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]','Amplitude']
+    label = ['#mu', 'P(XT)', 'Gain','Baseline','$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]','Amplitude']
     return np.array(label)
 

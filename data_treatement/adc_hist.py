@@ -60,14 +60,18 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
 
             pbar.update(1)
 
-            for telid in event.r0.tels_with_data:
+            #print(event.dl0)
+            #break
+
+            for telid in event.dl0.tels_with_data:
+                #print('hello')
                 if n_evt % n_batch == 0:
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
                     # Update adc histo
                     if h_type == 'ADC':
                         #print(batch[0,0])
-
-                        hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
+                        pass
+                        #hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
                     elif h_type == 'SPE':
                         hist.fill_with_batch(
                             spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
@@ -77,13 +81,15 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                         if hasattr(options, 'baseline_per_event_limit'):
                             batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=float)
                     else:
-                        batch = np.zeros((data.shape[0], n_batch, data.shape[1]), dtype=int)
+                        pass
+                        #batch = np.zeros((data.shape[0], n_batch, data.shape[1]), dtype=int)
                     batch_num += 1
                     log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
                 # Get the data
-                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
                 # Get ride off unwanted pixels
                 data = data[options.pixel_list]
+                #print(data)
                 if n_evt==1:
                     if hasattr(options,'window_width'):
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width+1),dtype=int)
@@ -115,6 +121,9 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                         #print(batch.shape,n_evt%n_batch)
 
                 else:
-                    batch[:, n_evt%n_batch-1, :] = data
+                    #print(np.sum(np.sum(data, axis=0), axis=0))
+                    #print(hist.data.shape)
+                    #print(data.shape)
+                    hist.fill_with_batch(data)
 
     return
