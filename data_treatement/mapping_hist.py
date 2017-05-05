@@ -13,9 +13,6 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
-    pbar = tqdm(total=len(options.shower_ids)*options.evt_per_shower)
-    tqdm_out = TqdmToLogger(log, level=logging.INFO)
-
     params=None
     if hasattr(options, 'baseline_per_event_limit'):
         params = np.load(options.output_directory + options.baseline_param_data)['params']
@@ -118,7 +115,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
         _url = options.directory + options.file_basename % file
         inputfile_reader = None
         if not options.mc:
-            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=len(options.shower_ids)*options.evt_per_shower)
+            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=len(options.evt_max)*10)
         else:
 
             seed = 0
@@ -133,7 +130,6 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                 if first_evt:
                     first_evt_num = event.r0.tel[telid].camera_event_number
                     batch_index = 0
-                    batch = np.zeros((len(options.pixel_list), options.evt_per_shower),dtype=int)
                     if charge_extraction=='baseline':
                         pass
                         #batch = np.zeros((len(options.pixel_list*(1+options.n_bins-options.window_width)), options.evt_per_shower),dtype=int)

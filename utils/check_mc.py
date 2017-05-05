@@ -105,16 +105,18 @@ for i,val in enumerate(['true_pix','injected_pix','measured_pix','true_patch','i
         camera_visu[val].image = np.ones(geom.pix_x.shape[0])
         camera_visu[val].add_colorbar()
 
-
-for ii,i in enumerate([4,6,8,16,21,33,43,64,79,76,81]):
+kk = 0
+f_out = open('evt_list.txt','w')
+for i in range(mc_events.shape[0]):#enumerate([4,6,8,16,21,33,43,64,79,76,81]):
+    ii = i
     print ('runnning evt,',i)
     pixel_true_pe = mc_events[i]
     patch_dac,patch_pe = load_mc_event(pixel_true_pe, cts, param)
     pixel_injected_pe = [0 for i in range(528)]
     patch_injected_pe = [0 for i in range(528)]
     pixel_injected_dac = [0 for i in range(528)]
-    pixel_measured_pe = data['pixel'][ii]
-    patch_measured_pe = data['patch'][ii]
+    pixel_measured_pe = data['pixel'][ii] if ii<data['pixel'].shape[0] else np.zeros((528),dtype=int)
+    patch_measured_pe = data['patch'][ii] if ii<data['pixel'].shape[0] else np.zeros((528),dtype=int)
     patch_true_pe = [0 for i in range(1296)]
     mask = np.array([True if i in pixel_list else False for i in range(1296)])
     for p in cts.camera.Patches:
@@ -151,10 +153,10 @@ for ii,i in enumerate([4,6,8,16,21,33,43,64,79,76,81]):
     patch_measured_pe[patch_measured_pe<30.e-1]= 1.e-3
     pixel_measured_pe[np.isnan(pixel_measured_pe)]=1e-3
     patch_measured_pe[np.isnan(patch_measured_pe)]=1e-3
-    diff_patch = (patch_measured_pe-patch_injected_pe)/patch_injected_pe
-    diff_pixel = (pixel_measured_pe-pixel_injected_pe)/pixel_injected_pe
-    diff_patch[patch_injected_pe<1]=0
-    diff_pixel[pixel_injected_pe<1]=0
+    #diff_patch = (patch_measured_pe-patch_injected_pe)/patch_injected_pe
+    #diff_pixel = (pixel_measured_pe-pixel_injected_pe)/pixel_injected_pe
+    #diff_patch[patch_injected_pe<1]=0
+    #diff_pixel[pixel_injected_pe<1]=0
     #patch_injected_pe[patch_injected_pe>100]=100
     #patch_true_pe[patch_true_pe>100]=100
     camera_visu['true_pix'].image = pixel_true_pe
@@ -169,12 +171,20 @@ for ii,i in enumerate([4,6,8,16,21,33,43,64,79,76,81]):
     if goodevt:
         print('Event %d',i)
         plt.show()
-        h = input('press a key to go to next event')
+        f_out.write('# Event %d'%kk)
+        for pixel in range(1296):
+            if pixel in pixel_list:
+                f_out.write('%d %f\n'%(pixel,pixel_injected_pe[pixel_list.index(pixel)]))
+            else:
+                f_out.write('%d 0.\n'%(pixel))
+        kk+=1
+        #h = input('press a key to go to next event')
 
+f_out.close()
 plt.subplots(1,2)
 plt.subplot(1,2,1)
 ac_array=np.array((len(pixel_list),1000))
-x_dac = np.range(0,1000,1)
+x_dac = np.arange(0,1000,1)
 for i in pixel_list:
     pes = np.polyval(param[i], x_dac)
     pes[pes<0.]=-1.
@@ -193,7 +203,7 @@ f.close()
 
 plt.subplot(1,2,2)
 dc_array=np.array((len(pixel_list),1000))
-x_dac = np.range(0,1000,1)
+x_dac = np.arange(0,1000,1)
 for i in pixel_list:
     pes = np.polyval(param[i], x_dac)
     pes[pes<0.]=-1.
