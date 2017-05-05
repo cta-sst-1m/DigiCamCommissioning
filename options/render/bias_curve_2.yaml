@@ -1,0 +1,16 @@
+render_module : bias_curve
+title    :  ['Trigger Rates with bad patches','Trigger Rates']
+legends  :  [['HV OFF','HV ON','HV ON w/o noisy patches'],['HV OFF','Dark (3MHz)','NSB 40.7 MHz','NSB 80 MHz','NSB 125 MHz','NSB 250 MHz','NSB 660 MHz']]
+xaxis    :  ['ADC','pe']
+dataset  :  [['DarkWOnoise_HVOff.txt','DarkWOnoise.txt','Dark_without_noisy_channel.txt'],
+             ['DarkWOnoise_HVOff.txt','Dark_without_noisy_channel.txt','NSB_DAC277_without_noisy_channel.txt','NSB_DAC288_without_noisy_channel.txt',
+             'NSB_DAC295_without_noisy_channel.txt','NSB_DAC306_without_noisy_channel.txt','NSB_DAC323_without_noisy_channel.txt']]
+variable :  [['trigger_cnt','trigger_cnt','trigger_cnt'],['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt']]
+NSB      :  [[0.,3.e6,3.e6],[0.,3.e6,40.7e6,80.e6,125.e6,250.e6,660.e6]]
+style    :  [['-','-','-.'],[':','-','-','-','-','-','-']]
+color    :  [['r','k','k'],['k','#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff']]
+x_lim    :  [[0,70],[0,70]]
+y_lim    :  [[1e-1,1e7],[1e-1,1e7]]
+base_directory : '/data/datasets/CTA/for_render/'
+
+
