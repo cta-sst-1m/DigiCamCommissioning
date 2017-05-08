@@ -5751,3 +5751,1208 @@
 2017-03-21 10:38:46,790 | INFO | analyse_hvoff : 	 -|
 2017-03-21 10:38:46,790 | INFO | analyse_hvoff : 	 -|> Display the analysis results
 2017-03-21 10:38:46,877 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/cts/anaylse_gain_nsb/ac_0/baseline.npz
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 08:57:14,156 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 -|
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 08:57:14,157 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 08:57:40,961 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 08:57:40,961 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 08:57:40,961 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 08:57:40,961 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 08:57:40,961 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 08:57:40,961 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 -|
+2017-04-12 08:57:40,962 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 08:57:40,963 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 08:57:52,919 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 08:57:58,096 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 08:57:58,096 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 08:57:58,096 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 08:57:58,096 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 08:57:58,096 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 08:57:58,096 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 08:57:58,096 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 -|
+2017-04-12 08:57:58,097 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 08:57:58,335 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 08:59:44,088 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 -|
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 08:59:44,089 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:00:20,534 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:00:20,535 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:00:54,454 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:00:54,455 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:01:17,742 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:01:17,742 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:01:17,742 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:01:17,742 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:01:17,742 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:01:17,742 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:01:17,743 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:01:17,744 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:11:38,459 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:11:38,460 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:13:28,770 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:13:28,771 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:16:18,824 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:16:18,825 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:16:50,698 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:16:50,699 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:16:50,700 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:16:50,700 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:16:50,700 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:16:50,700 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:16:50,700 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:16:50,700 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:16:52,018 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:17:00,968 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:17:00,969 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:17:39,594 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:17:39,595 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:17:39,596 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:17:39,596 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:17:39,596 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:17:41,009 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:17:47,218 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:17:47,218 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 09:17:47,219 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:17:47,220 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:17:47,220 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:17:47,220 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:17:47,220 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:17:47,220 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 09:17:47,450 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:19:39,933 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:19:39,934 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:19:41,436 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:19:54,735 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:19:54,736 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 09:19:54,972 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:21:34,001 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:21:34,001 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:21:34,001 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:21:34,001 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1000
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:21:34,002 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 09:21:34,240 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:23:07,124 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:23:07,125 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:24:01,198 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:24:01,198 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:24:01,198 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:24:01,199 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:24:01,200 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:24:01,200 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:24:01,200 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:24:01,200 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:24:01,200 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:24:01,200 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:28:25,984 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:28:25,984 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:28:25,985 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:28:25,986 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:28:25,986 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:28:25,986 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:28:25,986 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:28:25,986 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:28:44,976 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:28:44,976 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:28:44,976 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:28:44,976 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:28:44,976 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:28:44,977 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:28:44,978 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:29:02,666 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:29:02,667 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:29:02,668 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:29:02,668 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:29:02,668 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:29:02,668 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:29:02,668 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:29:37,009 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:29:37,010 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:29:37,011 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:29:37,011 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:29:37,011 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:30:24,456 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:30:24,457 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:30:24,458 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:30:24,459 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:30:24,459 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:30:24,459 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:30:59,834 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:30:59,835 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:30:59,836 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:31:25,852 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:31:25,852 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 09:31:25,852 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:31:25,852 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:31:25,853 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:31:25,854 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:31:25,854 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:31:25,854 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:31:25,854 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 09:31:25,854 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 09:31:46,421 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:31:55,883 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:31:55,884 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 09:31:56,070 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 09:35:23,810 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 09:35:23,810 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 09:35:23,810 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:35:23,810 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 09:35:23,810 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 -|
+2017-04-12 09:35:23,811 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 09:35:24,001 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:35:49,361 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 11:35:49,361 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 11:35:49,361 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 11:35:49,361 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 11:35:49,362 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 11:35:49,363 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 11:35:49,363 | INFO | analyse_hvoff : 	 -|
+2017-04-12 11:35:49,363 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 11:35:49,566 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 11:37:43,209 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 -|
+2017-04-12 11:37:43,210 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 11:37:43,211 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 11:37:52,560 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:37:52,561 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 11:37:52,653 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:39:54,623 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-04-12 11:39:54,624 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff : 	 -|
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 11:39:54,625 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 11:40:03,456 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:40:03,456 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 11:40:03,538 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:40:52,627 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 11:40:52,628 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff : 	 -|
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 11:40:52,629 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 11:49:05,496 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:49:05,497 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 11:49:05,517 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 11:55:38,598 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 11:55:38,598 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 11:55:38,599 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 -|
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 11:55:38,600 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 12:04:37,586 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 12:04:37,586 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 12:04:37,608 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-12 13:15:43,183 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 13:15:43,183 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 13:15:43,183 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 13:15:43,183 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-12 13:15:43,183 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 13:15:43,183 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 13:15:43,184 | INFO | analyse_hvoff : 	 -|
+2017-04-12 13:16:00,013 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 13:16:00,013 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 13:16:00,013 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 13:16:00,013 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 -|
+2017-04-12 13:16:00,014 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-12 13:16:00,015 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-12 13:37:21,172 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-12 13:37:21,172 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-12 13:37:21,172 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-12 13:37:21,172 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-12 13:37:21,172 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 -|
+2017-04-12 13:37:21,173 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-12 13:37:21,197 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-13 09:06:36,842 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-13 09:06:36,842 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-13 09:06:36,842 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-13 09:06:36,842 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-13 09:06:36,842 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-13 09:06:36,843 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-13 09:06:36,844 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-13 09:06:36,844 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-13 09:06:36,844 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-13 09:06:36,844 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-13 09:06:36,844 | INFO | analyse_hvoff : 	 -|
+2017-04-13 09:06:36,844 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-13 09:06:36,844 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-13 09:15:26,577 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-13 09:16:59,241 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 -|
+2017-04-13 09:16:59,242 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-13 09:16:59,265 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-18 15:03:17,749 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-18 15:03:17,750 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 -|
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-18 15:03:17,751 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-18 15:03:45,830 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-18 15:03:45,830 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/cts/anaylse_gain_nsb/ac_0/
+2017-04-18 15:03:45,831 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff : 	 -|
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-18 15:03:45,832 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/cts/hv_off/
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-18 15:03:55,034 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 no_name_0_000.%d.crate_intersil.fits.fz
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 -|
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-18 15:03:55,035 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-18 15:04:36,897 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-18 15:04:36,897 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-18 15:04:36,897 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-18 15:04:36,897 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-18 15:04:36,898 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.1.ac_scan.fits.fz
+2017-04-18 15:04:36,899 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/cts/hv_off/
+2017-04-18 15:04:36,899 | INFO | analyse_hvoff : 	 -|
+2017-04-18 15:04:36,899 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-18 15:04:36,899 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-18 15:05:00,313 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-18 15:05:00,313 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-18 15:05:00,313 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-18 15:05:00,313 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/cts/hv_off/
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%d.ac_scan.fits.fz
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [1]
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 -|
+2017-04-18 15:05:00,314 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-18 15:05:00,315 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-18 15:08:37,513 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-18 15:08:37,513 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-18 15:08:37,513 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-18 15:08:37,513 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-18 15:08:37,513 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-18 15:08:37,513 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/cts/mapping_check/
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%d.ac_scan.fits.fz
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [1]
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 -|
+2017-04-18 15:08:37,514 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-04-18 15:08:37,515 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-04-18 15:08:38,358 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-04-18 15:09:58,435 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-04-18 15:09:58,435 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-04-18 15:09:58,435 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-04-18 15:09:58,435 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 1800
+2017-04-18 15:09:58,435 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-04-18 15:09:58,435 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/digicam_commissioning/cts/mapping_check/
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/digicam_commissioning/trigger/20170411/
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 2200
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> angle_cts : 	 120
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 1
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [1]
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 CameraDigicam@localhost.localdomain_0_000.%d.ac_scan.fits.fz
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-04-18 15:09:58,436 | INFO | analyse_hvoff : 	 -|
+2017-04-18 15:09:58,437 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-04-18 15:09:58,458 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/digicam_commissioning/trigger/20170411/baseline.npz
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:20:35,395 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e4.fits.fz
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [1]
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-05-03 15:20:35,396 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:21:11,034 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [4]
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e%d.fits.fz
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-05-03 15:21:11,035 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e%d.fits.fz
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 None
+2017-05-03 15:21:30,660 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [4]
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-05-03 15:21:30,661 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-05-03 15:21:54,734 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/mc_care_cross_check/baseline.npz
+2017-05-03 15:22:03,460 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:22:03,460 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:22:03,460 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:22:03,460 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [4]
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:22:03,461 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e%d.fits.fz
+2017-05-03 15:22:03,462 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:22:03,462 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-05-03 15:22:03,700 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/mc_care_cross_check/baseline.npz
+2017-05-03 15:40:10,788 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:40:10,788 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 None
+2017-05-03 15:40:10,788 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:40:10,788 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:40:10,788 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:40:10,788 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [4]
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e%d.fits.fz
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:40:10,789 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-05-03 15:40:11,027 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/mc_care_cross_check/baseline.npz
+2017-05-03 15:40:21,779 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e%d.fits.fz
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [4]
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 0
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:40:21,780 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-05-03 15:40:21,781 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:41:48,361 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 100
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e%d.fits.fz
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 5
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [4]
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:41:48,362 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:41:48,363 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-05-03 15:41:48,363 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-05-03 15:42:16,581 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/mc_care_cross_check/baseline.npz
+2017-05-03 15:42:16,585 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-05-03 15:42:16,828 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/mc_care_cross_check/baseline.npz
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		-|> Will run analyse_hvoff with the following configuration:
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> n_pixels : 	 1296
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> log_file_basename : 	 None
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> verbose : 	 True
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> n_evt_per_batch : 	 100
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> file_basename : 	 test_inject_lightOnly_1e%d.fits.fz
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> adcs_binwidth : 	 1
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> create_histo : 	 True
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> perform_analysis : 	 None
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> adcs_min : 	 5
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> display_results : 	 True
+2017-05-03 15:43:48,162 | INFO | analyse_hvoff : 	 		 |--|> output_directory : 	 /home/alispach/data/mc_care_cross_check/
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 		 |--|> analysis_module : 	 analyse_hvoff
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 		 |--|> file_list : 	 [4]
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 		 |--|> evt_max : 	 10000
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 		 |--|> histo_filename : 	 baseline.npz
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 		 |--|> adcs_max : 	 4095
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 		 |--|> mc : 	 False
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 -|
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff : 	 		-|> Create the analysis histogram
+2017-05-03 15:43:48,163 | INFO | analyse_hvoff.data_treatement.adc_hist : 	 Running on DigiCam data
+2017-05-03 16:18:16,675 | INFO | analyse_hvoff.utils.histogram : 	 Saved histogram in /home/alispach/data/mc_care_cross_check/baseline.npz
+2017-05-03 16:18:16,680 | INFO | analyse_hvoff : 	 -|> Display the analysis results
+2017-05-03 16:18:17,025 | INFO | analyse_hvoff.utils.histogram : 	 Loaded histogram from /home/alispach/data/mc_care_cross_check/baseline.npz

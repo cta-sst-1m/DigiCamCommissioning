@@ -11,6 +11,9 @@ def initialise_logger(options,module):
     :param options:
     :return:
     """
+
+    print(' ')
+
     # define base logger
     logger = logging.getLogger(sys.modules['__main__'].__name__)
     logger.setLevel(logging.INFO if options.verbose else logging.DEBUG)

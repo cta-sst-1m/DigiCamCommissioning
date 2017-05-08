@@ -187,7 +187,8 @@ def display_results(options):
     dc_led = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
+    geom = None
+    #geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
 
     #display.display_hist(dc_led, options, geom=geom, scale='linear')
     #display.display_hist(dc_led, options, geom=geom, display_parameter=True)

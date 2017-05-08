@@ -5,7 +5,7 @@ from optparse import OptionParser
 from  yaml import load,dump
 import matplotlib.pyplot as plt
 import logging,sys
-from utils.geometry import generate_geometry_0, generate_geometry
+from utils.geometry import generate_geometry
 #internal modules
 from utils import logger
 import numpy as np
@@ -77,10 +77,17 @@ if __name__ == '__main__':
 
 
     if hasattr(options,'angle_cts'):
-        cts_path = '/data/software/CTS/'
-        #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
-        options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
+        #cts_path = '/data/software/CTS/'
+        cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
+        options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config_clust.cfg', angle=options.angle_cts, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
+
+    else:
+        # cts_path = '/data/software/CTS/'
+        cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
+        options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
+                          cts_path + 'config/camera_config_clust.cfg', angle=0, connected=True)
+        options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
 
     if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
         # TODO add usage of digicam and cts geometry to define the list
@@ -116,9 +123,20 @@ if __name__ == '__main__':
 
             exit()
 
-    #if not hasattr(options, 'threshold'):
-    #    options.threshold = np.arange(options.threshold_min, options.threshold_max, options.threshold_step)
 
+    if hasattr(options, 'threshold'):
+
+        if hasattr(options, 'threshold_min'):
+
+            options.threshold = np.arange(options.threshold_min, options.threshold_max, options.threshold_step)
+
+    if hasattr(options, 'clusters'):
+
+        if options.clusters=='all' or options.clusters is None:
+
+            options.clusters = [i for i in range(432)]
+
+            
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
     log.info('\t\t-|> Will run %s with the following configuration:'%options.analysis_module)

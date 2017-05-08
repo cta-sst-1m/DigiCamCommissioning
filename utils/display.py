@@ -67,7 +67,7 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
         axis.add_artist(anchored_text)
 
 
-    axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %options.scan_level[level])
+    axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %options.scan_level[level] if hasattr(options, 'scan_level') else 0)
     # Beautify
     axis.set_xlabel(hist.fit_result_label[index])
     axis.set_ylabel('$\mathrm{N_{pixel}/%.2f}$' % bin_width)
@@ -248,7 +248,7 @@ def draw_pulse_shape(axis, pulse_shape, options, index, color='k'):
     axis.errorbar(x, y, yerr=yerr, fmt='ok', label=pixel_label)
     axis.legend(loc='upper right')
     axis.set_xlabel('t [ns]')
-    axis.set_ylabel('ADC')
+    axis.set_ylabel('LSB')
 
     return h
 
@@ -297,7 +297,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     h_to_return = h
 
     ### Avoid NANs
-    mask = (~np.isnan(h))
+    mask = (~np.isnan(h) * (h>=1) )#* (x<500))
 
 
 
@@ -319,6 +319,8 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
         #if hist.fit_result[index][0, 0]<30.:
         #    import spectra_fit.fit_low_light as tmpfct
         #    reduced_func = tmpfct.fit_func
+        #print(index)
+        #print(hist.fit_result)
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
 
         text_fit_result += '$\chi^{2}/ndf : %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])
@@ -327,7 +329,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
             if 'Amplitude' in hist.fit_result_label[i]: continue
             text_fit_result += hist.fit_result_label[i] + ' : %0.2f $\pm$ %0.2f' % (hist.fit_result[index][i, 0], hist.fit_result[index][i, 1])
             text_fit_result += '\n'
-        anchored_text = AnchoredText(text_fit_result, loc=3, prop=dict(size=8))
+        anchored_text = AnchoredText(text_fit_result, loc=4, prop=dict(size=18))
         axis.add_artist(anchored_text)
         #axis.text(0.7, 0.7, text_fit_result, horizontalalignment='left', verticalalignment='center',
         #              transform=axis.transAxes, fontsize=10)
@@ -346,7 +348,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     return h_to_return
 
 
-def display_fit_result(hist, geom = None, limits=[0,4095], display_fit=False):
+def display_fit_result(hist, options, geom = None, limits=[0,4095], display_fit=False):
     """
     A function to display a vaiable both as an histogram and as a camera view
 
@@ -396,6 +398,8 @@ def display_fit_result(hist, geom = None, limits=[0,4095], display_fit=False):
         camera_visu.image = h
         camera_visu.add_colorbar()
         camera_visu.colorbar.set_label(hist.fit_result_label[counter.count_param])
+        camera_visu.axes.get_xaxis().set_visible(False)
+        camera_visu.axes.get_yaxis().set_visible(False)
 
     else: # TODO check this case
         axis_param = fig.add_subplot(1, 1, 1)
@@ -527,12 +531,14 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
             axis_param.cla()
             image = draw_fit_result(axis_param, hist, options=options, level=counter.count_level, index=counter.count_param,
                                 display_fit=True)
+            image = np.ma.masked_where(image <= 0, image)
         axis_histogram.cla()
         draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale=scale)
         #axis_histogram.set_xlim([min_hist_x, max_hist_x])
         #axis_histogram.set_ylim([min_hist_y, max_hist_y])
 
         if geom is not None and display_parameter:
+            camera_visu.cmap.set_bad(color='k')
             camera_visu.image = image
             camera_visu.colorbar.set_label(hist.fit_result_label[counter.count_param])
 
@@ -578,6 +584,8 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
         draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
         camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
+        image = np.ma.masked_where(image <= 0, image)
+        camera_visu.cmap.set_bad(color='k')
         camera_visu.image = image
         camera_visu.add_colorbar()
         #camera_visu.colorbar.set_clim(np.nanmin(image), np.nanmax(image))

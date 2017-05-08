@@ -1,0 +1,42 @@
+## Analysis module
+analysis_module : visualise_data
+
+## Logging
+mc                : True
+
+## Input files
+
+#file : CameraDigicam@localhost.localdomain_0_000.0.run_218.fits.fz
+#file : CameraDigicam@localhost.localdomain_0_000.1.thr7_20_FADC_2048.fits.fz
+file : sandbox_0.hdf5
+
+#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170504/mapping_ac_led_3/
+#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170504/
+directory     :     /home/alispach/data/digicam_commissioning/trigger/mc/
+cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
+
+telescope_id : 1
+trigger_trace_readout : False
+
+## Camera Configuration
+angle_cts : 240
+pixel_start : 0
+view_type : pixel # pixel, cluster_7, patch
+camera_view : max #, mean, sum, std, max, mode, baseline_substracted, stacked
+event_min : 0
+event_max : 10000
+scale : lin # log not working
+bin_start : 9
+movie_filename : high_threshold_cluster_7_vert.mp4
+n_frames : 500
+limits_colormap : #[4, 100]
+limits_readout : #2000, 2300]
+threshold : 20
+gain : 5.6
+
+## Trigger parameters
+baseline_window_width : 10
+clusters : all
+compression_factor : 4
+clipping_patch : 255
+blinding : True

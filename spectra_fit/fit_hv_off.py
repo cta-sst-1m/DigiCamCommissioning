@@ -77,4 +77,4 @@ def labels_func(*args, **kwargs):
     List of labels for the parameters
     :return:
     """
-    return np.array(['Amplitude', 'Baseline [ADC]', '$\sigma_e$ [ADC]'])
+    return np.array(['Amplitude', 'Baseline [LSB]', '$\sigma_e$ [LSB]'])

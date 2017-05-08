@@ -1,0 +1,39 @@
+## Analysis module
+analysis_module : visualise_data
+
+## Logging
+mc                : False
+
+## Input files
+
+#file :     test_inject_Dark_1e3.fits.fz
+file :     test_inject_lightAndDark_1e4.fits.fz
+
+directory     :     /home/alispach/data/mc_care_cross_check/
+cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
+
+telescope_id : 1
+trigger_trace_readout : False
+
+## Camera Configuration
+angle_cts : 120
+pixel_start : 0
+view_type : pixel # pixel, cluster_7, patch
+camera_view : max #, mean, sum, std, max, mode, baseline_substracted, stacked
+event_min : 0
+event_max : 10000
+scale : lin # log not working
+bin_start : 9
+movie_filename : high_threshold_cluster_7_vert.mp4
+n_frames : 500
+limits_colormap : #[0, 4096]
+limits_readout : #2000, 2300]
+threshold : 50
+gain : 5.6
+
+## Trigger parameters
+baseline_window_width : 10
+clusters : all
+compression_factor : 4
+clipping_patch : 255
+blinding : True
