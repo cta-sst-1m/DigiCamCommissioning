@@ -46,7 +46,7 @@ def create_histo(options):
 
     triggers = histogram.Histogram(data=np.zeros((len(options.scan_level), len(options.threshold))), \
                                  bin_centers=np.array(options.threshold), label='Trigger', \
-                                 xlabel='Threshold [ADC]', ylabel='trigger rate [Hz]')
+                                 xlabel='Threshold [LSB]', ylabel='trigger rate [Hz]')
 
     cluster_hist = histogram.Histogram(bin_center_min=0, bin_center_max=options.clipping_patch*7
 ,
@@ -108,25 +108,32 @@ def display_results(options):
     triggers = histogram.Histogram(filename=options.output_directory + options.histo_filename)
     cluster_histo = histogram.Histogram(filename=options.output_directory + options.cluster_histo_filename)
     patch_histo = histogram.Histogram(filename=options.output_directory + options.patch_histo_filename)
-    #max_cluster_histo = histogram.Histogram(filename=options.output_directory + options.max_cluster_histo_filename)
 
     max_cluster_histo = np.load(options.output_directory + options.max_cluster_histo_filename)['hist_max']
     time_cluster_histo = np.load(options.output_directory + options.max_cluster_histo_filename)['hist_time']
-    #print(max_cluster_histo)
-    #print ('hello')
-
-    max_cluster_histo = np.array(max_cluster_histo).ravel()
     time_cluster_histo = np.array(time_cluster_histo)
 
-    print(max_cluster_histo.shape)
-    print(max_cluster_histo[0][:][0])
 
     import matplotlib.pyplot as plt
 
-    plt.figure()
-    for i in range(1):
+    fig_1 = plt.figure()
+    axis_1 = fig_1.add_subplot(111)
+    axis_1.set_title('Blinding : %s | $N_{pixels}$ : %d | Baseline bins : %d | Window bins : %d' % (options.blinding, len(options.pixel_list), options.baseline_window_width, options.window_width), fontsize=14)
+    for i, level in enumerate((options.scan_level)):
 
-        plt.hist(max_cluster_histo, bins=np.arange(np.min(max_cluster_histo), np.max(max_cluster_histo)+1, 2), label='sector %d' %i, histtype='step', align='left', lw=3)
+        axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level], yerr=triggers.errors[level], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), linestyle='-', fmt='o')
+
+    axis_1.axhline(y=500, color = 'k', label='safe threshold', linestyle='-.')
+    axis_1.set_xlabel(triggers.xlabel)
+    plt.legend(loc='best', fontsize=12)
+    axis_1.set_ylabel(triggers.ylabel)
+    axis_1.set_yscale('log')
+
+    """
+    plt.figure()
+    for i in range(3):
+
+        plt.hist(max_cluster_histo[i], bins=np.arange(np.min(max_cluster_histo[i]), np.max(max_cluster_histo[i])+1, 2), label='sector %d' %i, histtype='step', align='left', lw=3)
         plt.xlabel('Max of all clusters [ADC]')
         plt.ylabel('$N_{entries}$')
         plt.legend(loc='best')
@@ -145,8 +152,8 @@ def display_results(options):
 
     plt.show()
 
-    exit()
-
+    #exit()
+    """
 
     """
     plt.figure()
@@ -161,17 +168,17 @@ def display_results(options):
     plt.ylabel('$N_{trigger}$')
     plt.legend(loc='best')
     """
-
-    # Define Geometry
+    """
+        # Define Geometry
     #geom = geometry.generate_geometry_0(pixel_list=np.arange(0, 432, 1))
 
     display.display_hist(cluster_histo, options, scale='log')
     display.display_hist(patch_histo, options, scale='log')
     #display.display_hist(max_cluster_histo, options, scale='log')
-    #display.display_hist(triggers, options, scale='log')
+    display.display_hist(triggers, options, scale='log')
 
     #trigger_spectrum = np.load(options.output_directory + options.trigger_spectrum_filename + '.npy')
-
+    """
     """
 
     v0 = {'x': [0.0 , 1.0 , 4.0 , 6.0 , 8.0 , 11.0 , 16.0 , 21.0 , 23.0 , 25.0 , 26.0 , 27.0 , 28.0 , 29.0 , 30.0 , 31.0 , 32.0 , 33.0 , 34.0 , 35.0 , 36.0 , 37.0 , 38.0 , 39.0 , 40.0 , 41.0 , 42.0 , 43.0 , 45.0 , 50.0 , 60.0 , 70.0 , 80.0 , 90.0 , 100.0],
@@ -221,7 +228,7 @@ def display_results(options):
                  9617.39645533, 1823.42062824, 218.54446397, 9.89753149851, 1.03840472115, 0.110881893597,
                  0.0831615585141, 0.0387794876454, 0.0498327833271, 0.0132679547492, 0.0166234457078]}
     """
-
+    """
     # dark run
     data_0 = []
     data_0 += [[0, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50, 70, 100]]
@@ -329,7 +336,7 @@ def display_results(options):
 
     return
 
-
+    """
 def save(options):
 
     print('Nothing implemented')

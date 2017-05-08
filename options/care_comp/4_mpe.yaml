@@ -1,0 +1,44 @@
+# Analysis module
+analysis_module : analyse_mpe
+
+# Steering
+create_histo      : True
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170317
+
+# Input files
+mc            :     False
+file_basename :     test_inject_lightOnly_1e%d.fits.fz
+directory     :     /home/alispach/data/mc_care_cross_check/
+file_list     :     [4]
+scan_level    :     [0]
+
+# Output files
+output_directory     :     /home/alispach/data/mc_care_cross_check/
+histo_filename  : mpe.npz
+full_histo_filename   : #full_mpe.npz
+dark_histo_filename   : #adc_dark.npz
+synch_histo_filename  : peaks.npz
+#baseline_param_data : #baseline_parameters.npz
+
+# Event processing
+
+integration_method : integration
+#baseline_per_event_limit : 13
+window_width : 7
+window_start : 3
+n_evt_per_batch   : 1000
+events_per_level  : 10000
+evt_max           : 10000
+
+# Camera Configuration
+n_pixels : 1296
+
+# Plot configuration
+adcs_min           : -500
+adcs_max           : 19000
+adcs_binwidth      : 4
