@@ -86,7 +86,7 @@ if __name__ == '__main__':
         # cts_path = '/data/software/CTS/'
         cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
         options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
-                          cts_path + 'config/camera_config_clust.cfg', angle=0, connected=True)
+                          cts_path + 'config/camera_config_clusters.cfg', angle=0, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
 
     if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
         if options.n_clusters==1:
 
-            camera = Camera(options.cts_directory + 'config/camera_config.cfg')
+            camera = Camera(options.cts_directory + 'config/camera_config_clusters.cfg')
             patches_in_cluster = np.load(options.cts_directory + 'config/cluster.p')['patches_in_cluster']
 
             patch_index = 300

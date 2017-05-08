@@ -231,6 +231,7 @@ class EventViewer():
         #self.axis_readout.set_yticks(np.linspace(np.min(y), np.max(y), 8).astype(int))
         self.axis_readout.set_ylim(limits_y)
         self.axis_readout.legend(loc='upper right')
+        print(self.camera.Pixels[pix].__dict__)
 
 
         #self.axis_readout.cla()
@@ -255,7 +256,7 @@ class EventViewer():
                 baseline = np.mean(image[..., 0:self.baseline_window_width], axis=1)
                 image = image - baseline[:, np.newaxis]
 
-                cluster_trace, patch_trace = trigger.compute_cluster_trace(image, self.camera, self.options)
+                cluster_trace, patch_trace = trigger.compute_cluster_trace(image, self.options)
 
                 for pixel_id in range(self.data.shape[0]):
 
