@@ -161,6 +161,63 @@ def multi_gaussian_with0( p, x):
 
     return gaus0+gaus1+gaus2+gaus3+gaus4+gaus5
 
+def bspleval(x, knots, coeffs, order):
+    '''
+    Evaluate a B-spline at a set of points.
+
+    Parameters
+    ----------
+    x : list or ndarray
+        The set of points at which to evaluate the spline.
+    knots : list or ndarray
+        The set of knots used to define the spline.
+    coeffs : list of ndarray
+        The set of spline coefficients.
+    order : int
+        The order of the spline.
+
+    Returns
+    -------
+    y : ndarray
+        The value of the spline at each point in x.
+    '''
+
+    k = order
+    t = knots
+    m = np.alen(t)
+    npts = np.alen(x)
+    B = np.zeros((m-1,k+1,npts))
+
+    ## Create the zero-order B-spline basis functions.
+    for i in range(m-1):
+        B[i,0,:] = np.float64(np.logical_and(x >= t[i], x < t[i+1]))
+
+    if (k == 0):
+        B[m-2,0,-1] = 1.0
+
+    ## Next iteratively define the higher-order basis functions, working from lower order to higher.
+    for j in range(1,k+1):
+        for i in range(m-j-1):
+            if (t[i+j] - t[i] == 0.0):
+                first_term = 0.0
+            else:
+                first_term = ((x - t[i]) / (t[i+j] - t[i])) * B[i,j-1,:]
+
+            if (t[i+j+1] - t[i+1] == 0.0):
+                second_term = 0.0
+            else:
+                second_term = ((t[i+j+1] - x) / (t[i+j+1] - t[i+1])) * B[i+1,j-1,:]
+
+            B[i,j,:] = first_term + second_term
+        B[m-j-2,j,-1] = 1.0
+
+    ## Evaluate the spline by multiplying the coefficients with the highest-order basis functions.
+    y = np.zeros(npts)
+    for i in range(m-k-1):
+        y += coeffs[i] * B[i,k,:]
+
+
+    return(y)
 
 if __name__ == '__main__':
     x = np.arange(0, 200, 1)
