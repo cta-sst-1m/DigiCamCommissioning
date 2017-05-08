@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline,UnivariateSpline
 import logging,sys
-
+from utils import histogram
 
 def plot_gain_drop(datas,labels,xaxis='pe',colors=['k','b','g','r','c'],style=[],xlim=[0,200], ylim=[5e-3,1e8], title= 'Rates'):
     log = logging.getLogger(sys.modules['__main__'].__name__)
@@ -43,6 +43,13 @@ def plot_gain_drop(datas,labels,xaxis='pe',colors=['k','b','g','r','c'],style=[]
             opt = ','
         data3str += ']'
         log.info(data3str)
+        data4str = '%s - y_err: [' % labels[i]
+        opt = ''
+        for jj in data[4]:
+            data4str += ' %s %s' % (opt,jj)
+            opt = ','
+        data4str += ']'
+        log.info(data4str)
         #ax1.plot(xnew, f(xnew) , color='%s'%colors[i])
 
     #ax1.plot(np.arange(xlim_min - 5, xlim_max + 5), np.ones(np.arange(xlim_min - 5, xlim_max + 5).shape[0]) * 6000.,
@@ -64,13 +71,14 @@ def plot_gain_drop(datas,labels,xaxis='pe',colors=['k','b','g','r','c'],style=[]
 
     plt.show()
 
-def load_mc(file):
-    h = histogram.Histogram(file[0])
-    d = np.append(h.bin_centers,h.bin_centers)
-    d = np.append(d,h.bin_centers)
-    d = np.append(d,h.data[file[1],:])
-    d = np.append(d,h.errors[file[1],:])
-    return
+def load_mc(file,var,nsb,offset = 0.):
+    h = histogram.Histogram(filename=file)
+    d = np.append(h.bin_centers.reshape(1,-1)+offset,h.bin_centers.reshape(1,-1),axis=0)
+    d = np.append(d,h.bin_centers.reshape(1,-1),axis=0)
+    d = np.append(d,h.data[int(var),:].reshape(1,-1),axis=0)
+    d = np.append(d,h.errors[int(var),:].reshape(1,-1),axis=0)
+    d = np.append(d,(d[0]*4/5.6 / (1. / (1 + 10000. * float(nsb) * 85e-15))).reshape(1,-1),axis=0)
+    return d
 
 def load_data(file):
     f = open(file,'r')
@@ -107,13 +115,14 @@ def load_data(file):
 def rate_calc(data,nsb=1.e9):
     # data[0,1,2]: threshold, cnt, time
     data = np.array(data)
-    samples = data[2]/4e-9
-    p = data[1]/data[2]*4e-9
-    q = 1.-p
-    # in data[3], put the rate in Hz
-    data = np.append(data,(data[1]/data[2]).reshape(1,data.shape[1]),axis=0)
-    # in data[4], put the binomial error on rate in Hz
-    data = np.append(data,(np.sqrt(samples*p*q)/data[2]).reshape(1,data.shape[1]),axis=0)
+    if data.shape[0]==3:
+        samples = data[2] / 4e-9
+        p = data[1] / data[2] * 4e-9
+        q = 1. - p
+        # in data[3], put the rate in Hz
+        data = np.append(data,(data[1]/data[2]).reshape(1,data.shape[1]),axis=0)
+        # in data[4], put the binomial error on rate in Hz
+        data = np.append(data,(np.sqrt(samples*p*q)/data[2]).reshape(1,data.shape[1]),axis=0)
     # in data[5], put the gain drop corrected NPE
     data = np.append(data,(data[0]*4./5.6 / (1. / (1 + 10000. * float(nsb) * 85e-15))).reshape(1,data.shape[1]),axis=0)
     #sort0 = data[0,:].argsort()
@@ -127,8 +136,9 @@ def get_datasets(options):
     for i,legend in enumerate(options.legends):
         datasets.append([])
         for j, l in enumerate(legend):
-            if legend.count('MC')>0. or legend.count('Toy')>0.:
-                data = load_mc(options.base_directory+options.dataset[i][j])
+            if l.count('MC')>0. or l.count('Toy')>0.:
+                data = load_mc(options.base_directory+options.dataset[i][j],options.variable[i][j], nsb=options.NSB[i][j],offset=options.offset[i][j])
+                datasets[-1].append(data )
             else:
                 data = load_data(options.base_directory+options.dataset[i][j])
                 datasets[-1].append(rate_calc([data['threshold'],data[options.variable[i][j]],data['time']] , nsb=options.NSB[i][j]))

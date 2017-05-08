@@ -1,0 +1,21 @@
+#### Data file for bias curve
+# threshold : threshold for PATCH7 trigger loggic
+# trigger_cnt : trigger count at Digicam level
+# readout_cnt : count of events that are shipped out of Digicam
+# dropped_cnt : count of events that are dropped at the Digicam level
+# time : duration of the acquisition
+# HEADER
+# threshold	trigger_cnt	readout_cnt	dropped_cnt	time
+# DATA
+0	107196110	106540	107089570	21.868008520
+1	88847332	88302	88759030	18.124859136
+2	56145765	55795	56089970	11.453775168
+3	70982755	70702	70912053	14.517300856
+4	53937537	56141	53881396	11.525524216
+5	137981197	204624	137776573	42.001023872
+6	9840061	72126	9767935	14.805517912
+7	492256	61212	431044	12.565311912
+8	17612	17611	1	13.597462392
+9	609	609	0	17.396789928
+10	12	12	0	14.405163808
+11	3	3	0	276.124906008
