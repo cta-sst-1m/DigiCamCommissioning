@@ -13,12 +13,12 @@ log_file_basename : 20170322
 
 # Input files
 mc            :     False
-file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.run_105.fits.fz
-directory     :     /data/datasets/CTA/DATA/20170322/scan_ac_level/
-file_list     :     [0]
+file_basename : CameraDigicam@localhost.localdomain_0_000.%d.run_59.fits.fz
+directory     :     /home/alispach/data/digicam_commissioning/cts/dark_xt/
+file_list     :     [0, 1, 2, 3, 4, 5]
 
 # Output file
-output_directory  : /data/datasets/CTA/DATA/20170322/scan_ac_level/
+output_directory  : /home/alispach/data/digicam_commissioning/cts/dark_xt/
 histo_filename    : adc_dark.npz
 baseline_param_data : baseline_parameters.npz
 pulse_shape_filename    : integrals.npz
@@ -26,11 +26,13 @@ full_histo_filename   : full_mpe.npz
 
 # Event processing
 dark_analysis     : analytic
-######### DO NOT USE FOR CREATE !!! #######
+n_evt_per_batch : 1000
+evt_max : 5000
+
 # Camera Configuration
 angle_cts         : 120.
 
 # Plot configuration
-adcs_min           : -500
-adcs_max           : 2000
+adcs_min           : 0
+adcs_max           : 1000
 adcs_binwidth      : 1

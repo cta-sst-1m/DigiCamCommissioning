@@ -2,6 +2,7 @@ import numpy as np
 import sys
 from ctapipe.io import zfits
 from utils.toy_reader import ToyReader
+from utils import mc_events_reader
 from ctapipe import visualization
 from utils import geometry
 from data_treatement import trigger
@@ -14,11 +15,12 @@ from itertools import cycle
 import matplotlib.gridspec as gridspec
 from matplotlib.colors import LogNorm
 import matplotlib as mpl
+import scipy.stats
 import matplotlib.animation as animation
 
 class EventViewer():
 
-    def __init__(self, options, expert_mode=True):
+    def __init__(self, options):
 
         plt.ioff()
         mpl.figure.autolayout = False
@@ -27,11 +29,14 @@ class EventViewer():
         self.mc = options.mc
         self.baseline_window_width = options.baseline_window_width
         self.scale = options.scale
+        self.gain = options.gain
+        self.colorbar_limits = options.limits_colormap if options.limits_colormap is not None else [0, np.inf]
+        expert_mode = options.trigger_trace_readout
 
         if self.mc:
 
-            self.event_iterator = ToyReader(filename=self.filename, id_list=[0], max_events=options.event_max)
-
+            #self.event_iterator = ToyReader(filename=self.filename, id_list=[0], max_events=options.event_max)
+            self.event_iterator = mc_events_reader.hdf5_mc_event_source(url=self.filename, dc_level=0, ac_level=0, max_events=options.event_max)
         else:
 
             self.event_iterator = zfits.zfits_event_source(url=self.filename, max_events=options.event_max, expert_mode=expert_mode)
@@ -44,13 +49,15 @@ class EventViewer():
         self.pixel_id = options.pixel_start
         self.r0_container = self.event_iterator.__next__().r0
 
-        print(self.r0_container.__dict__)
+ #       print(self.r0_container.__dict__)
 
         self.telescope_id = self.r0_container.tels_with_data[0]
+        self.local_time = self.r0_container.tel[self.telescope_id].local_camera_clock
         self.data = np.array(list(self.r0_container.tel[self.telescope_id].adc_samples.values()))
         self.image = np.zeros(self.data.shape[0])
 
-        if expert_mode:
+
+        if expert_mode and not mc:
 
             self.trigger_output_patch7 = np.array(list(self.r0_container.tel[self.telescope_id].trigger_output_patch7.values()))
             self.trigger_output_patch19 = np.array(list(self.r0_container.tel[self.telescope_id].trigger_output_patch19.values()))
@@ -61,15 +68,20 @@ class EventViewer():
         self.threshold = options.threshold
 
         self.event_clicked_on = Event_Clicked(options)
-        self.geometry = geometry.generate_geometry_0()
-        self.camera = Camera(options.cts_directory + 'config/camera_config.cfg',
-                             options.cts_directory + 'config/cluster.p')
+        #self.geometry = geometry.generate_geometry_0()
+        self.geometry = geometry.generate_geometry(options.cts, all_camera=True)[0]
+
+#        print(self.geometry)
+        #self.camera = Camera(options.cts_directory + 'config/camera_config_clust.cfg')
+                             #options.cts_directory + 'config/cluster.p')
+        self.camera = options.cts.camera
+        #print(self.camera.__dict__.keys())
 
         self.view_type = options.view_type
         self.view_types = ['pixel', 'patch', 'cluster_7']#, 'cluster_9']
         self.iterator_view_type = cycle(self.view_types)
         self.camera_view = options.camera_view
-        self.camera_views = ['sum', 'mean', 'max', 'std', 'time', 'baseline_substracted', 'stacked']
+        self.camera_views = ['sum', 'mean', 'max', 'std', 'time', 'baseline_substracted', 'stacked', 'p.e.']
         self.iterator_camera_view = cycle(self.camera_views)
         self.figure = plt.figure(figsize=(20, 10))
 
@@ -105,7 +117,7 @@ class EventViewer():
 
             self.camera_visu.set_limits_minmax(options.limits_colormap[0], options.limits_colormap[1])
 
-        self.camera.image = self.compute_image()
+        self.camera_visu.image = self.compute_image()
         self.camera_visu.cmap.set_bad(color='k')
         self.camera_visu.add_colorbar(orientation='horizontal', pad=0.03, fraction=0.05, shrink=.85)
 
@@ -138,18 +150,19 @@ class EventViewer():
 
             for i in range(step):
                 self.r0_container = self.event_iterator.__next__().r0
-                self.data = np.array(list(self.r0_container.tel[self.telescope_id].adc_samples.values()))
+
+            self.data = np.array(list(self.r0_container.tel[self.telescope_id].adc_samples.values()))
                 #self.event_id += 1
 
-
+        self.local_time = self.r0_container.tel[self.telescope_id].local_camera_clock
         self.update()
         self.first_call = False
         self.event_id += step
-        np.set_printoptions(threshold=np.nan)
-        patch_trace = np.array(list(self.r0_container.tel[1].trigger_input_traces.values()))
+        #np.set_printoptions(threshold=np.nan)
+        #patch_trace = np.array(list(self.r0_container.tel[1].trigger_input_traces.values()))
         #print(patch_trace)
         #print(np.max(patch_trace))
-        index = np.unravel_index(np.argmax(patch_trace), patch_trace.shape)
+        #index = np.unravel_index(np.argmax(patch_trace), patch_trace.shape)
         #print(index)
         #print(patch_trace[index[0]])
 
@@ -158,6 +171,11 @@ class EventViewer():
 
         self.camera_view = camera_view
         self.update()
+        if camera_view == 'p.e.':
+            self.camera_visu.colorbar.set_label('[p.e.]')
+
+        else:
+            self.camera_visu.colorbar.set_label('[ADC]')
 
     def next_view_type(self, view_type, event=None):
 
@@ -206,7 +224,7 @@ class EventViewer():
         self.pixel_id = pix
         self.event_clicked_on.ind[-1] = self.pixel_id
         self.trace_readout.set_ydata(y)
-        self.trace_readout.set_label('%s : %d, time : %d' % (self.view_type, self.pixel_id, self.time))
+        self.trace_readout.set_label('%s : %d, bin : %d' % (self.view_type, self.pixel_id, self.time))
         self.trace_time_plot.set_ydata(limits_y)
         self.trace_time_plot.set_xdata(self.time*4)
         #y_ticks = np.linspace(np.min(y), np.max(y) + (np.max(y)-np.min(y)//10), np.max(y)-np.min(y)//10)
@@ -292,11 +310,17 @@ class EventViewer():
 
                 self.image += np.mean(image, axis=1)
 
+            elif self.camera_view == 'p.e.':
+
+                baseline = scipy.stats.mode(image, axis=1)[0]
+                baseline = baseline.reshape(baseline.shape[0], )
+                self.image = np.max(image - baseline[:, np.newaxis], axis=1)/self.gain
+
         else:
 
             print('Cannot compute for camera type : %s' % self.camera_view)
         #print(np.max(self.image))
-        return np.ma.masked_where(self.image<=0, self.image)
+        return np.ma.masked_where(np.logical_or(self.image<=self.colorbar_limits[0], self.image>=self.colorbar_limits[1]), self.image)
 
     def press(self, event):
 
@@ -437,7 +461,7 @@ class EventViewer():
             self.camera_visu.set_limits_minmax(limits_colormap[0], limits_colormap[1])
 
         self.camera.image = self.compute_image()
-        self.camera_visu.cmap.set_bad(color='k')
+        #self.camera_visu.cmap.set_bad(color='w')
         self.camera_visu.add_colorbar(orientation='horizontal', pad=0.03, fraction=0.05, shrink=.85)
 
         if self.scale == 'log':

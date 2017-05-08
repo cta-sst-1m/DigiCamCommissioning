@@ -1,126 +1,83 @@
 import numpy as np
 from ctapipe.io import zfits
-import logging,sys
+import logging, sys
 from tqdm import tqdm
 from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
+from utils.mc_events_reader import hdf5_mc_event_source
 from cts_core.camera import Camera
 
 
-
-def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=None, max_cluster_hist=None, time_cluster_hist=None):
+def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=None, max_cluster_hist=None,
+        time_cluster_hist=None):
     # Few counters
-
-    camera = Camera(options.cts_directory + 'config/camera_config.cfg', options.cts_directory + 'config/cluster.p')
-    cluster_adc = []
-
-    pixel_in_sector_1 = []
-    pixel_in_sector_2 = []
-    pixel_in_sector_3 = []
-
-    for pix in camera.Pixels:
-
-        if pix.sector == 1:
-
-            pixel_in_sector_1.append(pix.ID)
-
-        elif pix.sector == 2:
-
-            pixel_in_sector_2.append(pix.ID)
-
-        elif pix.sector == 3:
-
-            pixel_in_sector_3.append(pix.ID)
-
-    pixel_in_sector = [pixel_in_sector_1, pixel_in_sector_2, pixel_in_sector_3]
 
     def integrate_trace(d):
 
         return np.convolve(d, np.ones((options.baseline_window_width), dtype=int), 'valid')
 
-    evt_num, first_evt, first_evt_num = 0, True, 0
-
-    n_evt, n_batch, batch_num, max_evt = (options.evt_max - options.evt_min), options.n_evt_per_batch, 0, options.evt_max
-    batch = None
+    event_number, event_min, event_max = 0, options.evt_min, options.evt_max
     level = 0
     time = np.zeros(len(options.nsb_rate))
+    baseline = []
+    baseline_computed = False
+    baseline_counter = 0
 
-    log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
-    pbar = tqdm(total=options.events_per_level*len(options.nsb_rate))
+    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
+    progress_bar = tqdm(total=options.events_per_level * len(options.nsb_rate))
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     for file in options.file_list:
 
-        if evt_num > max_evt: break
         # read the file
         _url = options.directory + options.file_basename % file
 
-        inputfile_reader = None
         if not options.mc:
-            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=max_evt)
+            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=options.evt_max)
 
         else:
-
-            seed = 0
-            inputfile_reader = ToyReader(filename=_url, id_list=[0], n_pixel=len(options.pixel_list), events_per_level=options.events_per_level, seed=seed, max_events=len(options.nsb_rate)*options.events_per_level, level_start=0)
-
+            """
+            inputfile_reader = ToyReader(filename=_url, id_list=[0], n_pixel=len(options.pixel_list),
+                                         events_per_level=options.events_per_level, seed=seed,
+                                         max_events=len(options.nsb_rate) * options.events_per_level, level_start=0)
+            """
+            inputfile_reader = hdf5_mc_event_source(url=_url, events_per_ac_level=0, events_per_dc_level=options.events_per_level, dc_start=0, ac_start=0, max_events=options.evt_max)
 
         if options.verbose:
             log.debug('--|> Moving to file %s' % _url)
         # Loop over event in this file
 
-        batch_index = 0
-
         for event in inputfile_reader:
-            if evt_num < min_evt:
-                evt_num += 1
-                pbar.update(1)
+            if event_number > event_max:
+                break
+
+            elif event_number < event_min:
+                event_number += 1
                 continue
-            else:
-                # progress bar logging
-
-                if max_evt-min_evt<=1000:
-
-                    if evt_num!=0:
-                        pbar.update(1)
-                else:
-
-                    if evt_num % int((max_evt-min_evt)/1000)==0: #TODO make this work properly
-                        pbar.update(int((max_evt-min_evt)/1000))
-            if evt_num > max_evt: break
 
             for telid in event.r0.tels_with_data:
 
-
-                evt_num += 1
-                if evt_num % n_batch == 0:
-                    log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
-                    # Update adc trigger_rate_camerao
-                    #print(batch)
-                    trigger_rate_camera.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] ))
-                    # Reset the batch
-                    batch = np.zeros((data.shape[0], n_batch),dtype=int)
-                    batch_num += 1
-                    log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
-
-                if evt_num > max_evt: break
-                # get the data
                 data = np.array(list(event.r0.tel[telid].adc_samples.values()))
-                # get rid of unwanted pixels
-
-                if not options.mc:
-                    data = data[options.pixel_list, :]
-
-                #print(baseline_window.shape)
 
                 if options.mc:
 
-                    #print(data[1])
-                    baseline = np.apply_along_axis(integrate_trace, 1, data) / options.baseline_window_width
-                    #print(baseline[1])
-                    data = data[:, 0:-options.baseline_window_width + 1] - baseline.astype(int)
-                    #print(data[1])
+                    if baseline_counter < options.baseline_window_width :
+                        baseline.append(data)
+                        baseline_counter += data.shape[-1]
+                        event_number += 1
+                        progress_bar.update(1)
+                        break
 
+                    elif baseline_counter >= options.baseline_window_width and not baseline_computed:
+                        log.debug('Computing baseline for level % d with %d bins' % (level, options.baseline_window_width))
+                        baseline = np.array(baseline)
+                        baseline = np.mean(np.mean(np.array(baseline), axis=0), axis=-1).astype(int)
+                        baseline_computed = True
+                        log.debug('Baseline recomputed for level %d : = %d [LSB]' % (level, np.mean(baseline)))
+
+                    data = data[options.pixel_list, :] - baseline[:, np.newaxis]
+
+                    """
                     for i in range(len(options.crate)):
 
                         if not options.crate[i]:
@@ -130,128 +87,102 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
                         if not options.pdp[i] and options.crate[i]:
 
                             data[pixel_in_sector[i]] = np.random.normal(options.baseline_mc, options.sigma_e, size=(len(pixel_in_sector[i]), data.shape[-1]))
-
-
+                    """
 
                 else:
-
-                    baseline = np.mean(data[..., options.baseline_window_width[0]:options.baseline_window_width[1]], axis=1)
-                    #print(baseline[700])
-                    data = data - baseline.astype(int)[:, np.newaxis]
-                    #print('baseline not implemented for data !!!')
+                    baseline = event.r0.tel[telid].baseline
+                    data = data[options.pixel_list, :] - baseline.astype(int)[:, np.newaxis]
 
                 if options.blinding:
 
-                    time[level] += data.shape[-1] - data.shape[-1] % options.window_width
+                    if data.shape[-1] < options.window_width:
+                        time[level] += data.shape[-1]
+                    else:
+                        time[level] += data.shape[-1] - data.shape[-1] % options.window_width
 
                 else:
 
                     time[level] += data.shape[-1]
+                cluster_trace, patch_trace = compute_cluster_trace(data, options, log)
+                cluster_max_sector, cluster_max, cluster_max_time, cluster_max_id = compute_trigger_info(cluster_trace,
+                                                                                                         options)
+                trigger_count = compute_trigger_count(cluster_trace, options, log)
 
-                trigger_count, cluster_trace, patch_trace, max_cluster = compute_trigger_v2(data, camera, options, log)
-                #cluster_trace, patch_trace = compute_cluster_trace(data, camera, options, log)
-                cluster_max_sector, cluster_max, cluster_max_time = get_sector_info(data, camera, options, log)
-                cluster_hist.fill_with_batch(cluster_trace, indices=(level, ))
-                patch_hist.fill_with_batch(patch_trace, indices=(level, ))
-                #cluster_max_hist.fill(cluster_max, indices=(cluster_max_sector, ))
-                #print(max_cluster)
-                #print(max_cluster_hist.data.shape)
-
-                #print('hello')
-                #print(cluster_max_sector)
+                cluster_hist.fill_with_batch(cluster_trace, indices=(level,))
+                patch_hist.fill_with_batch(patch_trace, indices=(level,))
                 max_cluster_hist[cluster_max_sector].append(cluster_max)
                 time_cluster_hist[cluster_max_sector].append(cluster_max_time)
-                #max_cluster_hist.fill(max_cluster, indices=(level, ))
                 trigger_rate_camera.data[level] += trigger_count
 
-                #print(trigger_rate_camera.data[level])
-                if evt_num%options.events_per_level==0:
+                progress_bar.update(1)
+                event_number += 1
+                if event_number % options.events_per_level == 0:
+                    log.debug('Going to level %d' % level)
                     level += 1
+                    baseline = []
+                    baseline_computed = False
+                    baseline_counter = 0
 
     trigger_rate_camera.errors = np.sqrt(trigger_rate_camera.data) / (time[:, np.newaxis] * 4.) * 1E9
     trigger_rate_camera.data = trigger_rate_camera.data / (time[:, np.newaxis] * 4.) * 1E9
 
     return
 
-def compute_cluster_trace(data, camera, options, log=None):
+
+def compute_cluster_trace(data, options, log=None):
+    camera = options.cts.camera
 
     cluster_trace = np.zeros((len(camera.Clusters_7), data.shape[-1]))
     patch_trace = np.zeros((len(camera.Patches), data.shape[-1]))
 
-
     for cluster_index, cluster in enumerate(camera.Clusters_7):
 
-        if cluster_index in options.clusters:
+        for patch_index, patch in enumerate(cluster.patches):
 
-            for patch_index, patch in enumerate(cluster.patches):
+            for pixel in patch.pixels:
+                patch_trace[patch.ID] += data[pixel.ID]
 
-                #print(len(cluster.patches))
-
-                for pixel in patch.pixels:
-
-                    #print(patch.ID, pixel.ID)
-                    patch_trace[patch.ID] += data[pixel.ID]
-
-                    #print(cluster.ID, patch.ID, pixel.ID)
-
-
-                patch_trace[patch.ID] /= options.compression_factor
-                patch_trace[patch.ID] = np.clip(patch_trace[patch.ID], 0., options.clipping_patch).astype(int)
-
-                cluster_trace[cluster.ID] += patch_trace[patch.ID]
-
-
+            patch_trace[patch.ID] /= options.compression_factor
+            patch_trace[patch.ID] = np.clip(patch_trace[patch.ID], 0., options.clipping_patch).astype(int)
+            cluster_trace[cluster.ID] += patch_trace[patch.ID]
 
     return cluster_trace, patch_trace
 
-def get_sector_info(data, camera, options, log):
 
-    cluster_trace, patch_trace = compute_cluster_trace(data, camera, options, log)
+def compute_trigger_info(cluster_trace, options):
+
+    camera = options.cts.camera
 
     cluster_max = np.max(cluster_trace)
-
     index_max = np.argmax(cluster_trace)
     index_max = np.unravel_index(index_max, cluster_trace.shape)
 
     cluster_max_id = index_max[0]
-    cluster_max_time = index_max[1]
-
-    #print(np.where(cluster_trace[cluster_max_id]>options.threshold[0]))
-
+    # cluster_max_time = index_max[1]
     try:
 
-        cluster_max_time = np.min(np.where(cluster_trace[cluster_max_id]>options.threshold[0])[0][0])
+        cluster_max_time = np.min(np.where(cluster_trace[cluster_max_id] > options.threshold[0])[0][0])
 
     except:
 
-        cluster_max_time = 0
-
-    #print(cluster_max_time)
+        cluster_max_time = -1
 
     cluster_max_sector = camera.Clusters_7[cluster_max_id].patches[0].sector - 1
 
-    return cluster_max_sector, cluster_max, cluster_max_time
+    return cluster_max_sector, cluster_max, cluster_max_time, cluster_max_id
 
-def compute_trigger_v2(data, camera, options, log):
 
+def compute_trigger_count(cluster_trace, options, log):
     trigger_count = np.zeros(len(options.threshold))
-
-
-    cluster_trace, patch_trace = compute_cluster_trace(data, camera, options, log)
-
-    max_cluster = np.max(np.max(cluster_trace, axis=1), axis=0).astype(int)
 
     for threshold_index, threshold in enumerate(options.threshold):
 
         t = 0
 
-        while(t<data.shape[-1]):
+        while t < cluster_trace.shape[-1]:
 
             if np.any(cluster_trace[:, t] > threshold):
 
-                #print(cluster_trace[:, t])
-
-                #print(cluster_trace[np.where(cluster_trace[:, t] > threshold)[0][0]])
                 trigger_count[threshold_index] += 1
                 log.debug('Trigger at time %d [ns] for threshold %d [ADC]' % (t * 4, threshold))
 
@@ -260,6 +191,4 @@ def compute_trigger_v2(data, camera, options, log):
 
             t += 1
 
-
-
-    return trigger_count, cluster_trace, patch_trace, max_cluster
+    return trigger_count
