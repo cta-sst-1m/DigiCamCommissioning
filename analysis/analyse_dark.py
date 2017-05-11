@@ -195,12 +195,12 @@ def display_results(options):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
+    geom,pix_list = geometry.generate_geometry(options.cts,all_camera=True)
 
     #. Perform some plots
 
     print(adcs.data.shape)
-    print(adcs.data[1])
+    print(adcs.data[0])
     print(np.max(adcs.data[1]))
 
     display.display_hist(adcs, options=options, geom=geom, draw_fit=False)
@@ -223,15 +223,7 @@ def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,int
     '''
 
     x = x - baseline
-    print(integral)
-    print(integral_square)
-    print(sigma_e)
-    print(sigma_1)
-    print(gain)
     sigma_1 = sigma_1/gain
-
-    print(sigma_1/gain)
-    0/0
     mean_adc = np.average(x, weights=y)
     sigma_2_adc = np.average((x - mean_adc) ** 2, weights=y) - 1./12.
     pulse_shape_area = integral * gain

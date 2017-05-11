@@ -60,10 +60,10 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
 
             pbar.update(1)
 
-            #print(event.dl0)
+            #print(event.r0)
             #break
 
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
                 #print('hello')
                 if n_evt % n_batch == 0:
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
@@ -86,7 +86,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     batch_num += 1
                     log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
                 # Get the data
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 # Get ride off unwanted pixels
                 data = data[options.pixel_list]
                 #print(data)

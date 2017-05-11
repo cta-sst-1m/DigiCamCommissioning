@@ -37,8 +37,8 @@ for i,pix in enumerate([250, 272, 273, 274, 275, 296, 297, 298, 299, 300, 320, 3
 
 plt.plot(dac,allnsb/len(pixels),color='k',linewidth = 2 , label='Average per DAC')
 plt.legend()
-plt.ylim(40.9,660.)
-plt.xlim(250.,350.)
+plt.ylim(40.9,1500.)
+plt.xlim(250.,550.)
 plt.show()
 
 
@@ -55,6 +55,7 @@ plt.figure()
 for i,pix in enumerate([250, 272, 273, 274, 275, 296, 297, 298, 299, 300, 320, 321, 322, 323, 344, 345, 346, 347, 348, 369, 370]):
     y = np.polyval(param[pix],dac)
     plt.plot(dac,y,label='pixel %d'%pixels[i])
+
 
 plt.legend()
 plt.ylim(1,3000.)

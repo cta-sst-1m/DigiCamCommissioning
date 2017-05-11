@@ -5,7 +5,7 @@ from optparse import OptionParser
 from  yaml import load,dump
 import matplotlib.pyplot as plt
 import logging,sys
-from utils.geometry import generate_geometry_0, generate_geometry
+from utils.geometry import  generate_geometry
 #internal modules
 from utils import logger
 import numpy as np

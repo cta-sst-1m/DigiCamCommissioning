@@ -583,6 +583,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
 
 
         draw_hist(axis_histogram, hist, options=options, index=counter.count, draw_fit=draw_fit, scale = scale)
+        print(geom)
         camera_visu = visualization.CameraDisplay(geom, ax=axis_camera, title='', norm='lin', cmap='viridis', allow_pick=True)
         image = np.ma.masked_where(image <= 0, image)
         camera_visu.cmap.set_bad(color='k')
