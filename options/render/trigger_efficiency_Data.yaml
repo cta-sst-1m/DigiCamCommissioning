@@ -4,7 +4,7 @@ legends  :  [['Dark (3MHz)','NSB 48 MHz','NSB 80 MHz','NSB 125 MHz','NSB 250 MHz
 dataset  :  [['trigger_efficiency_dark/trigger.npz','trigger_efficiency_40/trigger.npz','trigger_efficiency_80/trigger.npz','trigger_efficiency_125/trigger.npz',
               'trigger_efficiency_250/trigger.npz','trigger_efficiency_660/trigger.npz']]
 style    :  [[':','-','-','-','-','-']]
-color    :  [['#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff']]
+color    :  [['k','#002699','#0039e6','#3366ff','#ccd9ff','r']]
 x_lim    :  [[0,100]]
 y_lim    :  [[0,100]]
 nsbs     : [[3.e6,48e6,80.e6,125.e6,250.e6,660.e6]]
