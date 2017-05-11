@@ -143,6 +143,8 @@ def get_datasets(options):
                 datasets[-1].append(data )
             else:
                 data = load_data(options.base_directory+options.dataset[i][j])
+                print(options.NSB,i)
+                print(options.NSB[i],j)
                 datasets[-1].append(rate_calc([data['threshold'],data[options.variable[i][j]],data['time']] , nsb=options.NSB[i][j]))
 
     return datasets
