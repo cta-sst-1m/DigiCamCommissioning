@@ -2,17 +2,17 @@
 analysis_module : visualise_data
 
 ## Logging
-mc                : True
+mc                : False
 
 ## Input files
 
 #file : CameraDigicam@localhost.localdomain_0_000.0.run_218.fits.fz
-#file : CameraDigicam@localhost.localdomain_0_000.1.thr7_20_FADC_2048.fits.fz
-file : sandbox_0.hdf5
+file : CameraDigicam@localhost.localdomain_0_000.1.thr7_20_FADC_2048.fits.fz
+#file : sandbox_0.hdf5
 
 #directory     :     /home/alispach/data/digicam_commissioning/trigger/20170504/mapping_ac_led_3/
-#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170504/
-directory     :     /home/alispach/data/digicam_commissioning/trigger/mc/
+directory     :     /home/alispach/data/digicam_commissioning/trigger/20170504/
+#directory     :     /home/alispach/data/digicam_commissioning/trigger/mc/
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
 telescope_id : 1

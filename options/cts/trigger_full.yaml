@@ -4,10 +4,11 @@ analysis_module : analyse_trigger
 # Logging
 verbose           : True
 mc                : True
-log_file_basename : 20161214
+log_file_basename : 20170508
 
 # Input files
 file_basename : nsb_full_camera_%d.hdf5
+file_basename : nsb_scan_camera+1cluster_%d.hdf5
 directory     : /home/alispach/data/digicam_commissioning/trigger/mc/
 scan_level : [0, 1, 2, 4, 3, 5]
 nsb_rate : [0, 3, 40, 80, 125, 660]
@@ -23,10 +24,10 @@ max_cluster_histo_filename : max_cluster.npz
 
 ## Camera Configuration
 n_pixels          : 1296
-window_width : 51 # bins
+window_width : 50 # bins
 evt_min : 0
-evt_max : 600
-events_per_level : 100
+evt_max : 60
+events_per_level : 10
 
 ## Trigger parameters
 #baseline_window : [0, 20]
