@@ -1,0 +1,24 @@
+# Analysis module
+analysis_module : analyse_trigeff_data
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170511
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.run_344.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170511/trigger_efficiency_660/
+file_list     :     [0,1,2,3,4,5]#,14,15,
+scan_level    :     [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 24, 27, 30, 34, 38, 42, 46, 50, 55, 60, 100]
+output_directory  : /data/datasets/CTA/DATA/20170511/trigger_efficiency_660/
+histo_filename    : trigger.npz
+
+# Camera Configuration
+angle_cts         : 120.
+events_per_level  : 5000

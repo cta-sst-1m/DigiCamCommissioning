@@ -1,41 +1,48 @@
 render_module : bias_curve
-title    :  ['Trigger Rates DATA','Trigger Rates MC','Trigger Rate DATA vs. Toy Dark','Trigger Rate DATA vs. Toy High NSB','Trigger Rate DATA vs. Toy Medium NSB']
-legends  :  [['HV OFF','Dark (3MHz)','NSB 40 MHz','NSB 80 MHz','NSB 250 MHz','NSB 660 MHz'],
+title    :  ['Trigger Rates DATA','Trigger Rates MC','Trigger Rate DATA vs. Toy Dark','Trigger Rate DATA vs. Toy High NSB',
+             'Trigger Rate DATA vs. Toy Medium NSB','Trigger rate comparison BL 2048-500']
+legends  :  [['HV OFF','Dark (3MHz)','NSB 48 MHz','NSB 80 MHz','NSB 250 MHz','NSB 660 MHz'],
              ['Toy HV OFF','Toy Dark (3MHz)','Toy NSB 36 MHz','Toy NSB 40.9 MHz','Toy NSB 81.8 MHz','Toy NSB 129 MHz',
              'Toy NSB 204.5 MHz','Toy NSB 385 MHz','Toy NSB 589 MHz','Toy NSB 660 MHz'],
              ['DATA','Toy'],
              ['DATA (660 MHz)','Toy (660 MHz)'],
-             ['DATA (125 MHz)','Toy (129 MHz)']]
-xaxis    :  ['pe','ADC','ADC','ADC','ADC']
+             ['DATA (125 MHz)','Toy (129 MHz)'],
+             ['BL 2048','BL 500']]
+xaxis    :  ['pe','ADC','ADC','ADC','ADC','ADC']
 dataset  :  [['DarkWOnoise_HVOff.txt','Dark_without_noisy_channel.txt','NSB_DAC277_without_noisy_channel.txt','NSB_DAC288_without_noisy_channel.txt',
              'NSB_DAC295_without_noisy_channel.txt','NSB_DAC306_without_noisy_channel.txt','NSB_DAC323_without_noisy_channel.txt'],
              ['trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz'],
              ['Dark_without_noisy_channel.txt','trigger.npz'],
              ['NSB_DAC323_without_noisy_channel.txt','trigger.npz'],
-             ['NSB_DAC295_without_noisy_channel.txt','trigger.npz']]
+             ['NSB_DAC295_without_noisy_channel.txt','trigger.npz'],
+             ['Dark_without_noisy_channel.txt','NSB_Dark_without_noisy_channel_500.txt']]
 variable :  [['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt'],
-             [ 0 , 1 , 2 , 3,4, 7, 5 , 8,9,6],
+             [ 0 , 1 , 2 , 3, 4, 7, 5 , 8,9,6],
              ['trigger_cnt',1],
              ['trigger_cnt',6],
-             ['trigger_cnt',5]]
-offset   :   [[0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,6],[0,-9],[0,-10]]
+             ['trigger_cnt',5],
+             ['trigger_cnt','trigger_cnt']]
+offset   :   [[0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0],[0,0],[0,0]]
 NSB      :  [[0.,3.e6,40.7e6,80.e6,125.e6,250.e6,660.e6],
              [0.,3.e6,36.e6,40.9e6,81.8e6,129.e6,204.e6,385.e6,589.e6,660.e6],
              [3e6,3e6],
              [660e6,589e6],
-             [125e6,130e6]]
+             [125e6,130e6],
+             [3e6,3e6]]
 style    :  [[':','-','-','-','-','-','-'],
              [':','-','-','-','-','-','-','-','-','-'],
              ['-',':'],
              ['-',':'],
-             ['-',':']]
+             ['-',':'],
+             ['-','-']]
 color    :  [['k','#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff'],
              ['k','#4d0000','#990000','#e60000','#ff3333','#ff8080','#ffcccc','#3366ff','#809fff','#ccd9ff'],
              ['#0039e6','#e60000'],
              ['#0039e6','#e60000'],
-             ['#0039e6','#e60000']]
-x_lim    :  [[0,70],[0,70],[0,70],[0,70],[0,70]]
-y_lim    :  [[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7]]
+             ['#0039e6','#e60000'],
+             ['k','r' ]]
+x_lim    :  [[0,70],[0,70],[0,70],[0,70],[0,70],[0,70]]
+y_lim    :  [[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,5e8]]
 base_directory : '/data/datasets/CTA/for_render/'
 
 
