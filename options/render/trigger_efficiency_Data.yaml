@@ -1,0 +1,15 @@
+render_module : trigger_efficiency
+title    :  ['Trigger efficiencies at safe threshold']
+legends  :  [['Dark (3MHz)','NSB 48 MHz','NSB 80 MHz','NSB 125 MHz','NSB 250 MHz','NSB 660 MHz']]
+dataset  :  [['trigger_efficiency_dark/trigger.npz','trigger_efficiency_40/trigger.npz','trigger_efficiency_80/trigger.npz','trigger_efficiency_125/trigger.npz',
+              'trigger_efficiency_250/trigger.npz','trigger_efficiency_660/trigger.npz']]
+style    :  [[':','-','-','-','-','-']]
+color    :  [['#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff']]
+x_lim    :  [[0,100]]
+y_lim    :  [[0,100]]
+nsbs     : [[3.e6,48e6,80.e6,125.e6,250.e6,660.e6]]
+evt_per_level : 5000
+levels :  [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 24, 27, 30, 34, 38, 42, 46, 50, 55, 60, 100]
+base_directory : '/data/datasets/CTA/DATA/20170511/'
+
+
