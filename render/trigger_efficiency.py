@@ -53,8 +53,8 @@ def plot_trigger_efficiency(datas,labels,colors=['k','b','g','r','c'],style=[],x
     #ax1.plot(np.arange(xlim_min - 5, xlim_max + 5), np.ones(np.arange(xlim_min - 5, xlim_max + 5).shape[0]) * 500.,
     #         label='Max. physics rate (500Hz)', linestyle='--', color='k', linewidth=2.)
 
-    ax1.set_xlabel('p.e. in a cluster (21 pixels)')
-    ax1.set_ylabel('Trigger Efficiency')
+    ax1.set_xlabel('<N(p.e.)> in a single cluster (21 pixels)')
+    ax1.set_ylabel('Trigger Efficiency [%]')
     ax1.xaxis.get_label().set_ha('right')
     ax1.xaxis.get_label().set_position((1, 0))
     ax1.yaxis.get_label().set_ha('right')
