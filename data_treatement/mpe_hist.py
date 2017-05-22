@@ -196,6 +196,9 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                             _tmp_baseline = baseline
                         data = data - _tmp_baseline[:, None]
                         #if level>32 :
+
+                    else:
+                        baseline = np.zeros((len(options.scan_level), data.shape[0]))
                     integration = np.apply_along_axis(integrate_trace,1,data)
                     local_max = np.argmax(np.multiply(integration, mask_window), axis=1)
                     local_max_edge = np.argmax(np.multiply(integration, mask_windows_edge), axis=1)
@@ -218,6 +221,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                         plt.plot(np.arange(92),data[options.pixel_list.index(62)])
                         plt.show()
                     '''
+                    #print(baseline)
                     batch[...,batch_index]=integration[index_max] - baseline[level,:]
                     batch_index += 1
                     #hist.fill(integration[index_max],indices=(level,))

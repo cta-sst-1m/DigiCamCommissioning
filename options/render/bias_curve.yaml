@@ -1,0 +1,34 @@
+render_module : bias_curve
+title    :  ['Trigger Rates DATA','Trigger Rates Toy (New)', 'Trigger Rates Toy (Oldest)']
+legends  :  [['DATA DAC 292 40 MHz', 'DATA DAC 304 81 MHz', 'DATA DAC 311 125 MHz','DATA DAC 339 660 MHz'],
+             ['Toy HV off', 'Toy 39 MHz', 'Toy 79 MHz', 'Toy 120 MHz', 'Toy 247 MHz', 'Toy 646 MHz'],
+             ['Toy HV off', 'Toy dark', 'Toy 40 MHz', 'Toy 80 MHz', 'Toy 125 MHz', 'Toy 660 MHz']]
+xaxis    :  ['ADC', 'ADC', 'ADC', 'ADC']
+dataset  :  [['NSB40MHz_corrected_DAC_292.txt', 'NSB81MHz_corrected_DAC_304.txt', 'NSB125MHz_corrected_DAC_311.txt', 'NSB660MHz_corrected_DAC_339.txt'],
+             ['trigger_11_may.npz', 'trigger_11_may.npz', 'trigger_11_may.npz', 'trigger_11_may.npz', 'trigger_11_may.npz', 'trigger_11_may.npz'],
+             ['trigger_8_may.npz', 'trigger_8_may.npz', 'trigger_8_may.npz', 'trigger_8_may.npz', 'trigger_8_may.npz', 'trigger_8_may.npz', 'trigger_8_may.npz']]
+variable :  [['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt'],
+            [0, 1, 2, 3, 4, 5],
+            [0, 1, 2, 3, 4, 5]]
+offset   :   [[0, 0, 0, 0],
+              [0, 0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0, 0, 0]]
+NSB      :  [[39e6, 79e6, 120e6, 646e6],
+             [0, 39e6, 79e6, 120e6, 247e6, 646e6],
+             [0, 3e6, 40e6, 80e6, 125e6, 660e6]]
+style    :  [['-','-','-','-'],
+             ['-','-','-','-','-','-'],
+             ['-','-','-','-','-','-']]
+color    :  [['k','#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff'],
+             ['k','#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff'],
+             ['k','#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff']]
+x_lim    :  [[0, 100],
+             [0, 100],
+             [0, 100]]
+y_lim    :  [[1e-1, 1e7],
+             [1e-1, 1e7],
+             [1e-1, 1e7]]
+base_directory : 'data/'
+
+
+

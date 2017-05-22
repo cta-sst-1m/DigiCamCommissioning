@@ -23,15 +23,20 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     n_evt, n_batch, batch_num, max_evt = 0, options.n_evt_per_batch, 0, options.evt_max
     _tmp_baseline = None
     batch = None
-    if baseline is None:
-        baseline = np.zeros(len(options.pixel_list))
+
     if not options.mc:
         log.info('Running on DigiCam data')
     else:
         log.info('Running on MC data')
     params=None
     if hasattr(options, 'baseline_per_event_limit') and not h_type=='MEANRMS':
+
         params = np.load(options.output_directory + options.baseline_param_data)['params']
+        #print(params)
+        #print(params.keys())
+        #print(params[:, 1])
+        #print(params[:, 2])
+        #print(params[:, 3])
 
 
     def integrate_trace(d):
@@ -60,11 +65,16 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
 
             pbar.update(1)
 
-            #print(event.r0)
+            #print(event.dl0)
             #break
 
             for telid in event.r0.tels_with_data:
                 #print('hello')
+
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
+                # Get ride off unwanted pixels
+                data = data[options.pixel_list]
+
                 if n_evt % n_batch == 0:
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
                     # Update adc histo
@@ -86,38 +96,45 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     batch_num += 1
                     log.debug('Reading  the batch #%d of %d events' % (batch_num, n_batch))
                 # Get the data
-                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
-                # Get ride off unwanted pixels
-                data = data[options.pixel_list]
+
                 #print(data)
                 if n_evt==1:
                     if hasattr(options,'window_width'):
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width+1),dtype=int)
                         if hasattr(options, 'baseline_per_event_limit'):
+
                             batch = np.zeros((data.shape[0], n_batch, data.shape[1]-options.window_width-options.baseline_per_event_limit),dtype=float)
                     else:
                         batch = np.zeros((data.shape[0], n_batch, data.shape[1]),dtype=int)
                 if hasattr(options,'window_width'):
+                    #print('hello')
                     if hasattr(options, 'baseline_per_event_limit') and baseline is None:
+                        #print('hello')
                         _baseline = np.mean(data[...,0:options.baseline_per_event_limit], axis=-1)
                         _rms = np.std(data[...,0:options.baseline_per_event_limit], axis=-1)
                         if h_type == 'MEANRMS':
                             hist[0][...,n_evt-1]=_baseline
                             hist[1][...,n_evt-1]=_rms
                         # get the indices where baseline is good
-                        ind_good_baseline = (_rms - params[:,2])/params[:,3] < 0.5
-                        if n_evt > 1:
-                            _tmp_baseline[ind_good_baseline] = _baseline[ind_good_baseline]
-                            #_tmp_baseline[~ind_good_baseline] = 10000
+                        #print('hello')
 
-                        else:
-                            _tmp_baseline = _baseline
-                        #_tmp_baseline = baseline
-                        data = data - _tmp_baseline[:, None]
+                        if params is not None:
+
+                            ind_good_baseline = (_rms - params[:,2])/params[:,3] < 0.5
+                            #print(params[:,2])
+                            if n_evt > 1:
+                                _tmp_baseline[ind_good_baseline] = _baseline[ind_good_baseline]
+                                #_tmp_baseline[~ind_good_baseline] = 10000
+
+                            else:
+                                _tmp_baseline = _baseline
+                            #_tmp_baseline = baseline
+                            data = data - _tmp_baseline[:, None]
                     elif baseline is not None:
                         data = data - baseline[:, None]
                     if not  h_type == 'MEANRMS':
                         batch[:,n_evt%n_batch,:]=np.apply_along_axis(integrate_trace,-1,data[...,options.baseline_per_event_limit:-1])
+                        #print(batch[:,n_evt%n_batch][1])
                         #print(batch.shape,n_evt%n_batch)
 
                 else:

@@ -75,23 +75,45 @@ if __name__ == '__main__':
                                  fromlist=[None],
                                  level=0)
 
+    # cts_path = '/data/software/CTS/'
+    cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
 
     if hasattr(options,'angle_cts'):
-        cts_path = '/data/software/CTS/'
-        #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
+
         options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
 
+    elif not hasattr(options, 'pixel_list'):
+
+        if not hasattr(options, 'n_pixels'):
+
+            options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
+                              cts_path + 'config/camera_config.cfg', angle=0, connected=True)
+            options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
+
     else:
-        cts_path = '/data/software/CTS/'
-        #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
         options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
-                          cts_path + 'config/camera_config_clusters.cfg', angle=0, connected=True)
-        options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
+                          cts_path + 'config/camera_config.cfg', angle=0, connected=True)
+
+        if options.pixel_list == 'all':
+
+            options.cts = options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg', cts_path + 'config/camera_config.cfg', angle=0, connected=True)
+            options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
+
+        elif hasattr(options, 'n_pixels'):
+
+            options.pixel_list = np.arange(0, options.n_pixels, 1)
+
+        else:
+
+            options.pixel_list = options.pixel_list
+
 
     if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
         # TODO add usage of digicam and cts geometry to define the list
         options.pixel_list = np.arange(0, options.n_pixels, 1)
+
+
 
     if hasattr(options, 'n_clusters'):
 

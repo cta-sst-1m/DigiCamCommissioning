@@ -262,7 +262,7 @@ class Histogram:
 
 
     # noinspection PyTypeChecker
-    def fill_with_batch(self, batch, indices=None):
+    def fill_with_batch(self, batch, indices=None): # TODO fill_with_batch should be fill that takes care of batch inside Histogram
         """
         A function to transform a batch of data in Histogram and add it to the existing one
         :param batch: a np.array with the n-1 same shape of data, and n dimension containing the array to Histogram

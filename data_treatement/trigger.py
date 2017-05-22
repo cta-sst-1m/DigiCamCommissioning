@@ -90,15 +90,37 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
                     """
 
                 else:
-                    baseline = event.r0.tel[telid].baseline
-                    data = data[options.pixel_list, :] - baseline.astype(int)[:, np.newaxis]
+
+                    if baseline_counter < options.baseline_window_width:
+                        baseline.append(data)
+                        baseline_counter += data.shape[-1]
+                        event_number += 1
+                        progress_bar.update(1)
+                        break
+
+                    elif baseline_counter >= options.baseline_window_width and not baseline_computed:
+                        log.debug('Computing baseline for level % d with %d bins' % (level, options.baseline_window_width))
+                        baseline = np.array(baseline)
+                        baseline = np.mean(np.mean(np.array(baseline), axis=0), axis=-1).astype(int)
+                        baseline_computed = True
+                        log.debug('Baseline recomputed for level %d : = %d [LSB]' % (level, np.mean(baseline)))
+
+
+                    data = data[options.pixel_list, :] - baseline[:, np.newaxis]
+
 
                 if options.blinding:
 
                     if data.shape[-1] < options.window_width:
                         time[level] += data.shape[-1]
+
+                    elif options.window_width % data.shape[-1] == options.window_width:
+
+                        time[level] += options.window_width
+
                     else:
                         time[level] += data.shape[-1] - data.shape[-1] % options.window_width
+                        print(data.shape)
 
                 else:
 
@@ -179,7 +201,7 @@ def compute_trigger_count(cluster_trace, options, log):
 
         t = 0
 
-        while t < cluster_trace.shape[-1]:
+        while t < cluster_trace.shape[-1] - (cluster_trace.shape[-1] % options.window_width):
 
             if np.any(cluster_trace[:, t] > threshold):
 
