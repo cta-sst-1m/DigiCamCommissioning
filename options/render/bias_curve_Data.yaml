@@ -20,7 +20,7 @@ dataset  :  [['DarkWOnoise_HVOff.txt','Dark_without_noisy_channel.txt','NSB_DAC2
              ['NSB81MHz_corrected_DAC_304.txt','trigger_2.npz'],
              ['NSB125MHz_corrected_DAC_311.txt','trigger_2.npz'],
              ['NSB_DAC323_without_noisy_channel.txt','trigger_2.npz'],
-             ['NSB660MHz_corrected_DAC_339.txt','trigger_2.npz'],
+             ['NSB660MHz_corrected_DAC_339.txt','trigger.npz'],
              ]
 variable :  [['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt'],
             ['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt'],
@@ -30,7 +30,7 @@ variable :  [['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_c
             ['trigger_cnt',2],
             ['trigger_cnt',3],
             ['trigger_cnt',4],
-            ['trigger_cnt',5]]
+            ['trigger_cnt',6]]
 offset   :   [[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0],
               [0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
 NSB      :  [[0.,3.e6,17.e6,32.e6,48.e6,92.e6,247.e6,660.e6],
