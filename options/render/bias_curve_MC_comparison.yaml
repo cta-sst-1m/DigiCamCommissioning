@@ -1,18 +1,18 @@
 render_module : bias_curve
-title    :  ['Trigger Rates DATA','Trigger Rates MC','Trigger Rate DATA vs. Toy Dark','Trigger Rate DATA vs. Toy High NSB',
-             'Trigger Rate DATA vs. Toy Medium NSB','Trigger rate comparison BL 2048-500']
-legends  :  [['HV OFF','Dark (3MHz)','NSB 48 MHz','NSB 80 MHz','NSB 250 MHz','NSB 660 MHz'],
-             ['Toy HV OFF','Toy Dark (3MHz)','Toy NSB 36 MHz','Toy NSB 40.9 MHz','Toy NSB 81.8 MHz','Toy NSB 129 MHz',
-             'Toy NSB 204.5 MHz','Toy NSB 385 MHz','Toy NSB 589 MHz','Toy NSB 660 MHz'],
-             ['DATA','Toy'],
+title    :  ['Trigger Rates DATA','Trigger Rates MC','Trigger Rate DATA vs. Toy vs CARE Dark','Trigger Rate DATA vs. Toy High NSB','Trigger Rate DATA vs. Toy Medium NSB', 'DATA vs TOY HV OFF', 'Toy vs DATA Dark']
+legends  :  [['HV OFF','Dark (3MHz)','NSB 40 MHz','NSB 80 MHz', 'NSB 125 MHz' , 'NSB 250 MHz','NSB 660 MHz'],
+             ['Toy HV OFF','Toy Dark 3MHz', 'Toy NSB 40 MHz','Toy NSB 80 MHz','Toy NSB 125 MHz',
+             'Toy NSB 660 MHz'],
+             ['DATA','Toy', 'CARE'],
              ['DATA (660 MHz)','Toy (660 MHz)'],
              ['DATA (125 MHz)','Toy (129 MHz)'],
-             ['BL 2048','BL 500']]
-xaxis    :  ['pe','ADC','ADC','ADC','ADC','ADC']
+             ['DATA HV OFF', 'Toy HV OFF'],
+             ['DATA Dark', 'Toy Dark']]
+xaxis    :  ['ADC','ADC','ADC','ADC','ADC', 'ADC', 'ADC']
 dataset  :  [['DarkWOnoise_HVOff.txt','Dark_without_noisy_channel.txt','NSB_DAC277_without_noisy_channel.txt','NSB_DAC288_without_noisy_channel.txt',
              'NSB_DAC295_without_noisy_channel.txt','NSB_DAC306_without_noisy_channel.txt','NSB_DAC323_without_noisy_channel.txt'],
-             ['trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz'],
-             ['Dark_without_noisy_channel.txt','trigger.npz'],
+             ['trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz','trigger.npz'],
+             ['Dark_without_noisy_channel.txt','trigger.npz', 'care_dark.txt'],
              ['NSB_DAC323_without_noisy_channel.txt','trigger.npz'],
              ['NSB_DAC295_without_noisy_channel.txt','trigger.npz'],
              ['Dark_without_noisy_channel.txt','NSB_Dark_without_noisy_channel_500.txt']]
@@ -29,20 +29,53 @@ NSB      :  [[0.,3.e6,40.7e6,80.e6,125.e6,250.e6,660.e6],
              [660e6,589e6],
              [125e6,130e6],
              [3e6,3e6]]
+             ['DarkWOnoise_HVOff.txt', 'trigger.npz'],
+             ['Dark_without_noisy_channel.txt', 'trigger.npz']]
+variable :  [['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt'],
+             [ 0 , 1 , 2 , 3, 4, 5],
+             ['trigger_cnt',1, None],
+             ['trigger_cnt',5],
+             ['trigger_cnt',4],
+             ['trigger_cnt',0],
+             ['trigger_cnt', 1]]
+offset   :   [[0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0],[0,0],[0,0],[0,0],[0,0]]
+NSB      :  [[0.,3.e6, 40e6, 80.e6,125.e6,250.e6,660.e6],
+             [0.,3.e6,40.e6,80e6,125e6,660.e6],
+             [3e6,3e6, 3e6],
+             [660e6,589e6],
+             [125e6,130e6],
+             [0., 0.],
+             [3e6, 3e6]]
+>>>>>>> Stashed changes
 style    :  [[':','-','-','-','-','-','-'],
-             [':','-','-','-','-','-','-','-','-','-'],
+             [':','-','-','-','-','-'],
+             ['-',':','-.'],
              ['-',':'],
              ['-',':'],
+<<<<<<< Updated upstream
              ['-',':'],
              ['-','-']]
+=======
+             ['-', ':'],
+             ['-', ':']]
+>>>>>>> Stashed changes
 color    :  [['k','#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff'],
-             ['k','#4d0000','#990000','#e60000','#ff3333','#ff8080','#ffcccc','#3366ff','#809fff','#ccd9ff'],
+             ['k','#4d0000','#990000','#e60000','#ff3333','#ff8080','#ffcccc'],
+             ['#0039e6','#e60000','#3366ff'],
              ['#0039e6','#e60000'],
              ['#0039e6','#e60000'],
+             ['#0039e6','#e60000'],
+<<<<<<< Updated upstream
              ['#0039e6','#e60000'],
              ['k','r' ]]
 x_lim    :  [[0,70],[0,70],[0,70],[0,70],[0,70],[0,70]]
 y_lim    :  [[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,5e8]]
 base_directory : '/data/datasets/CTA/for_render/'
+=======
+             ['#0039e6','#e60000']]
+x_lim    :  [[0,70],[0,70],[0,70],[0,70],[0,70],[0,70],[0,20]]
+y_lim    :  [[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1, 1e7]]
+base_directory : 'data/'
+>>>>>>> Stashed changes
 
 

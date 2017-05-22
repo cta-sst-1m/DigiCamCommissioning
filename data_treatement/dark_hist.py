@@ -1,6 +1,6 @@
 import numpy as np
 from ctapipe.io import zfits
-from utils.toy_reader import ToyReader
+from utils.mc_events_reader import hdf5_mc_event_source
 import logging
 import sys
 import peakutils
@@ -9,7 +9,7 @@ from utils.logger import TqdmToLogger
 from tqdm import tqdm
 
 
-def run(hist, options, hist_type, prev_fit_result=None):
+def run(hist, options, hist_type):
     """
     Fill the adcs Histogram out of darkrun/baseline runs
     :param h_type: type of Histogram to produce: ADC for all samples adcs or SPE for only peaks
@@ -27,7 +27,7 @@ def run(hist, options, hist_type, prev_fit_result=None):
     else:
         log.info('Running on MC data')
 
-    pbar = tqdm(total=options.max_event)
+    pbar = tqdm(total=options.max_event-options.min_event)
 
     for file in options.file_list:
         # Open the file
@@ -36,9 +36,12 @@ def run(hist, options, hist_type, prev_fit_result=None):
         if not options.mc:
             inputfile_reader = zfits.zfits_event_source(url=_url, max_events=options.max_event)  #TODO data_type arg does not exist anymore
         else:
-            inputfile_reader = ToyReader(filename=_url, id_list=[0],
-                                         max_events=options.max_event,
-                                         n_pixel=options.n_pixels, events_per_level=options.events_per_level)
+            #inputfile_reader = ToyReader(filename=_url, id_list=[0],
+            #                             max_events=options.max_event,
+            #                             n_pixel=options.n_pixels, events_per_level=options.events_per_level)
+
+            inputfile_reader = hdf5_mc_event_source(url=_url, events_per_dc_level=options.dc_step, events_per_ac_level=options.ac_step, dc_start=options.dc_start, ac_start=options.ac_start, max_events=options.max_event)
+
 
         log.debug('--|> Moving to file %s' % _url)
         # Loop over event in this file
@@ -47,15 +50,22 @@ def run(hist, options, hist_type, prev_fit_result=None):
             if event_number > options.max_event:
                 break
 
+            if event_number < options.min_event:
+                event_number += 1
+                continue
+
             pbar.update(1)
 
-            for telid in event.dl0.tels_with_data:
+            for telid in event.r0.tels_with_data:
 
                 # Take data from zfits
-                data = np.array(list(event.dl0.tel[telid].adc_samples.values()))
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
 
                 # Get rid off unwanted pixels
+
+
                 data = data[options.pixel_list]
+
 
                 if hist_type == 'raw':
 

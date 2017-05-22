@@ -28,6 +28,7 @@ def plot_gain_drop(datas,labels,xaxis='pe',colors=['k','b','g','r','c'],style=[]
 
         ax1.plot(data[index], data[3],color='%s'%colors[i], linestyle='%s'%style[i] ,label=labels[i], linewidth = 2)
         #ax1.plot(xnew, ynew, color='%s' % colors[i], linestyle='%s' % style[i], label=labels[i])
+
         ax1.fill_between(data[index], data[3]-data[4],data[3]+data[4], alpha= 0.3, edgecolor='%s'%colors[i], facecolor='%s'%colors[i])
         data0str = '%s - x: ['%labels[i]
         opt = ''
@@ -77,7 +78,20 @@ def load_mc(file,var,nsb,offset = 0.):
     d = np.append(d,h.bin_centers.reshape(1,-1),axis=0)
     d = np.append(d,h.data[int(var),:].reshape(1,-1),axis=0)
     d = np.append(d,h.errors[int(var),:].reshape(1,-1),axis=0)
-    d = np.append(d,(d[0]*4/5.8 / (1. / (1 + 10000. * float(nsb) * 85e-15))).reshape(1,-1),axis=0)
+    d = np.append(d,(d[0]*4/5.6/ (1. / (1 + 10000. * float(nsb) * 85e-15)) ).reshape(1,-1),axis=0)
+    #
+
+    print(d)
+
+    return d
+
+def load_care(file, nsb, offset = 0.):
+    h = np.genfromtxt(file).T
+
+    d = [h[0], h[0], h[0], h[1], h[2], h[0]*4/5.6/ (1. / (1 + 10000. * float(nsb) * 85e-15))]
+
+    print(d)
+
     return d
 
 def load_data(file):
@@ -124,7 +138,8 @@ def rate_calc(data,nsb=1.e9):
         # in data[4], put the binomial error on rate in Hz
         data = np.append(data,(np.sqrt(samples*p*q)/samples).reshape(1,data.shape[1]),axis=0)
     # in data[5], put the gain drop corrected NPE
-    data = np.append(data,(data[0]*4./5.8 / (1. / (1 + 10000. * float(nsb) * 85e-15))).reshape(1,data.shape[1]),axis=0)
+    data = np.append(data,(data[0]*4./5.6 / (1. / (1 + 10000. * float(nsb) * 85e-15))).reshape(1,data.shape[1]),axis=0)
+    #
     #sort0 = data[0,:].argsort()
     #for i,d in enumerate(data):
     #    data[i]=data[i,sort0]
@@ -136,15 +151,16 @@ def get_datasets(options):
     for i,legend in enumerate(options.legends):
         datasets.append([])
         for j, l in enumerate(legend):
-
-            print(l)
-            if l.count('MC')>0. or l.count('Toy')>0.:
+            if l.count('Toy')>0.:
                 data = load_mc(options.base_directory+options.dataset[i][j],options.variable[i][j], nsb=options.NSB[i][j],offset=options.offset[i][j])
+                datasets[-1].append(data )
+
+            elif l.count('CARE')>0.:
+
+                data = load_care(options.base_directory+options.dataset[i][j], nsb=options.NSB[i][j], offset=options.offset[i][j])
                 datasets[-1].append(data )
             else:
                 data = load_data(options.base_directory+options.dataset[i][j])
-                print(options.NSB,i)
-                print(options.NSB[i],j)
                 datasets[-1].append(rate_calc([data['threshold'],data[options.variable[i][j]],data['time']] , nsb=options.NSB[i][j]))
 
     return datasets

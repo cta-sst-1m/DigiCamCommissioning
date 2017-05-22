@@ -111,7 +111,7 @@ def display_results(options):
     plt.legend(loc='best')
 
     plt.figure()
-    plt.bar(time[~trigger_mask]/1E9, np.ones(time[~trigger_mask].shape), width=param[1]/4/1E9, align='center', label='Bellow threshold', color='r')
+    plt.bar(time[~trigger_mask]/1E9, np.ones(time[~trigger_mask].shape), width=param[1]/4/1E9, align='center', label='Below threshold', color='r')
     plt.xlabel('t [s]')
     plt.legend(loc='best')
 

@@ -36,7 +36,7 @@ class EventViewer():
         if self.mc:
 
             #self.event_iterator = ToyReader(filename=self.filename, id_list=[0], max_events=options.event_max)
-            self.event_iterator = mc_events_reader.hdf5_mc_event_source(url=self.filename, dc_level=0, ac_level=0, max_events=options.event_max)
+            self.event_iterator = mc_events_reader.hdf5_mc_event_source(url=self.filename, events_per_dc_level=100, events_per_ac_level=0, dc_start=5, ac_start=0, max_events=options.event_max)
         else:
 
             self.event_iterator = zfits.zfits_event_source(url=self.filename, max_events=options.event_max, expert_mode=expert_mode)

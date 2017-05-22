@@ -3,31 +3,36 @@ analysis_module : analyse_trigger
 
 # Logging
 verbose           : True
-mc                : True
+mc                : False
 log_file_basename : 20170508
 
 # Input files
-file_basename : nsb_full_camera_%d.hdf5
-file_basename : nsb_scan_camera+1cluster_%d.hdf5
-directory     : /home/alispach/data/digicam_commissioning/trigger/mc/
-scan_level : [0, 1, 2, 4, 3, 5]
-nsb_rate : [0, 3, 40, 80, 125, 660]
-file_list     :     [0]
+#file_basename : nsb_full_camera_%d.hdf5
+#file_basename : nsb_scan_camera+1cluster_%d.hdf5
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%d.run_325.fits.fz
+
+#directory     : /home/alispach/data/digicam_commissioning/trigger/mc/
+directory     : /home/alispach/data/digicam_commissioning/dc_calibration/nsb/
+
+scan_level : [0, 1, 2, 4, 3, 5, 6, 7, 8]
+#nsb_rate : [0, 38.74, 79.11, 120.25, 247, 646]
+nsb_rate : [0, 277, 288, 295, 306, 323, 333, 343, 353]
+file_list     :     [0, 1, 2, 3, 4, 5]
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
 # Output files
-output_directory  :  /home/alispach/data/digicam_commissioning/trigger/mc/
-histo_filename    : trigger_rate_camera_no_blinding.npz
+output_directory  :  /home/alispach/data/digicam_commissioning/dc_calibration/nsb/
+histo_filename    : trigger_rate_digicam_recomputed.npz
 cluster_histo_filename  : cluster.npz
 patch_histo_filename    : patch.npz
 max_cluster_histo_filename : max_cluster.npz
 
 ## Camera Configuration
-n_pixels          : 1296
+pixel_list : all
 window_width : 50 # bins
 evt_min : 0
-evt_max : 60
-events_per_level : 10
+evt_max : 1000
+events_per_level : 1000
 
 ## Trigger parameters
 #baseline_window : [0, 20]

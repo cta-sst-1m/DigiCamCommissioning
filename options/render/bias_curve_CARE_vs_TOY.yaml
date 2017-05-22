@@ -1,0 +1,15 @@
+render_module : bias_curve
+title    :  ['Toy vs CARE', 'Toy vs CARE', 'Toy vs CARE', 'Toy vs CARE']
+legends  :  [['CARE dark', 'Toy dark'],['CARE 80 MHz', 'Toy 80 MHz'],['CARE 125 MHz', 'Toy 125 MHz'],['CARE 660 MHz', 'Toy 660 MHz']]
+xaxis    :  ['ADC','ADC', 'ADC', 'ADC']
+dataset  :  [['care_dark.txt', 'trigger_rate_camera_full_camera.npz'],['care_80MHz.txt', 'trigger_rate_camera_full_camera.npz'], ['care_125MHz.txt', 'trigger_rate_camera_full_camera.npz'], ['care_660MHz.txt', 'trigger_rate_camera_full_camera.npz']]
+variable :  [[None, 1],[None, 3],[None, 4],[None, 5]]
+offset   :  [[0, 0],[0, 0],[0, 0],[0, 0]]
+NSB      :  [[3e6,3e6],[80e6,80e6],[125e6,125e6],[660e6,660e6]]
+style    :  [['-', ':'],['-', ':'],['-', ':'],['-', ':']]
+color    :  [['#0039e6','#e60000'],['#0039e6','#e60000'],['#0039e6','#e60000'],['#0039e6','#e60000']]
+x_lim    :  [[0,70],[0,70],[0,70],[0,70]]
+y_lim    :  [[1e-1,1e7],[1e-1,1e7],[1e-1,1e7],[1e-1,1e7]]
+base_directory : 'data/'
+
+
