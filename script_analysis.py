@@ -22,10 +22,13 @@ if __name__ == '__main__':
 
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
-                      help="full path of the yaml configuration function",
+                      help="full path of the yaml configuration",
                       default='options/module.yaml')
 
     # Other options allows to overwrite the yaml_config interactively
+    parser.add_option("-i", "--yaml_data_config", dest="yaml_data_config",
+                      help="full path of the yaml data configuration",
+                      default='options/cts_victor/0_datasets.yaml')
 
     # Output level
     parser.add_option("-v", "--verbose",
@@ -54,11 +57,22 @@ if __name__ == '__main__':
 
     # Load the YAML configuration
     options_yaml = {}
+    options_data_yaml = {}
+
+    with open(options.yaml_data_config) as f:
+        options_data_yaml.update(load(f))
+
     with open(options.yaml_config) as f:
         options_yaml.update(load(f))
 
 
     # Update with interactive options
+    for key,val in options_data_yaml.items():
+        if not (key in options.__dict__.keys()): # and (options.__dict__[key])):
+            options.__dict__[key]=val
+        else:
+            options_data_yaml[key]=options.__dict__[key]
+
     for key,val in options_yaml.items():
         if not (key in options.__dict__.keys()): # and (options.__dict__[key])):
             options.__dict__[key]=val
@@ -79,44 +93,34 @@ if __name__ == '__main__':
     cts_path = '/data/software/CTS/'
     #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
 
+    # Configure the CTS angle
     if hasattr(options,'angle_cts'):
-
         options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
 
-    elif not hasattr(options, 'pixel_list'):
-
-        if not hasattr(options, 'n_pixels'):
-
-            options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
-                              cts_path + 'config/camera_config.cfg', angle=0, connected=True)
-            options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
-
+    # Update the pixel list from the CTS with 0 angle otherwise
+    elif not hasattr(options, 'pixel_list') and not hasattr(options, 'n_pixels'):
+        options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
+                          cts_path + 'config/camera_config.cfg', angle=0, connected=True)
+        options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
+    # TODO what is that?
     else:
         options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
                           cts_path + 'config/camera_config.cfg', angle=0, connected=True)
-
         if options.pixel_list == 'all':
             options.cts = options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg', cts_path + 'config/camera_config.cfg', angle=0, connected=True)
             options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
-
         elif hasattr(options, 'n_pixels'):
-
             options.pixel_list = np.arange(0, options.n_pixels, 1)
-
         else:
-
             options.pixel_list = options.pixel_list
 
-
     if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
-        # TODO add usage of digicam and cts geometry to define the list
+        # TODO add usage of digicam and cts geometry to define the list Isn't this a doublon???
         options.pixel_list = np.arange(0, options.n_pixels, 1)
 
-
-
+    # TODO is this still necessary??? what is the use?
     if hasattr(options, 'n_clusters'):
-
         if options.n_clusters==1:
 
             camera = Camera(options.cts_directory + 'config/camera_config_clusters.cfg')
@@ -137,15 +141,11 @@ if __name__ == '__main__':
 
             for pixel in camera.Patches[patch_index].pixels:
                 options.pixel_list.append(pixel.ID)
-
-
-
-
         else:
 
             exit()
 
-
+    # TODO What is this config part? if it is linked to an analysis only then put it in the analysis script
     if hasattr(options, 'threshold'):
 
         if hasattr(options, 'threshold_min'):
@@ -162,6 +162,9 @@ if __name__ == '__main__':
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
     log.info('\t\t-|> Will run %s with the following configuration:'%options.analysis_module)
+    for key,val in options_data_yaml.items():
+        log.info('\t\t |--|> %s : \t %s'%(key,val))
+    log.info('-|')
     for key,val in options_yaml.items():
         log.info('\t\t |--|> %s : \t %s'%(key,val))
     log.info('-|')
@@ -184,7 +187,6 @@ if __name__ == '__main__':
         plt.ion()
         # Call the histogram creation function
         log.info('-|> Display the analysis results')
-
         analysis_module.display_results(options)
 
     if options.save:
@@ -193,7 +195,6 @@ if __name__ == '__main__':
         if hasattr(analysis_module,'save'):
             # Call the histogram creation function
             log.info('-|> Save the analysis results')
-
             analysis_module.save(options)
         else:
             log.warning('-|> Save function does not exist')

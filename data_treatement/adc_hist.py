@@ -97,10 +97,11 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     # Fill the necessary histo with batch
                     if h_type == 'ADC':
                         hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
-                    if h_type == 'SPE':
+                    elif h_type == 'SPE':
                         hist.fill_with_batch(
                             spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
-
+                    else :
+                        pass
                     # Reset the batch
                     batch = batch_reset(n_batch, data.shape, options)
                     # Increment the batch count

@@ -11,3 +11,7 @@ output_directory  : /data/datasets/CTA/DATA/20170508/
 
 # Camera Configuration
 angle_cts         : 120.
+
+# Base definition for the signal extraction
+window_width      : 7
+charge_extraction : integration_saturation
