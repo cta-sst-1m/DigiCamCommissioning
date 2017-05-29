@@ -5,9 +5,8 @@
 # internal modules
 import logging
 import sys
-
+import pylatex as pl
 import matplotlib.pyplot as plt
-import matplotlib.colors as col
 import numpy as np
 from scipy import stats
 
@@ -15,7 +14,7 @@ from data_treatement import adc_hist
 from utils import histogram
 
 
-__all__ = ["create_histo", "perform_analysis", "display_results"]
+__all__ = ["create_histo", "perform_analysis", "display_results","create_report"]
 
 
 def create_histo(options):
@@ -141,6 +140,7 @@ def display_results(options):
     return
 
 
+
 def create_report(options):
     """
     Display the analysis results
@@ -149,5 +149,119 @@ def create_report(options):
 
     :return:
     """
+    # Load the histogram
+    adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+
+    geometry_options = {
+        "head": "1.in",
+        "margin": "1.in",
+        "bottom": "1.in"
+    }
+
+    doc = pl.Document('report',geometry_options=geometry_options)
+
+    doc.preamble.append(pl.Command('title', 'Pixel baseline parameters analysis'))
+    doc.preamble.append(pl.Command('author', 'DigicamCommissioning'))
+    doc.preamble.append(pl.Command('date', pl.NoEscape(r'\today')))
+
+    doc.append(pl.NoEscape(r'\maketitle'))
+
+    # SUMMARY
+    with doc.create(pl.Section('Summary')):
+        # PIXEL LIST
+        with doc.create(pl.Subsection('Valid Pixels')):
+            pix_list = ''
+            for i,p in enumerate(options.pixel_list):
+                pix_list+='%d, '%p
+            doc.append(pix_list)
+        # MISSING PIXELS
+        with doc.create(pl.Subsection('Missing Pixels')):
+            doc.append('Pixel that appeared not responding in the analysis:')
+            with doc.create(pl.Itemize()) as itemize:
+                for p in np.where(np.isnan(adcs.fit_result[..., 1]))[0]:
+                    itemize.add_item('Pixel %d, corresponding to AC LED %d and DC LED %d'%
+                               (options.pixel_list[p],options.cts.pixel_to_led['AC'][p],options.cts.pixel_to_led['DC'][p]))
+
+        # SUMMARY PLOTS
+        with doc.create(pl.Subsection('Mean and standard deviation over %d sample'%options.baseline_per_event_limit)):
+            pixel_idx = 0
+
+
+            with doc.create(pl.Figure(position='!h')) as plot:
+                plt.subplots(1,1,figsize=(10,8))
+                plt.hist(adcs.fit_result[..., 0][~np.isnan(adcs.fit_result[..., 1])], bins=30, label='<Baseline mean>')
+                plt.xlabel('$mode(<BL>_{%d})$' % options.baseline_per_event_limit)
+                plot.add_plot(width='7cm')
+
+                plt.subplots(1,1,figsize=(10,8))
+                plt.hist(adcs.fit_result[..., 1][~np.isnan(adcs.fit_result[..., 1])], bins=30,
+                         label='<Baseline Variation>')
+                plt.xlabel('$\sigma(<BL>_{%d})$' % options.baseline_per_event_limit)
+                plot.add_plot(width='7cm')
+
+                plot.add_caption('Mode over %d events of the baseline average, computed over %d samples, for all pixels (left)'%
+                                 (options.max_event,options.baseline_per_event_limit)+
+                                 'Mode over %d events of the baseline std deviation, computed over %d samples, for all pixels (right)'%
+                                 (options.max_event,options.baseline_per_event_limit))
+                plt.close()
+            with doc.create(pl.Figure(position='!h')) as plot:
+                plt.subplots(1,1,figsize=(10,8))
+                plt.hist(adcs.fit_result[..., 2][~np.isnan(adcs.fit_result[..., 1])], bins=30,
+                         label='\sigma(Baseline mean)')
+                plt.xlabel('$mode(\sigma(BL)_{%d})$' % options.baseline_per_event_limit)
+                plot.add_plot(width='7cm')
+
+                plt.subplots(1,1,figsize=(10,8))
+                plt.hist(adcs.fit_result[..., 3][~np.isnan(adcs.fit_result[..., 1])], bins=30,
+                         label='\sigma(Baseline Variation)')
+                plt.xlabel('$\sigma(\sigma(BL)_{%d})$' % options.baseline_per_event_limit)
+                plot.add_plot(width='7cm')
+                plot.add_caption('Std deviation over %d events of the baseline average, computed over %d samples, for all pixels'%
+                                 (options.max_event,options.baseline_per_event_limit)+
+                                 'Std deviation over %d events of the baseline std deviation , computed over %d samples, for all pixels'%
+                                 (options.max_event,options.baseline_per_event_limit))
+                plt.close()
+
+
+
+    with doc.create(pl.Section('Results per pixel')):
+        for i,p in enumerate(options.pixel_list):
+            if i in np.where(np.isnan(adcs.fit_result[..., 1]))[0]: continue
+            means = adcs.data[0]
+            rmses = adcs.data[1]
+            pixel_idx = i
+            with doc.create(pl.Figure(position='!h')) as plot:
+                plt.subplots(1, 1, figsize=(10, 8))
+                plt.hist(
+                    (rmses[pixel_idx].astype(float) - adcs.fit_result[pixel_idx, 2]) / adcs.fit_result[pixel_idx, 3],
+                    bins=200)
+                plt.plot([0.5, 0.5], [0., 500], color='r', linewidth=2.)
+                plt.xlabel('$ \\frac{\sigma(BL)_{%d}-mode(\sigma(BL)_{%d})}{\sigma(\sigma(BL)_{%d})}$' %
+                           (options.baseline_per_event_limit, options.baseline_per_event_limit,
+                            options.baseline_per_event_limit))
+                plt.xlim(-3.,10.)
+                plot.add_plot(width='7cm')
+                plt.close()
+                plt.subplots(1, 1, figsize=(10, 8))
+                plt.hist2d(
+                    (means[pixel_idx].astype(float) - adcs.fit_result[pixel_idx, 0]) / adcs.fit_result[pixel_idx, 1],
+                    (rmses[pixel_idx].astype(float) - adcs.fit_result[pixel_idx, 2]) / adcs.fit_result[pixel_idx, 3],
+                    bins=50)
+
+                plt.xlabel('$ \\frac{<BL>_{%d}-mode(<BL>_{%d})}{\sigma(<BL>_{%d})}$' %
+                           (options.baseline_per_event_limit, options.baseline_per_event_limit,
+                            options.baseline_per_event_limit))
+                plt.ylabel('$ \\frac{\sigma(BL)_{%d}-mode(\sigma(BL)_{%d})}{\sigma(\sigma(BL)_{%d})}$' %
+                           (options.baseline_per_event_limit, options.baseline_per_event_limit,
+                            options.baseline_per_event_limit))
+                plot.add_plot(width='7cm')
+                plot.add_caption(
+                    pl.NoEscape('\\textbf{(Pixel %d)} Normalised std deviation of baseline evaluated over %d samples (left)' %
+                    (p,options.baseline_per_event_limit)+'Normalised std deviation vs mode of baseline evaluated over %d samples (right)'  %
+                    (options.baseline_per_event_limit)))
+                plt.close()
+
+    doc.generate_pdf(options.output_directory + '/reports/baseline_parameters', clean_tex=False)
+
 
     return

@@ -4,7 +4,7 @@
 import logging
 import sys
 from optparse import OptionParser
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 from cts_core.camera import Camera
 from cts_core.cameratestsetup import CTS
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # Other options allows to overwrite the yaml_config interactively
     parser.add_option("-i", "--yaml_data_config", dest="yaml_data_config",
                       help="full path of the yaml data configuration",
-                      default='options/cts_victor/0_datasets.yaml')
+                      default='options/cts_victor/0_generic_config.yaml')
 
     # Output level
     parser.add_option("-v", "--verbose",
@@ -45,12 +45,16 @@ if __name__ == '__main__':
     parser.add_option("-d", "--display_results", dest="display_results", action="store_true",
                       help="display the result of the analysis")
 
+    parser.add_option("-s", "--save_to_csv", dest="save", action="store_true",
+                      help="create a csv file for the result of the analysis")
+
+    parser.add_option("-r", "--create_report", dest="create_report", action="store_true",
+                      help="create a PDF report for the analysis")
+
     # Logfile basename
     parser.add_option("-l", "--log_file_basename", dest="log_file_basename",
                       help="string to appear in the log file name")
 
-    parser.add_option("-s", "--save_to_csv", dest="save", action="store_true",
-                      help="create a csv file for the result of the analysis")
 
     # Parse the options
     (options, args) = parser.parse_args()
@@ -184,6 +188,7 @@ if __name__ == '__main__':
     # Display the results of the analysis
     if options.display_results:
         # make the plots non blocking
+        import matplotlib.pyplot as plt
         plt.ion()
         # Call the histogram creation function
         log.info('-|> Display the analysis results')
@@ -191,6 +196,7 @@ if __name__ == '__main__':
 
     if options.save:
         # make the plots non blocking
+        import matplotlib.pyplot as plt
         plt.ion()
         if hasattr(analysis_module,'save'):
             # Call the histogram creation function
@@ -198,3 +204,8 @@ if __name__ == '__main__':
             analysis_module.save(options)
         else:
             log.warning('-|> Save function does not exist')
+
+    if options.create_report:
+        # create a report for the analysis
+        matplotlib.use('Agg')
+        analysis_module.create_report(options)
