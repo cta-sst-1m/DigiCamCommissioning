@@ -1,0 +1,13 @@
+# Logging
+verbose           : False
+log_file_basename : 20170508
+
+# Input files
+mc            :     False
+directory     :     /data/datasets/CTA/DATA/20170508/
+
+# Output file
+output_directory  : /data/datasets/CTA/DATA/20170508/
+
+# Camera Configuration
+angle_cts         : 120.

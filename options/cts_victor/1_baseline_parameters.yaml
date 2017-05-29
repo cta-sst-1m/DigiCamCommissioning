@@ -1,0 +1,21 @@
+# Analysis module
+analysis_module   : analyse_baseline_parameters
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Input files
+file_basename :     dark_run/CameraDigicam@localhost.localdomain_0_000.%s.run_307.fits.fz
+file_list     :     [0]
+
+# Output file
+output_directory  : /data/datasets/CTA/DATA/20170508/
+histo_filename    : baseline_parameters.npz
+
+# Event processing
+baseline_per_event_limit : 50
+min_event         : 0
+max_event         : 9000
+window_width      : 7

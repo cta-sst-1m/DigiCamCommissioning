@@ -1,0 +1,127 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Baseline parameters extraction &#8212; DigicamCommissioning 2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Baseline parameters extraction" href="dark_parameter_evaluation.html" />
+    <link rel="prev" title="DigicamCommissioning’s documentation!" href="../index.html" />
+    <link href="../_static/style.css" rel="stylesheet" type="text/css">
+
+  </head>
+  <body>
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>DigicamCommissioning 2 documentation</span></a></h1>
+        <h2 class="heading"><span>Baseline parameters extraction</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="../index.html">DigicamCommissioning’s documentation!</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="dark_parameter_evaluation.html">Baseline parameters extraction</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="baseline-parameters-extraction">
+<span id="protocols"></span><h1>Baseline parameters extraction<a class="headerlink" href="#baseline-parameters-extraction" title="Permalink to this headline">¶</a></h1>
+<p>The aim of this analysis is to give for a given pixel, the baseline parameters
+such that it can be decided in subsequent analysis whether or not the baseline
+computed by averaging the first N samples of an event can be used to subtract the
+baseline in this event or if it contained too much fluctuation. The condition is</p>
+<div class="math">
+\[\frac{\sigma(BL_{N})_{i}-&lt;\sigma(BL_{N})&gt;}{\sigma(\sigma(BL_{N}))}&lt;0.5\]</div>
+<div class="section" id="expected-input-data">
+<h2>Expected input data<a class="headerlink" href="#expected-input-data" title="Permalink to this headline">¶</a></h2>
+<p>Any runs containing no signal between sample 0 and sample N</p>
+</div>
+<div class="section" id="output-data">
+<h2>Output data<a class="headerlink" href="#output-data" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>histogram.Histogram with data size (2,n_pixels,n_events):</dt>
+<dd><ul class="first last simple">
+<li>[0] correspond to the mean of the baseline over N samples</li>
+<li>[1] correspond to the std deviation of the baseline over N samples</li>
+</ul>
+</dd>
+<dt><code class="docutils literal"><span class="pre">fit_result</span></code> is of size (n_pixels,4):</dt>
+<dd><ul class="first last simple">
+<li>[0] contains the modes of data[0]</li>
+<li>[1] contains the stddev of data[0]</li>
+<li>[2] contains the modes of data[1]</li>
+<li>[3] contains the stddev of data[1]</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="step-0-configuration">
+<h2>Step 0: Configuration<a class="headerlink" href="#step-0-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Non standard configurations which are required to run this analysis:</p>
+<blockquote>
+<div><code class="docutils literal"><span class="pre">baseline_per_event_limit</span></code> : integer that specifies the number of samples N to take into account to compute the baseline</div></blockquote>
+</div>
+<div class="section" id="step-1-histogram-building">
+<h2>Step 1: Histogram building<a class="headerlink" href="#step-1-histogram-building" title="Permalink to this headline">¶</a></h2>
+<p>The histogram building phase uses the module data_treatement.adc_hist
+with <code class="docutils literal"><span class="pre">h_type='MEANRMS'</span></code></p>
+</div>
+<div class="section" id="step-2-analysis">
+<h2>Step 2: Analysis<a class="headerlink" href="#step-2-analysis" title="Permalink to this headline">¶</a></h2>
+<p>The analysis computes the modes and standard deviation of the baseline mean and
+standard deviation over N samples of all the events</p>
+</div>
+<div class="section" id="step-3-display">
+<h2>Step 3: Display<a class="headerlink" href="#step-3-display" title="Permalink to this headline">¶</a></h2>
+<img alt="../_images/BL_parameter_0.png" src="../_images/BL_parameter_0.png" />
+<img alt="../_images/BL_parameter.png" src="../_images/BL_parameter.png" />
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="../index.html">DigicamCommissioning’s documentation!</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="dark_parameter_evaluation.html">Baseline parameters extraction</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Victor Coco, Cyril Alispach.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.1.
+    </div>
+  </body>
+</html>
