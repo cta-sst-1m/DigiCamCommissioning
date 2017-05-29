@@ -38,10 +38,12 @@ def create_histo(options):
                                bin_width=options.adcs_binwidth, data_shape=(options.n_pixels,),
                                label='Pixel SPE',xlabel='Pixel ADC',ylabel = 'Count / ADC')
 
+
     hv_off_fit = histogram.Histogram(filename=options.output_directory + options.hv_off_histo_filename,fit_only=True)
 
+
     # Get the adcs
-    adc_hist.run(adcs, options, 'SPE',prev_fit_result=hv_off_fit.fit_result )
+    adc_hist.run(adcs, options, 'SPE', prev_fit_result=hv_off_fit.fit_result)
 
     # Save the histogram
     adcs.save(options.output_directory + options.histo_filename)
@@ -70,6 +72,7 @@ def perform_analysis(options):
     # load previous fit result
     hv_off_fit = histogram.Histogram(filename=options.output_directory + options.hv_off_histo_filename,fit_only=True)
 
+
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' +  __name__)
     log.warning('\t-|> Fit the SPE distribution')
 
@@ -77,7 +80,7 @@ def perform_analysis(options):
     p0_fun = lambda *args, **kwargs : fit_full_mpe.p0_func(*args, n_peaks = 6,**kwargs )
     bound_fun = lambda *args, **kwargs : fit_full_mpe.bounds_func(*args, n_peaks = 6,**kwargs )
     adcs.fit(fit_full_mpe.fit_func,p0_fun , fit_full_mpe.slice_func,
-                bound_fun, config=hv_off_fit.fit_result, labels_func=fit_full_mpe.labels_func, force_quiet=True)
+                bound_fun, config=hv_off_fit.fit_result, labels_func=fit_full_mpe.label_func, force_quiet=True)
 
     # get the bad fits
 
@@ -93,7 +96,7 @@ def perform_analysis(options):
                                                                                        **kwargs)
                 adcs.fit(fit_full_mpe.fit_func, reduced_p0, fit_full_mpe.slice_func,
                               reduced_bounds, config= hv_off_fit.fit_result,
-                         labels_func=fit_full_mpe.labels_func, limited_indices=(pix,),force_quiet=True)
+                         labels_func=fit_full_mpe.label_func, limited_indices=(pix,),force_quiet=True)
                 i-=1
 
     for pix,pix_fit_result in enumerate(adcs.fit_result):
@@ -104,6 +107,9 @@ def perform_analysis(options):
     adcs.save(options.output_directory + options.histo_filename)
 
     # Delete the histograms
+
+    print(hv_off_fit.fit_result[~np.isnan(hv_off_fit.fit_result[1])])
+
     del adcs,hv_off_fit
 
 
@@ -122,16 +128,18 @@ def display_results(options):
     # Define Geometry
     geom = geometry.generate_geometry_0()
 
+    print(adcs.fit_result)
+
     # Perform some plots
-    display.display_fit_result(adcs, geom, index_var=1, limits=[4., 6.], bin_width=0.05)
-    display.display_fit_result(adcs,index_var=2, limits=[0., 2.], bin_width=0.05)
-    display.display_fit_result(adcs, index_var=3, limits=[0., 2.], bin_width=0.05)
+    #display.display_fit_result(adcs, options=options)#, geom, index=1, limits=[4., 6.])#, bin_width=0.05)
+    #display.display_fit_result(adcs, options=options) #, index=2, limits=[0., 2.])#, bin_width=0.05)
+    #display.display_fit_result(adcs, options=options)#, index=3, limits=[0., 2.])#, bin_width=0.05)
 
     #display.display_fit_result(adcs, geom , index_var=1, limits=[4., 6.], bin_width=0.05)
     #display.display_fit_result(adcs, geom, index_var=2, limits=[0., 2.], bin_width=0.05)
     #display.display_fit_result(adcs, geom, index_var=3, limits=[0., 2.], bin_width=0.05)
 
-    display.display_hist(adcs,  geom, index_default=(700,),param_to_display=1,limits = [1950.,2070.],limitsCam = [4.,6.],draw_fit = True)
+    display.display_hist(adcs, options=options, draw_fit=True) #  geom, index_default=(700,),param_to_display=1,limits = [1950.,2070.],limitsCam = [4.,6.],draw_fit = True)
 
     input('press button to quit')
 

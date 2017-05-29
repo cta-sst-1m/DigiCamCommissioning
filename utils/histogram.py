@@ -435,9 +435,10 @@ class Histogram:
             except Exception as inst:
                 self.logger.error('Could not fit index %s'%idx[-1])
                 #self.logger.error(inst)
+                print('\n')
                 print(inst)
                 print('p0:', reduced_p0)
-                print()
+                print('bounds:', reduced_bounds)
                 print('bound min:', reduced_bounds[0])
                 print('bound max:', reduced_bounds[1])
                 fit_result = (np.ones((len(reduced_p0), 2)) * np.nan)

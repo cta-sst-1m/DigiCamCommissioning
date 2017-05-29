@@ -67,7 +67,7 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
         axis.add_artist(anchored_text)
 
 
-    axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %options.scan_level[level])
+    axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %level)
     # Beautify
     axis.set_xlabel(hist.fit_result_label[index])
     axis.set_ylabel('$\mathrm{N_{pixel}/%.2f}$' % bin_width)
@@ -346,7 +346,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     return h_to_return
 
 
-def display_fit_result(hist, geom = None, limits=[0,4095], display_fit=False):
+def display_fit_result(hist, options, geom = None, limits=[0,4095], display_fit=False):
     """
     A function to display a vaiable both as an histogram and as a camera view
 

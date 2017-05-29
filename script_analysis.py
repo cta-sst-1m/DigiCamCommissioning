@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
             exit()
 
-    if not hasattr(options, 'threshold'):
+    if not hasattr(options, 'threshold') and hasattr(options, 'threshold_min') and hasattr(options, 'threshold_max'):
 
         options.threshold = np.arange(options.threshold_min, options.threshold_max, options.threshold_step)
 
