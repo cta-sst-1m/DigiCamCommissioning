@@ -11,7 +11,6 @@ output_directory  : /data/datasets/CTA/DATA/20170508/
 
 # Camera Configuration
 angle_cts         : 120.
-pixel_list : [700, 707]
 
 
 # Base definition for the signal extraction
