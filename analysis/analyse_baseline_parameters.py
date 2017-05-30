@@ -235,9 +235,13 @@ def create_report(options):
             means = adcs.data[0]
             rmses = adcs.data[1]
             pixel_idx = i
-            if i%3 == 0 and i!=0:
-                doc.append(pl.NoEscape(r'\clearpage'))
             with doc.create(pl.Figure(position='h')) as plot:
+                plt.subplots(1, 1, figsize=(10, 8))
+                plt.hist(
+                    (means[pixel_idx].astype(float)),bins=200)
+                plt.xlabel('$<BL>_{%d}$' %(options.baseline_per_event_limit))
+                plt.savefig(options.output_directory + '/reports/plots/pixel_%d_full1d.pdf'%p)
+                plt.close()
                 plt.subplots(1, 1, figsize=(10, 8))
                 plt.hist(
                     (rmses[pixel_idx].astype(float) - adcs.fit_result[pixel_idx, 2]) / adcs.fit_result[pixel_idx, 3],
@@ -267,6 +271,11 @@ def create_report(options):
                 with doc.create(pl.SubFigure(
                         position='b',
                         width=pl.NoEscape(r'0.45\linewidth'))) as left_fig:
+                    left_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_full1d.pdf' % p, width='7cm')
+                    left_fig.add_caption('Average baselines')
+                with doc.create(pl.SubFigure(
+                        position='b',
+                        width=pl.NoEscape(r'0.45\linewidth'))) as left_fig:
                     left_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_1d.pdf' % p, width='7cm')
                     left_fig.add_caption('Normalised std deviation of the baseline')
                 with doc.create(pl.SubFigure(
@@ -279,6 +288,8 @@ def create_report(options):
                         '\\textbf{(Pixel %d)} Baseline is evaluated over %d samples' %
                         (p,options.baseline_per_event_limit)))
 
+            if i%2 == 0:
+                doc.append(pl.NoEscape(r'\clearpage'))
     doc.generate_pdf(options.output_directory + '/reports/baseline_parameters', clean_tex=False)
 
 
