@@ -84,7 +84,7 @@ def perform_analysis(options):
         # Delete the histograms
         del adcs
 
-    elif  options.dark_analysis == 'analytic':
+    elif options.dark_analysis == 'analytic':
 
         log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
         log.info('Perform an analytic extraction of mu_XT ( ==> baseline and sigmae for full mpe )')
