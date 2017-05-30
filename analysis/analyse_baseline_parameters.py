@@ -153,9 +153,9 @@ def create_report(options):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     geometry_options = {
-        "head": "0.9in",
+        "head": "0.8in",
         "margin": "1.in",
-        "bottom": "0.9in"
+        "bottom": "0.8in"
     }
 
     doc = pl.Document('report',geometry_options=geometry_options)
@@ -235,7 +235,7 @@ def create_report(options):
             means = adcs.data[0]
             rmses = adcs.data[1]
             pixel_idx = i
-            if i%3 == 0:
+            if i%3 == 0 and i!=0:
                 doc.append(pl.NoEscape(r'\clearpage'))
             with doc.create(pl.Figure(position='h')) as plot:
                 plt.subplots(1, 1, figsize=(10, 8))
