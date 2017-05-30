@@ -54,18 +54,13 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     if hasattr(options, 'baseline_per_event_limit') and not h_type == 'MEANRMS':
         params = Histogram(filename=options.output_directory + options.baseline_param_data, fit_only=True)
         # Initialise the baseline holder
-        baseline = np.zeros((options.pixel_list,), dtype = float)
+        baseline = np.zeros((len(options.pixel_list),), dtype = float)
 
     # Start the logging
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
 
     # Initialise the event counter
-    # TODO check the options of the event counter and build-in batch
-    event_counter = EventCounter(options.min_event, options.max_event, log)
-    setattr(event_counter,'batch',None)
-    setattr(event_counter,'batch_num',0)
-    setattr(event_counter,'n_batch', options.n_evt_per_batch if hasattr(options,'n_evt_per_batch') else -1)
-
+    event_counter = EventCounter(options.min_event, options.max_event, log, batch_size=options.n_evt_per_batch if hasattr(options,'n_evt_per_batch') else -1)
 
     # Loop over the events *********************************************************************************************
 
@@ -99,25 +94,23 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
 
                 # Batch data treatement ******************************
 
-                if counter.n_batch > 0 and counter.event_id % counter.n_batch == 0:
-                    if counter.event_id == 0:
-                        # TODO Check if it should not be 1
-                        batch = batch_reset(counter.n_batch, data.shape, options)
+                # fisrt batch creation
+                if counter.event_id == 0:
+                    batch = batch_reset(counter.batch_size, data.shape, options)
+
+                if counter.fill_batch:
+                    log.debug('Treating the batch #%d of %d events' % (counter.batch_num, counter.n_batch))
+                    # Fill the necessary histo with batch
+                    if h_type == 'ADC':
+                        hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
+                    elif h_type == 'SPE':
+                        hist.fill_with_batch(
+                            spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
                     else:
-                        log.debug('Treating the batch #%d of %d events' % (counter.batch_num, counter.n_batch))
-                        # Fill the necessary histo with batch
-                        if h_type == 'ADC':
-                            hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
-                        elif h_type == 'SPE':
-                            hist.fill_with_batch(
-                                spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
-                        else:
-                            pass
-                        # Reset the batch
-                        batch = batch_reset(counter.n_batch, data.shape, options)
-                        # Increment the batch count
-                        counter.batch_num += 1
-                        log.debug('Reading  the batch #%d of %d events' % (counter.batch_num, counter.n_batch))
+                        pass
+                    # Reset the batch
+                    batch = batch_reset(counter.n_batch, data.shape, options)
+                    log.debug('Reading  the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
 
                 # Data treatement ************************************
 
@@ -136,7 +129,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     hist.fill_with_batch(data)
                 else:
                     # Store in batch
-                    batch[:, counter.event_id % n_batch, :] = data
+                    batch[:, counter.event_id % counter.batch_size, :] = data
 
 
     return

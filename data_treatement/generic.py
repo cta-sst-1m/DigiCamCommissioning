@@ -36,10 +36,10 @@ def subtract_baseline(data,event_id,options,params,baseline=None):
             data = data - baseline[:, None]
     # Treat the case where the baseline has been specified
 
-    if baseline is not None:
-        return (data - baseline[:, None])[..., options.baseline_per_event_limit:]
-    else :
+    if baseline is None:
         return data
+    else :
+        return (data - baseline[:, None])[..., options.baseline_per_event_limit:]
 
 
 # Define the integration function
@@ -52,8 +52,12 @@ def integrate(data,options):
     :return:
     """
     if options.window_width == 1 : return data
-    h = ndimage.convolve1d(data,np.ones(options.window_width, dtype=int),axis=-1,mode='constant',cval=-1e8)
+    h = ndimage.convolve1d(data,np.ones(options.window_width, dtype=int),axis=-1,mode='constant',cval=-1.e8)
     print(options.window_width)
+    print(h.shape)
+    print(h[0])
+    print(h[1])
+    print(np.sum(h,axis=-2))
     print(h[h>1e-6].shape[0]/data.shape[0])
     print(h[h>1e-6].reshape(data.shape[0],-1))
 

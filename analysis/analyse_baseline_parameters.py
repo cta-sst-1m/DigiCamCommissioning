@@ -236,6 +236,8 @@ def create_report(options):
             means = adcs.data[0]
             rmses = adcs.data[1]
             pixel_idx = i
+            if i%10 == 0:
+                doc.append(pl.NoEscape(r'\clearpage'))
             with doc.create(pl.Figure(position='h')) as plot:
                 plt.subplots(1, 1, figsize=(10, 8))
                 plt.hist(
