@@ -5,7 +5,7 @@ from optparse import OptionParser
 from  yaml import load,dump
 import matplotlib.pyplot as plt
 import logging,sys
-from utils.geometry import generate_geometry_0, generate_geometry
+from utils.geometry import generate_geometry
 #internal modules
 from utils import logger
 import numpy as np
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     __name__ = options.analysis_module
     # Start the loggers
-    logger.initialise_logger( options )
+    logger.initialise_logger( options, options.analysis_module )
     # load the analysis module
     print('--------------------------',options.analysis_module)
     analysis_module = __import__('analysis.%s'%options.analysis_module,
@@ -75,22 +75,51 @@ if __name__ == '__main__':
                                  fromlist=[None],
                                  level=0)
 
+    # cts_path = '/data/software/CTS/'
+    cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
 
     if hasattr(options,'angle_cts'):
-        #cts_path = '/data/software/CTS/'
-        cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
+
         options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
         options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
+
+    elif not hasattr(options, 'pixel_list'):
+
+        if not hasattr(options, 'n_pixels'):
+
+            options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
+                              cts_path + 'config/camera_config.cfg', angle=0, connected=True)
+            options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
+
+    else:
+        options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
+                          cts_path + 'config/camera_config.cfg', angle=0, connected=True)
+
+        if options.pixel_list == 'all':
+
+            options.cts = options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg', cts_path + 'config/camera_config.cfg', angle=0, connected=True)
+            options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
+
+        elif hasattr(options, 'n_pixels'):
+
+            options.pixel_list = np.arange(0, options.n_pixels, 1)
+
+        else:
+
+            options.pixel_list = options.pixel_list
+
 
     if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
         # TODO add usage of digicam and cts geometry to define the list
         options.pixel_list = np.arange(0, options.n_pixels, 1)
 
+
+
     if hasattr(options, 'n_clusters'):
 
         if options.n_clusters==1:
 
-            camera = Camera(options.cts_directory + 'config/camera_config.cfg')
+            camera = Camera(options.cts_directory + 'config/camera_config_clusters.cfg')
             patches_in_cluster = np.load(options.cts_directory + 'config/cluster.p')['patches_in_cluster']
 
             patch_index = 300
@@ -116,9 +145,13 @@ if __name__ == '__main__':
 
             exit()
 
-    if not hasattr(options, 'threshold') and hasattr(options, 'threshold_min') and hasattr(options, 'threshold_max'):
 
-        options.threshold = np.arange(options.threshold_min, options.threshold_max, options.threshold_step)
+    if hasattr(options, 'clusters'):
+
+        if options.clusters=='all' or options.clusters is None:
+
+            options.clusters = [i for i in range(432)]
+
 
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)

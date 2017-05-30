@@ -4,18 +4,21 @@ import io
 
 __all__ = ['initialise_logger']
 
-def initialise_logger(options):
+def initialise_logger(options,module):
     """
     Setting up the main logger
 
     :param options:
     :return:
     """
+
+    print(' ')
+
     # define base logger
     logger = logging.getLogger(sys.modules['__main__'].__name__)
     logger.setLevel(logging.INFO if options.verbose else logging.DEBUG)
     # define file handler and stream handler
-    fh = logging.FileHandler('%s_%s.log' % (options.analysis_module,options.log_file_basename))
+    fh = logging.FileHandler('%s_%s.log' % (module,options.log_file_basename))
     fh.setLevel(logging.INFO if options.verbose else logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(level= logging.INFO if options.verbose else logging.DEBUG)

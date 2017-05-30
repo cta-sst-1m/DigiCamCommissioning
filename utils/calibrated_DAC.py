@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils.histogram import Histogram
 
-f = open('/data/datasets/CTA/DATA/20170322/scan_ac_level/coeff.txt')
+f = open('data/dac/coeff.txt')
 coeffs = np.zeros((528,2),dtype = float)
 lines = f.readlines()
 for i,l in enumerate(lines):
@@ -13,7 +13,7 @@ for i,l in enumerate(lines):
         coeffs[i,j]=val[j]
 f.close()
 
-ac_led = Histogram(filename='/data/datasets/CTA/DATA/20170322/scan_ac_level/ac_led.npz', fit_only=True)
+ac_led = Histogram(filename='data/dac/ac_led.npz', fit_only=True)
 
 param, covariance = ac_led.fit_result[:, :, 0], ac_led.fit_result[:, :, 2:7:1]
 
@@ -32,13 +32,13 @@ for i,pix in enumerate([250, 272, 273, 274, 275, 296, 297, 298, 299, 300, 320, 3
     #if pix not in [660,552,555]: continue
     nsb = coeffs[pix, 0] * np.exp(coeffs[pix, 1] * dac)
     allnsb+=nsb
-    print(pix,pixels[i],nsb[250])
+    print(pix,pixels[i],nsb[323])
     plt.plot(dac,nsb,label='pixel %d'%pixels[i])
 
 plt.plot(dac,allnsb/len(pixels),color='k',linewidth = 2 , label='Average per DAC')
 plt.legend()
-plt.ylim(40.9,660.)
-plt.xlim(250.,350.)
+plt.ylim(40.9,1500.)
+plt.xlim(250.,550.)
 plt.show()
 
 
@@ -55,6 +55,7 @@ plt.figure()
 for i,pix in enumerate([250, 272, 273, 274, 275, 296, 297, 298, 299, 300, 320, 321, 322, 323, 344, 345, 346, 347, 348, 369, 370]):
     y = np.polyval(param[pix],dac)
     plt.plot(dac,y,label='pixel %d'%pixels[i])
+
 
 plt.legend()
 plt.ylim(1,3000.)

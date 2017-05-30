@@ -1,0 +1,25 @@
+# Analysis module
+analysis_module : analyse_trigeff_data
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170322
+
+# Input files
+mc            :     False
+file_basename :     CameraDigicam@localhost.localdomain_0_000.%s.run_218.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170504/
+file_list     :     [0]#,14,15,
+scan_level    :     [0]
+
+output_directory  : /data/datasets/CTA/DATA/20170504/
+histo_filename    : trigger.npz
+
+# Camera Configuration
+angle_cts         : 120.
+events_per_level  : 528

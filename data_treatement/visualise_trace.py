@@ -42,7 +42,6 @@ class EventViewer():
             self.event_iterator = zfits.zfits_event_source(url=self.filename, max_events=options.event_max, expert_mode=expert_mode)
 
 
-
         self.event_id = 0
         self.first_call = True
         self.time = options.bin_start
@@ -175,12 +174,12 @@ class EventViewer():
             self.camera_visu.colorbar.set_label('[p.e.]')
 
         else:
-            self.camera_visu.colorbar.set_label('[ADC]')
+            self.camera_visu.colorbar.set_label('[LSB]')
 
     def next_view_type(self, view_type, event=None):
 
         self.view_type = view_type
-        self.update()
+        pbar.update(1)
 
     def set_time(self, time):
 

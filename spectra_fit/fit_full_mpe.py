@@ -233,7 +233,7 @@ def label_func(*args,n_peaks = 22, **kwargs):
     List of labels for the parameters
     :return:
     """
-    label = ['Baseline [ADC]', 'Gain [ADC / p.e.]', '$\sigma_e$ [ADC]', '$\sigma_1$ [ADC]']
+    label = ['Baseline [LSB]', 'Gain [LSB / p.e.]', '$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]']
     for p in range(n_peaks):
         label += ['Amplitude_' + str(p)]
     return np.array(label)

@@ -1,0 +1,53 @@
+# Analysis module
+analysis_module : analyse_dc_calibration
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : log
+
+# MC input
+mc        :  False
+dc_start  : 0
+ac_start  : 0
+dc_step   : 1000
+ac_step   : 0
+
+
+# Input files
+file_basename_dc :     nsb/CameraDigicam@localhost.localdomain_0_000.%d.run_325.fits.fz
+#file_basename_dc :     dc_scan_mc_%d.hdf5
+file_basename_ac_dc :     nsb+signal/CameraDigicam@localhost.localdomain_0_000.%d.run_326.fits.fz
+#file_basename_ac_dc :     ac_dc_scan_mc_%d.hdf5
+directory     :     /home/alispach/data/digicam_commissioning/dc_calibration/
+#directory     :     /home/alispach/data/digicam_commissioning/dc_calibration/mc/
+file_list     :     [0, 1, 2, 3, 4, 5]
+#file_list     :     [1]
+scan_level    :     [0, 277, 288, 295, 306, 323, 333, 343, 353]
+#scan_level    :     [0, 1, 2, 3, 4, 5]
+
+# Output files
+output_directory        : /home/alispach/data/digicam_commissioning/dc_calibration/
+#output_directory        : /home/alispach/data/digicam_commissioning/dc_calibration/mc/
+dc_scan_filename        : nsb.npz
+ac_dc_scan_filename     : signal+nsb.npz
+dc_calibration_filename : dc_calibration.npz
+pulse_shape_filename : pulse_shape.npz
+
+# Event processing
+max_event          : 6000
+events_per_level   : 1000
+
+# Camera Configuration
+#n_pixels : 21
+pixel_list : [482, 516, 517, 518, 519, 552, 553, 554, 555, 556, 588, 589, 590, 591, 624, 625, 626, 627, 628, 661, 662]
+n_bins : 92
+
+# Plot configuration
+adcs_min           : 0
+adcs_max           : 4095
+adcs_binwidth      : 1

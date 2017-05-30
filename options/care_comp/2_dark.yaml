@@ -1,0 +1,38 @@
+# Analysis module
+analysis_module   : analyse_dark
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170322
+
+# Input files
+mc            :     False
+file_basename :      test_inject_Dark_1e%d.fits.fz
+directory     :     /home/alispach/data/mc_care_cross_check/
+file_list     :     [3]
+
+# Output file
+output_directory  : /home/alispach/data/mc_care_cross_check/
+histo_filename    : adc_dark.npz
+baseline_param_data : baseline_parameters.npz
+
+# Event processing
+dark_analysis     : fit_baseline
+baseline_per_event_limit : 0
+evt_max           : 1000
+n_evt_per_batch   : 10
+window_width      : 7
+
+# Camera Configuration
+#angle_cts         : 120.
+n_pixels : 1296
+
+# Plot configuration
+adcs_min           : -500
+adcs_max           : 5000
+adcs_binwidth      : 1

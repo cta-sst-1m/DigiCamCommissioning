@@ -53,6 +53,7 @@ def run(hist, options, min_evt = 0):
                 if evt_num % n_batch == 0:
                     log.debug('Treating the batch #%d of %d events' % (batch_num, n_batch))
                     # Update adc histo
+                    #print(np.max(batch))
                     hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] ))
                     # Reset the batch
                     batch = np.zeros((data.shape[0], n_batch),dtype=int)
@@ -69,7 +70,7 @@ def run(hist, options, min_evt = 0):
                     baseline = np.mean(data[..., 0:options.baseline_per_event_limit], axis=-1)
                     rms = np.std(data[..., 0:options.baseline_per_event_limit], axis=-1)
                     ind_good_baseline = (rms - params[:, 2]) / params[:, 3] < 0.5
-                    if n_evt > 1:
+                    if evt_num>1:
                         _tmp_baseline[ind_good_baseline] = baseline[ind_good_baseline]
                     else:
                         _tmp_baseline = baseline
@@ -90,6 +91,7 @@ def run(hist, options, min_evt = 0):
                     data_max[data[(np.arange(0,data.shape[0]),data_max)] < 40] = 0
                     data_max[data[(np.arange(0,data.shape[0]),data_max)] > 3000] = 0 #TODO need to adapt this more generic
                 #if (data_max-np.argmin(data, axis=1))/data_max>0.2:
+
                 batch[:,batch_index]=data_max
                 batch_index += 1
                 if batch_index%n_batch==0:

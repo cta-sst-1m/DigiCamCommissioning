@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
-
+from utils.histogram import Histogram
 
 #data_0 = np.zeros((6,35))
 data_0 = []
@@ -33,7 +33,7 @@ data_4 = []
 data_4 += [[]]
 data_4 += [[]]
 data_4 += [[]]
-
+triggers = Histogram(filename='/home/alispach/data/digicam_commissioning/trigger/mc/trigger.npz')
 
 dataset = [data_0,data_1,data_2,data_3]
 colors=['k','b','g','r','y']
@@ -63,6 +63,7 @@ def plot(datas,labels,colors=colors,xlim=[0,100]):
     ax2 = ax1.twiny()
     xlim_min = xlim[0]
     xlim_max = xlim[1]
+    ax1.errorbar(triggers.bin_centers, triggers.data[0], yerr=triggers.errors[0], fmt='o', color='%s' % colors[1], label='MC')
     for i,data in enumerate(datas):
         data = np.array(data)
         print(data.shape)
@@ -96,7 +97,7 @@ def plot(datas,labels,colors=colors,xlim=[0,100]):
     ax1.set_xlim(xlim_min, xlim_max)
     ax2.set_xlim(xlim_min * 4. / 5.6, xlim_max * 4. / 5.6)
     ax1.legend()
-    
+
     plt.show()
 
 

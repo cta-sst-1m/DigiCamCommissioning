@@ -155,7 +155,7 @@ class Histogram:
             self.bin_edges = file['bin_edges']
             self.bin_width = file['bin_width'][0]
             self.errors = file['errors']
-            self.auto_errors = file['auto_errors'][0]
+            #self.auto_errors = file['auto_errors'][0]
             self.underflow = file['underflow']
             self.overflow = file['overflow']
             self.fit_slices = file['fit_slices'] if 'fit_slices' in file.keys() else None
@@ -240,6 +240,7 @@ class Histogram:
         hist_indices = ((value - self.bin_edges[0]) // self.bin_width).astype(int)
 
         # treat overflow and underflow
+
         hist_indices[hist_indices > self.data.shape[-1] - 1] = self.data.shape[-1] - 1
         hist_indices[hist_indices < 0] = 0
 
@@ -261,7 +262,7 @@ class Histogram:
 
 
     # noinspection PyTypeChecker
-    def fill_with_batch(self, batch, indices=None):
+    def fill_with_batch(self, batch, indices=None): # TODO fill_with_batch should be fill that takes care of batch inside Histogram
         """
         A function to transform a batch of data in Histogram and add it to the existing one
         :param batch: a np.array with the n-1 same shape of data, and n dimension containing the array to Histogram

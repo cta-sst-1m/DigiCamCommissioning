@@ -98,6 +98,8 @@ def display_results(options):
 
     # Perform some plots
 
+    print(adcs.data[adcs.data[:,0]>0])
+
     try:
 
         display.display_hist(adcs, geom=geom, options=options, display_parameter=True, draw_fit=True)

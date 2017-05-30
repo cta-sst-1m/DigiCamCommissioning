@@ -1,0 +1,50 @@
+# Analysis module
+analysis_module : analyse_hvoff
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : log
+
+
+
+# Input files
+mc            :     False
+#file_basename :     CameraDigicam@localhost.localdomain_0_000.%d.run_60.fits.fz
+file_basename :     test_inject_lightOnly_1e%d.fits.fz
+#file_basename :     no_name_0_000.%d.crate_intersil.fits.fz
+
+#directory     :     /home/alispach/data/digicam_commissioning/cts/hv_off/
+directory     :     /home/alispach/data/mc_care_cross_check/
+#directory     :     /home/alispach/data/digicam_commissioning/cts/anaylse_gain_nsb/ac_0/
+#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170411/
+
+#file_list     :     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]#, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+file_list     :     [4]
+# Output files
+#output_directory  : /home/alispach/data/digicam_commissioning/cts/ac_scan/
+#output_directory  : /home/alispach/data/digicam_commissioning/full_chain/
+#output_directory  : /home/alispach/data/digicam_commissioning/cts/anaylse_gain_nsb/ac_0/
+output_directory     :     /home/alispach/data/mc_care_cross_check/
+
+histo_filename    : baseline.npz
+
+# Event processing
+evt_max           : 10000
+n_evt_per_batch   : 100
+
+# Camera Configuration
+n_pixels          : 1296
+#angle_cts         : 120
+#window_width      : 7
+
+# Plot configuration
+adcs_min           : 5
+#adcs_min           : 2500
+adcs_max           : 4095
+#adcs_max           : 5000
+adcs_binwidth      : 1

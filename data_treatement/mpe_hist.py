@@ -7,8 +7,7 @@ from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
 import matplotlib.pyplot as plt
 # noinspection PyProtectedMember
-def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', baseline=0.):
-
+def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', baseline=0., trigger_output=None):
     # Few counters
     level, evt_num, first_evt, first_evt_num = 0, 0, True, 0
 
@@ -110,7 +109,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
         _url = options.directory + options.file_basename % file
         inputfile_reader = None
         if not options.mc:
-            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=len(options.scan_level)*options.events_per_level)
+            inputfile_reader = zfits.zfits_event_source(url=_url, max_events=len(options.scan_level)*options.events_per_level,expert_mode=type(trigger_output).__name__ == 'ndarray')
         else:
 
             seed = 0
@@ -166,6 +165,10 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                 # put in proper format
                 #rdata = data.reshape((1,) + data.shape)
                 # charge extraction type
+                if type(trigger_output).__name__ == 'ndarray':
+                    trig = event.r0.tel[telid].trigger_output_patch7
+                    trigger_output[level,:,1]+=1
+                    trigger_output[level,:,0]+=np.any(trig>0.5,axis=-2)*np.ones((trig.shape[0]),dtype=int)
 
                 # charge extraction type
                 if charge_extraction == 'global_max':
@@ -193,6 +196,9 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                             _tmp_baseline = baseline
                         data = data - _tmp_baseline[:, None]
                         #if level>32 :
+
+                    else:
+                        baseline = np.zeros((len(options.scan_level), data.shape[0]))
                     integration = np.apply_along_axis(integrate_trace,1,data)
                     local_max = np.argmax(np.multiply(integration, mask_window), axis=1)
                     local_max_edge = np.argmax(np.multiply(integration, mask_windows_edge), axis=1)
@@ -215,6 +221,7 @@ def run(hist, options, peak_positions=None, charge_extraction = 'amplitude', bas
                         plt.plot(np.arange(92),data[options.pixel_list.index(62)])
                         plt.show()
                     '''
+                    #print(baseline)
                     batch[...,batch_index]=integration[index_max] - baseline[level,:]
                     batch_index += 1
                     #hist.fill(integration[index_max],indices=(level,))
