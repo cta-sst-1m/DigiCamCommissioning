@@ -95,11 +95,11 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                 # Batch data treatement ******************************
 
                 # fisrt batch creation
-                if counter.event_id == 0:
+                if counter.event_id == 0 and counter.batch_size > 0:
                     batch = batch_reset(counter.batch_size, data.shape, options)
 
                 if counter.fill_batch:
-                    log.debug('Treating the batch #%d of %d events' % (counter.batch_num, counter.n_batch))
+                    log.debug('Treating the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
                     # Fill the necessary histo with batch
                     if h_type == 'ADC':
                         hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
@@ -109,7 +109,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     else:
                         pass
                     # Reset the batch
-                    batch = batch_reset(counter.n_batch, data.shape, options)
+                    batch = batch_reset(counter.batch_size, data.shape, options)
                     log.debug('Reading  the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
 
                 # Data treatement ************************************

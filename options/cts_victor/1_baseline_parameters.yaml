@@ -13,3 +13,4 @@ histo_filename    : baseline_parameters.npz
 
 # Event processing
 baseline_per_event_limit : 50
+n_evt_per_batch : 100
