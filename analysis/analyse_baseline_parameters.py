@@ -187,39 +187,44 @@ def create_report(options):
             pixel_idx = 0
 
 
-            with doc.create(pl.Figure(position='!h')) as plot:
+            with doc.create(pl.Figure(position='!ht')) as plot:
                 plt.subplots(1,1,figsize=(10,8))
                 plt.hist(adcs.fit_result[..., 0][~np.isnan(adcs.fit_result[..., 1])], bins=30, label='<Baseline mean>')
                 plt.xlabel('$mode(<BL>_{%d})$' % options.baseline_per_event_limit)
-                plot.add_plot(width='7cm')
+                plt.savefig(options.output_directory + 'reports/plots/summary_0.pdf')
 
                 plt.subplots(1,1,figsize=(10,8))
                 plt.hist(adcs.fit_result[..., 1][~np.isnan(adcs.fit_result[..., 1])], bins=30,
                          label='<Baseline Variation>')
                 plt.xlabel('$\sigma(<BL>_{%d})$' % options.baseline_per_event_limit)
-                plot.add_plot(width='7cm')
 
+                plt.savefig(options.output_directory + 'reports/plots/summary_1.pdf')
+                plot.add_image(options.output_directory + 'reports/plots/summary_1.pdf'%p,width='7cm')
+                plot.add_image(options.output_directory + 'reports/plots/summary_2.pdf'%p,width='7cm')
                 plot.add_caption('Mode over %d events of the baseline average, computed over %d samples, for all pixels (left)'%
                                  (options.max_event,options.baseline_per_event_limit)+
                                  'Mode over %d events of the baseline std deviation, computed over %d samples, for all pixels (right)'%
                                  (options.max_event,options.baseline_per_event_limit))
                 plt.close()
-            with doc.create(pl.Figure(position='!h')) as plot:
+            with doc.create(pl.Figure(position='!ht')) as plot:
                 plt.subplots(1,1,figsize=(10,8))
                 plt.hist(adcs.fit_result[..., 2][~np.isnan(adcs.fit_result[..., 1])], bins=30,
                          label='\sigma(Baseline mean)')
                 plt.xlabel('$mode(\sigma(BL)_{%d})$' % options.baseline_per_event_limit)
-                plot.add_plot(width='7cm')
+                plt.savefig(options.output_directory + 'reports/plots/summary_2.pdf')
 
                 plt.subplots(1,1,figsize=(10,8))
                 plt.hist(adcs.fit_result[..., 3][~np.isnan(adcs.fit_result[..., 1])], bins=30,
                          label='\sigma(Baseline Variation)')
                 plt.xlabel('$\sigma(\sigma(BL)_{%d})$' % options.baseline_per_event_limit)
-                plot.add_plot(width='7cm')
+
+                plt.savefig(options.output_directory + 'reports/plots/summary_3.pdf')
                 plot.add_caption('Std deviation over %d events of the baseline average, computed over %d samples, for all pixels'%
                                  (options.max_event,options.baseline_per_event_limit)+
                                  'Std deviation over %d events of the baseline std deviation , computed over %d samples, for all pixels'%
                                  (options.max_event,options.baseline_per_event_limit))
+                plot.add_image(options.output_directory + 'reports/plots/summary_2.pdf'%p,width='7cm')
+                plot.add_image(options.output_directory + 'reports/plots/summary_3.pdf'%p,width='7cm')
                 plt.close()
 
 
@@ -230,7 +235,7 @@ def create_report(options):
             means = adcs.data[0]
             rmses = adcs.data[1]
             pixel_idx = i
-            with doc.create(pl.Figure(position='!h')) as plot:
+            with doc.create(pl.Figure(position='!ht')) as plot:
                 plt.subplots(1, 1, figsize=(10, 8))
                 plt.hist(
                     (rmses[pixel_idx].astype(float) - adcs.fit_result[pixel_idx, 2]) / adcs.fit_result[pixel_idx, 3],
@@ -240,7 +245,7 @@ def create_report(options):
                            (options.baseline_per_event_limit, options.baseline_per_event_limit,
                             options.baseline_per_event_limit))
                 plt.xlim(-3.,10.)
-                plot.add_plot(width='7cm')
+                plt.savefig(options.output_directory + '/reports/plots/pixel_%d_1d.pdf'%p)
                 plt.close()
                 plt.subplots(1, 1, figsize=(10, 8))
                 plt.hist2d(
@@ -254,12 +259,23 @@ def create_report(options):
                 plt.ylabel('$ \\frac{\sigma(BL)_{%d}-mode(\sigma(BL)_{%d})}{\sigma(\sigma(BL)_{%d})}$' %
                            (options.baseline_per_event_limit, options.baseline_per_event_limit,
                             options.baseline_per_event_limit))
-                plot.add_plot(width='7cm')
-                plot.add_caption(
-                    pl.NoEscape('\\textbf{(Pixel %d)} Normalised std deviation of baseline evaluated over %d samples (left)' %
-                    (p,options.baseline_per_event_limit)+'Normalised std deviation vs mode of baseline evaluated over %d samples (right)'  %
-                    (options.baseline_per_event_limit)))
+
+                plt.savefig(options.output_directory + 'reports/plots/pixel_%d_2d.pdf'%p)
                 plt.close()
+                with doc.create(pl.SubFigure(
+                        position='b',
+                        width=pl.NoEscape(r'0.45\linewidth'))) as left_fig:
+                    left_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_1d.pdf' % p, width='7cm')
+                    left_fig.add_caption('Normalised std deviation of the baseline')
+                with doc.create(pl.SubFigure(
+                        position='b',
+                        width=pl.NoEscape(r'0.45\linewidth'))) as right_fig:
+                    right_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_2d.pdf' % p, width='7cm')
+                    right_fig.add_caption('Normalised std deviation vs normalised mode of the baseline')
+                plot.add_caption(
+                    pl.NoEscape(
+                        '\\textbf{(Pixel %d)} Baseline is evaluated over %d samples' %
+                        (p,options.baseline_per_event_limit)))
 
     doc.generate_pdf(options.output_directory + '/reports/baseline_parameters', clean_tex=False)
 
