@@ -69,13 +69,13 @@ def perform_analysis(options):
     x = np.tile(dark_step_function.bin_centers, (y.shape[0], 1))
 
     y = - np.diff(np.log(y)) / np.diff(x)
-    x = x[..., :-1] + np.diff(x) / 2.
+    x = x[..., :-1] #+ np.diff(x) / 2.
 
     y[np.isnan(y)] = 0
     y[np.isinf(y)] = 0
     y[y < 0] = 0
 
-    threshold = 0.8
+    threshold = 0.1
     width = 2
 
     dark_count = np.zeros(y.shape[0])
@@ -96,6 +96,7 @@ def perform_analysis(options):
         if options.debug:
 
             plt.figure()
+            plt.semilogy(x[pixel], y[pixel])
             plt.semilogy(dark_step_function.bin_centers, dark_step_function.data[pixel])
             plt.axvline(min_x[0])
             plt.axvline(min_x[1])

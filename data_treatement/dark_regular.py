@@ -1,6 +1,6 @@
 import numpy as np
 from ctapipe.io import zfits
-from utils.mc_events_reader import hdf5_mc_event_source
+#from utils.mc_events_reader import hdf5_mc_event_source
 import logging
 import sys
 from utils.logger import TqdmToLogger
@@ -48,6 +48,9 @@ def run(hist, options):
                 # Take data from zfits
                 data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 data = data[options.pixel_list]
+
+                data = np.apply_along_axis(integrate_trace, axis=-1, arr=data, window_width=options.window_width)
+
                 n_peaks = compute_n_peaks(data, thresholds=thresholds, min_distance=options.min_distance)
 
                 if options.debug:
@@ -78,4 +81,5 @@ def compute_peaks(y, threshold, min_distance):
 
     return n_peaks
 
-
+def integrate_trace(data, window_width):
+    return np.convolve(data, np.ones((window_width), dtype=int), 'valid')

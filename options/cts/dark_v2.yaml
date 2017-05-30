@@ -24,17 +24,18 @@ event_max          : 10000
 event_min          : 0
 
 # Peak detection
-min_distance : 4
+min_distance : 3
 
 # Camera Configuration
 pixel_list : [0, 1] #all #[0, 1, 2, 3, 4]
 #n_pixels : all
 # Histogram
-adcs_min : 500
-adcs_max : 580
+adcs_min : 3500
+adcs_max : 4000
 adcs_binwidth : 1
 
 # Data
 n_bins : 92
+window_width : 7
 
 
