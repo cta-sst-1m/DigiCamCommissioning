@@ -180,7 +180,7 @@ def create_report(options):
             with doc.create(pl.Itemize()) as itemize:
                 for p in np.where(np.isnan(adcs.fit_result[..., 1]))[0]:
                     itemize.add_item('Pixel %d, corresponding to AC LED %d and DC LED %d'%
-                               (options.pixel_list[p],options.cts.pixel_to_led['AC'][p],options.cts.pixel_to_led['DC'][p]))
+                               (options.pixel_list[p],options.cts.pixel_to_led['AC'][options.pixel_list[p]],options.cts.pixel_to_led['DC'][options.pixel_list[p]]))
 
         # BADLY RESPONDING PIXELS
         with doc.create(pl.Subsection('Badly responding Pixels')):
@@ -189,8 +189,8 @@ def create_report(options):
                 means = adcs.data[0]
                 for p in np.where(np.nanstd(means,axis=-1)<0.2)[0]:
                     itemize.add_item('Pixel %d, corresponding to AC LED %d and DC LED %d' %
-                                     (options.pixel_list[p], options.cts.pixel_to_led['AC'][p],
-                                      options.cts.pixel_to_led['DC'][p]))
+                                     (options.pixel_list[p], options.cts.pixel_to_led['AC'][options.pixel_list[p]],
+                                      options.cts.pixel_to_led['DC'][options.pixel_list[p]]))
 
         # SUMMARY PLOTS
         with doc.create(pl.Subsection('Mean and standard deviation over %d sample'%options.baseline_per_event_limit)):
@@ -281,17 +281,17 @@ def create_report(options):
                 plt.close()
                 with doc.create(pl.SubFigure(
                         position='b',
-                        width=pl.NoEscape(r'0.45\linewidth'))) as left_fig:
+                        width=pl.NoEscape(r'0.3\linewidth'))) as left_fig:
                     left_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_full1d.pdf' % p, width='7cm')
-                    left_fig.add_caption('Average baselines')
+                    left_fig.add_caption('Average baselines, std_dev %f'%np.nanstd(means[pixel_idx]))
                 with doc.create(pl.SubFigure(
                         position='b',
-                        width=pl.NoEscape(r'0.45\linewidth'))) as left_fig:
+                        width=pl.NoEscape(r'0.3\linewidth'))) as left_fig:
                     left_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_1d.pdf' % p, width='7cm')
                     left_fig.add_caption('Normalised std deviation of the baseline')
                 with doc.create(pl.SubFigure(
                         position='b',
-                        width=pl.NoEscape(r'0.45\linewidth'))) as right_fig:
+                        width=pl.NoEscape(r'0.3\linewidth'))) as right_fig:
                     right_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_2d.pdf' % p, width='7cm')
                     right_fig.add_caption('Normalised std deviation vs normalised mode of the baseline')
                 plot.add_caption(
