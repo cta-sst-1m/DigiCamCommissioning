@@ -153,9 +153,9 @@ def create_report(options):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     geometry_options = {
-        "head": "0.8in",
-        "margin": "1.in",
-        "bottom": "0.8in"
+        "head": "0.5in",
+        "margin": "0.5in",
+        "bottom": "0.5in"
     }
 
     doc = pl.Document('report',geometry_options=geometry_options)
@@ -294,7 +294,7 @@ def create_report(options):
                         '\\textbf{(Pixel %d)} Baseline is evaluated over %d samples' %
                         (p,options.baseline_per_event_limit)))
 
-            if i%2 == 0:
+            if i%3 == 0 and i!=0:
                 doc.append(pl.NoEscape(r'\clearpage'))
     doc.generate_pdf(options.output_directory + '/reports/baseline_parameters', clean_tex=False)
 

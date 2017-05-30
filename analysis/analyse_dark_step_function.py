@@ -34,16 +34,32 @@ def create_histo(options):
         - 'adcs_binwidth'    : the bin width for the adcs histo                   (int)
     :return:
     """
-    dark_step_function = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+    if options.analysis_type == 'step_function':
+        dark = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+                                bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
+                                label='Dark step function', xlabel='threshold LSB', ylabel='entries')
+
+        # Get the adcs
+        adc_hist.run(dark, options, h_type='STEPFUNCTION')
+    elif options.analysis_type == 'single_photo_electron':
+        adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                    bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
-                                   label='Dark step function', xlabel='threshold LSB', ylabel='entries')
+                                   label='Pixel SPE', xlabel='Pixel ADC', ylabel='Count / ADC')
+        # Get the adcs
+        adc_hist.run(dark, options, 'SPE')
 
-    # Get the adcs
+    elif options.analysis_type == 'adc_template':
+        dark = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+                                   bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
+                                   label='Dark LSB', xlabel='LSB', ylabel='entries')
+        # Get the adcs
+        adc_hist.run(dark, options, 'ADC')
 
-    adc_hist.run(dark_step_function, options, h_type='STEPFUNCTION')
 
     # Save the histogram
-    dark_step_function.save(options.output_directory + options.histo_filename)
+    dark.save(options.output_directory + options.histo_filename)
+
+    del dark
 
     return
 
