@@ -9,9 +9,8 @@ from data_treatement import adc_hist
 import logging,sys
 import numpy as np
 import peakutils
-from scipy.interpolate import barycentric_interpolate, interp1d
+from scipy.interpolate import interp1d
 
-from scipy import stats
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
