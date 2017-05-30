@@ -79,8 +79,8 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                 # Batch data treatement ******************************
 
                 # fisrt batch creation
-                if counter.event_id == 0 and counter.batch_size>0:
-                    batch = np.zeros((data.shape[0], counter.batch_size , data.shape[1]), dtype=int)
+                if counter.event_id == 0 and counter.batch_size > 0:
+                    batch = np.zeros((data.shape[0], counter.batch_size, data.shape[1]), dtype=int)
 
                 if counter.fill_batch:
                     log.debug('Treating the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
