@@ -2,9 +2,10 @@ from tqdm import tqdm
 import sys
 import logging
 
+
 class EventCounter:
 
-    def __init__(self, event_min, event_max, log, batch_size, level_dc_min=-1, level_dc_max=-1, level_ac_min=-1, level_ac_max=-1, event_per_level=-1, event_per_level_in_file=-1):
+    def __init__(self, event_min, event_max, log, batch_size=-1, level_dc_min=-1, level_dc_max=-1, level_ac_min=-1, level_ac_max=-1, event_per_level=-1, event_per_level_in_file=-1):
 
         if level_dc_min == -1 or level_dc_max == -1 or level_ac_min == -1 or level_ac_max == -1 or event_per_level == -1 or event_per_level_in_file == -1:
 
@@ -43,6 +44,9 @@ class EventCounter:
 
         if (level_ac_max * level_dc_max * event_per_level_in_file) > event_max:
             raise ValueError('Not enough events in file')
+
+        if batch_size > event_max - event_min:
+            raise ValueError('Batch size : %d  > number of events : %d' % (batch_size, event_max - event_min))
 
     def __iter__(self):
         return self
