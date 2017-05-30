@@ -15,3 +15,6 @@ angle_cts         : 120.
 # Base definition for the signal extraction
 window_width      : 7
 charge_extraction : integration_saturation
+
+# Event processing
+baseline_per_event_limit : 50
