@@ -95,72 +95,16 @@ if __name__ == '__main__':
                                  level=0)
 
     cts_path = '/data/software/CTS/'
-    #cts_path = '/home/alispach/Documents/PhD/ctasoft/CTS/'
 
     # Configure the CTS angle
-    if hasattr(options,'angle_cts'):
+    if hasattr(options, 'angle_cts'):
         options.cts = CTS(cts_path + 'config/cts_config_' + str(int(options.angle_cts)) + '.cfg', cts_path + 'config/camera_config.cfg', angle=options.angle_cts, connected=True)
-        options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
 
-    # Update the pixel list from the CTS with 0 angle otherwise
-    elif not hasattr(options, 'pixel_list') and not hasattr(options, 'n_pixels'):
-        options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
-                          cts_path + 'config/camera_config.cfg', angle=0, connected=True)
-        options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
-    # TODO what is that?
-    else:
-        options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
-                          cts_path + 'config/camera_config.cfg', angle=0, connected=True)
-        if options.pixel_list == 'all':
-            options.cts = options.cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg', cts_path + 'config/camera_config.cfg', angle=0, connected=True)
-            options.pixel_list = generate_geometry(options.cts, available_board=None, all_camera=True)[1]
-        elif hasattr(options, 'n_pixels'):
-            options.pixel_list = np.arange(0, options.n_pixels, 1)
-        else:
-            options.pixel_list = options.pixel_list
+        if not hasattr(options, 'pixel_list'):
+            options.pixel_list = generate_geometry(options.cts, available_board=None)[1]
 
-    if not hasattr(options,'pixel_list') and hasattr(options,'n_pixels'):
-        # TODO add usage of digicam and cts geometry to define the list Isn't this a doublon???
-        options.pixel_list = np.arange(0, options.n_pixels, 1)
-
-    # TODO is this still necessary??? what is the use?
-    if hasattr(options, 'n_clusters'):
-        if options.n_clusters==1:
-
-            camera = Camera(options.cts_directory + 'config/camera_config_clusters.cfg')
-            patches_in_cluster = np.load(options.cts_directory + 'config/cluster.p')['patches_in_cluster']
-
-            patch_index = 300
-            patches_in_cluster = patches_in_cluster[patch_index]
-
-            #print(patches_in_cluster)
-            options.pixel_list = []
-            options.cluster_list = [patch_index]
-
-            for patch in patches_in_cluster:
-
-                for pixel in camera.Patches[patch].pixels:
-
-                    options.pixel_list.append(pixel.ID)
-
-            for pixel in camera.Patches[patch_index].pixels:
-                options.pixel_list.append(pixel.ID)
-        else:
-
-            exit()
-
-    # TODO What is this config part? if it is linked to an analysis only then put it in the analysis script
-    if hasattr(options, 'threshold'):
-
-        if hasattr(options, 'threshold_min'):
-
-            options.threshold = np.arange(options.threshold_min, options.threshold_max, options.threshold_step)
-
-    if hasattr(options, 'clusters'):
-
-        if options.clusters=='all' or options.clusters is None:
-
-            options.clusters = [i for i in range(432)]
+        elif options.pixel_list == 'all':
+            options.pixel_list = np.arange(0, 1296, 1)
 
             
     # Some logging

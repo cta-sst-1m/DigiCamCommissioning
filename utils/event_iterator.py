@@ -58,7 +58,7 @@ class EventCounter:
         self.progress_bar.update(1)
         self.fill_batch = False
 
-        if (self.event_count + 2) % self.batch_size == 0 and not self.event_count == 0:
+        if (self.event_count + 2) % self.batch_size == 0 and not self.event_count == 0 and self.batch_size > 0:
 
             self.fill_batch = True
             self.batch_id += 1

@@ -43,7 +43,6 @@ def create_histo(options):
 
     adc_hist.run(dark_step_function, options, h_type='STEPFUNCTION')
 
-
     # Save the histogram
     dark_step_function.save(options.output_directory + options.histo_filename)
 
@@ -61,6 +60,7 @@ def perform_analysis(options):
     """
 
     dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
 
     y = dark_step_function.data
     x = np.tile(dark_step_function.bin_centers, (y.shape[0], 1))
@@ -72,17 +72,26 @@ def perform_analysis(options):
     y[np.isinf(y)] = 0
     y[y < 0] = 0
 
-    threshold = 0.8
-    width = 2
+    threshold = 0.15
+    width = 3
 
     dark_count = np.zeros(y.shape[0])
     cross_talk = np.zeros(y.shape[0])
 
-    time = (options.event_max - options.event_min) * 4 * options.n_bins
+    n_samples = options.n_samples - options.baseline_per_event_limit - options.window_width + 1
+    time = (options.max_event - options.min_event) * 4 * n_samples
 
     for pixel in range(y.shape[0]):
         max_indices = peakutils.indexes(y[pixel], thres=threshold, min_dist=options.min_distance)
-        max_x = peakutils.interpolate(x[pixel], y[pixel], ind=max_indices, width=width)
+
+        try:
+            max_x = peakutils.interpolate(x[pixel], y[pixel], ind=max_indices, width=width)
+
+        except RuntimeError:
+
+            log.warning('Could not interpolate for pixel %d taking max as indices' % options.pixel_list[pixel])
+            max_x = x[pixel][max_indices]
+
         gain = np.mean(np.diff(max_x))
         min_x = max_x + 0.5 * gain
         f = interp1d(dark_step_function.bin_centers, dark_step_function.data[pixel], kind='cubic')
@@ -90,7 +99,7 @@ def perform_analysis(options):
         dark_count[pixel] = counts[0] / time
         cross_talk[pixel] = counts[1] / counts[0]
 
-        if options.debug:
+        if options.verbose:
 
             plt.figure()
             plt.semilogy(dark_step_function.bin_centers, dark_step_function.data[pixel])
@@ -98,9 +107,10 @@ def perform_analysis(options):
             plt.axvline(min_x[1])
             plt.show()
 
-    print(cross_talk)
-    print(dark_count)
+    np.savez(options.output_directory + options.analysis_result_filename, dark_count_rate=dark_count, cross_talk=cross_talk)
+
     return
+
 
 def display_results(options):
     """
@@ -109,9 +119,25 @@ def display_results(options):
     :return:
     """
 
-    # Load the histogram
-    adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    # Load the data
+    dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    data = np.load(options.output_directory + options.analysis_result_filename)
+    dark_count_rate = data['dark_count_rate']
+    cross_talk = data['cross_talk']
 
-    display.display_hist(adcs, options=options)
+    # Display step function
+    display.display_hist(dark_step_function, options=options)
+
+    # Display histograms of dark count rate and cross talk
+    plt.figure()
+    plt.hist(dark_count_rate * 1E3, bins='auto')
+    plt.xlabel('$f_{dark}$ [MHz]')
+
+    plt.figure()
+    plt.hist(cross_talk, bins='auto')
+    plt.xlabel('XT')
+
+    plt.show()
 
     return
+

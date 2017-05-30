@@ -1,5 +1,5 @@
 # Logging
-verbose           : False
+verbose           : True
 log_file_basename : 20170508
 
 # Input files
@@ -11,6 +11,8 @@ output_directory  : /data/datasets/CTA/DATA/20170508/
 
 # Camera Configuration
 angle_cts         : 120.
+pixel_list : [700, 707]
+
 
 # Base definition for the signal extraction
 window_width      : 7
@@ -18,3 +20,4 @@ charge_extraction : integration_saturation
 
 # Event processing
 baseline_per_event_limit : 50
+n_samples : 92
