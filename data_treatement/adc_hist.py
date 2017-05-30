@@ -10,22 +10,6 @@ from utils.event_iterator import EventCounter
 from utils.histogram import Histogram
 from utils.peakdetect import spe_peaks_in_event_list,compute_n_peaks
 
-def batch_reset(n_batch, shape, options):
-    """
-    Create/reset the batches to be filled
-    :param n_batch: number of events in a batch    (int)
-    :param shape: data shape                       (tuple)
-    :param options: configuration container        (yaml container)
-    :return: the batch                             (ndarray)
-    """
-    batch = np.zeros((shape[0], n_batch, shape[1] - options.window_width + 1), dtype=int)
-    if hasattr(options, 'baseline_per_event_limit'):
-        batch = np.zeros(
-            (shape[0], n_batch, shape[1] - options.window_width - options.baseline_per_event_limit),
-            dtype=float)
-    return batch
-
-
 def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     """
     Fill the adcs Histogram for all pixels
@@ -52,7 +36,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     # Get the baseline parameters if running in per event baseline subtraction mode
     params = None
     if hasattr(options, 'baseline_per_event_limit') and not h_type == 'MEANRMS':
-        params = Histogram(filename=options.output_directory + options.baseline_param_data, fit_only=True)
+        params = Histogram(filename=options.output_directory + options.baseline_param_data, fit_only=True).fit_result
         # Initialise the baseline holder
         baseline = np.zeros((len(options.pixel_list),), dtype = float)
 
@@ -88,28 +72,30 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
 
                 data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 # Subtract the baseline and get rid of unwanted pixels
-                data = subtract_baseline(data[options.pixel_list], options, params, baseline)
+                data = subtract_baseline(data[options.pixel_list], counter.event_id,options, params, baseline)
                 # Perform integration
                 data = integrate(data, options)
 
                 # Batch data treatement ******************************
 
                 # fisrt batch creation
-                if counter.event_id == 0:
-                    batch = batch_reset(counter.batch_size, data.shape, options)
+                if counter.event_id == 0 and counter.batch_size>0:
+                    batch = np.zeros((data.shape[0], counter.batch_size , data.shape[1]), dtype=int)
 
                 if counter.fill_batch:
-                    log.debug('Treating the batch #%d of %d events' % (counter.batch_num, counter.n_batch))
+                    log.debug('Treating the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
                     # Fill the necessary histo with batch
                     if h_type == 'ADC':
                         hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
                     elif h_type == 'SPE':
                         hist.fill_with_batch(
                             spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
+                    elif h_type == 'STEPFUNCTION':
+                        hist.data+= compute_n_peaks(batch.reshape(batch.shape[0],-1), thresholds=hist.bin_centers,min_distance=options.min_distance)
                     else:
                         pass
                     # Reset the batch
-                    batch = batch_reset(counter.n_batch, data.shape, options)
+                    batch = np.zeros((data.shape[0], counter.batch_size , data.shape[1]), dtype=int)
                     log.debug('Reading  the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
 
                 # Data treatement ************************************
@@ -120,10 +106,9 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     _rms = np.std(data[..., 0:options.baseline_per_event_limit], axis=-1)
                     hist.data[0, ..., counter.event_id] = _baseline
                     hist.data[1, ..., counter.event_id] = _rms
-                elif h_type == 'STEPFUNCTION':
+                #elif h_type == 'STEPFUNCTION':
                     # Get the number of peak above threshold
-                    # TODO check if this can be batched + threshold
-                    hist.data += compute_n_peaks(data, thresholds=hist.bin_centers, min_distance=options.min_distance)
+                #    hist.data += compute_n_peaks(data, thresholds=hist.bin_centers, min_distance=options.min_distance)
                 elif h_type == 'RAW':
                     # Fill the full trace
                     hist.fill_with_batch(data)

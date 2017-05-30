@@ -11,5 +11,3 @@ max_event         : 9000
 output_directory  : /data/datasets/CTA/DATA/20170508/
 histo_filename    : baseline_parameters.npz
 
-# Event processing
-baseline_per_event_limit : 50

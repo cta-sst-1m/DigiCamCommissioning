@@ -40,7 +40,8 @@ def create_histo(options):
                                    label='Dark step function', xlabel='threshold LSB', ylabel='entries')
 
     # Get the adcs
-    adc_hist.run(dark_step_function, options, 'STEPFUNCTION')
+
+    adc_hist.run(dark_step_function, options, h_type='STEPFUNCTION')
 
 
     # Save the histogram

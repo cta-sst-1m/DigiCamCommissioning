@@ -13,13 +13,11 @@ def subtract_baseline(data,event_id,options,params,baseline=None):
     :param baseline: TODO
     :return:
     """
-
     # Treat the case where the baseline is computed from the event itself and is not known
     if hasattr(options, 'baseline_per_event_limit'):
         # Get the mean and std deviations
         _baseline = np.mean(data[..., 0:options.baseline_per_event_limit], axis=-1)
         _rms = np.std(data[..., 0:options.baseline_per_event_limit], axis=-1)
-
         if params is not None:
             # Case where the baseline parameters have been evaluated already
 
@@ -32,9 +30,6 @@ def subtract_baseline(data,event_id,options,params,baseline=None):
                 baseline[ind_good_baseline] = _baseline[ind_good_baseline]
             else:
                 baseline = _baseline
-            # Subtract the baseline
-            data = data - baseline[:, None]
-    # Treat the case where the baseline has been specified
 
     if baseline is None:
         return data
@@ -53,12 +48,4 @@ def integrate(data,options):
     """
     if options.window_width == 1 : return data
     h = ndimage.convolve1d(data,np.ones(options.window_width, dtype=int),axis=-1,mode='constant',cval=-1.e8)
-    print(options.window_width)
-    print(h.shape)
-    print(h[0])
-    print(h[1])
-    print(np.sum(h,axis=-2))
-    print(h[h>1e-6].shape[0]/data.shape[0])
-    print(h[h>1e-6].reshape(data.shape[0],-1))
-
-    return h[h>1e-6].reshape(data.shape[0],-1)
+    return h[...,int(np.floor((options.window_width-1)/2)):-int(np.floor(options.window_width/2))]
