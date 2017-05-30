@@ -53,4 +53,8 @@ def integrate(data,options):
     """
     if options.window_width == 1 : return data
     h = ndimage.convolve1d(data,np.ones(options.window_width, dtype=int),axis=-1,mode='constant',cval=-1e8)
+    print(options.window_width)
+    print(h[h>1e-6].shape[0]/data.shape[0])
+    print(h[h>1e-6].reshape(data.shape[0],-1))
+
     return h[h>1e-6].reshape(data.shape[0],-1)

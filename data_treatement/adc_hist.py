@@ -46,7 +46,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     # Initialisation phase *********************************************************************************************
 
     # If no integration window has been specified, then set it to 1
-    if not hasattr(options, 'window_width'):
+    if not hasattr(options, 'window_width') or h_type=='MEANRMS':
         options.window_width = 1
 
     # Get the baseline parameters if running in per event baseline subtraction mode
@@ -130,7 +130,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                 elif h_type == 'STEPFUNCTION':
                     # Get the number of peak above threshold
                     # TODO check if this can be batched + threshold
-                    hist.data += compute_n_peaks(data, thresholds=thresholds, min_distance=options.min_distance)
+                    hist.data += compute_n_peaks(data, thresholds=hist.bin_centers, min_distance=options.min_distance)
                 elif h_type == 'RAW':
                     # Fill the full trace
                     hist.fill_with_batch(data)
