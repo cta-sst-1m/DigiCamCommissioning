@@ -1,15 +1,28 @@
-.. _protocols:
+.. _analysis.analyse_dark_step_function:
 
 ==============================================
-Baseline parameters extraction
+Parameters extraction from dark runs
 ==============================================
 
-.. currentmodule:: analysis.analyse_baseline_parameters
+.. currentmodule:: analysis.analyse_dark_step_function
+
+The aim of this module is to evaluate the parameters of the pixels
+from dark runs. There are several analysis implemented:
+
+  * Step function
+
+  * Dark ADC
+
+  * SPE
 
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Expected input data
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Any runs without light. Baseline is evaluated event by event,
+which implies the N first samples are not to be used in analysis
+
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Output data

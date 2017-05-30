@@ -169,7 +169,7 @@ def create_report(options):
     # SUMMARY
     with doc.create(pl.Section('Summary')):
         # PIXEL LIST
-        with doc.create(pl.Subsection('Valid Pixels')):
+        with doc.create(pl.Subsection('List of Pixels')):
             pix_list = ''
             for i,p in enumerate(options.pixel_list):
                 pix_list+='%d, '%p
@@ -181,6 +181,16 @@ def create_report(options):
                 for p in np.where(np.isnan(adcs.fit_result[..., 1]))[0]:
                     itemize.add_item('Pixel %d, corresponding to AC LED %d and DC LED %d'%
                                (options.pixel_list[p],options.cts.pixel_to_led['AC'][p],options.cts.pixel_to_led['DC'][p]))
+
+        # BADLY RESPONDING PIXELS
+        with doc.create(pl.Subsection('Badly responding Pixels')):
+            doc.append('Pixel showing a very small variation of the baseline:')
+            with doc.create(pl.Itemize()) as itemize:
+                means = adcs.data[0]
+                for p in np.where(np.nanstd(means,axis=-1)<0.2)[0]:
+                    itemize.add_item('Pixel %d, corresponding to AC LED %d and DC LED %d' %
+                                     (options.pixel_list[p], options.cts.pixel_to_led['AC'][p],
+                                      options.cts.pixel_to_led['DC'][p]))
 
         # SUMMARY PLOTS
         with doc.create(pl.Subsection('Mean and standard deviation over %d sample'%options.baseline_per_event_limit)):
@@ -235,6 +245,7 @@ def create_report(options):
             means = adcs.data[0]
             rmses = adcs.data[1]
             pixel_idx = i
+            if i > 20 : continue
             with doc.create(pl.Figure(position='h')) as plot:
                 plt.subplots(1, 1, figsize=(10, 8))
                 plt.hist(

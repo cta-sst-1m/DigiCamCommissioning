@@ -7,5 +7,11 @@ Analysis protocols
 
 .. currentmodule:: analysis
 
+.. automodule:: analysis
 
-  protocols/baseline_parameter.rst
+.. toctree::
+  :maxdepth: 1
+  :glob:
+
+  baseline_parameter.rst
+  dark_parameter_evaluation.rst

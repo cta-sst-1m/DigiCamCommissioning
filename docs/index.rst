@@ -56,9 +56,14 @@ Protocols list
   :maxdepth: 1
   :glob:
 
-  analysis/baseline_parameter.rst
-  analysis/dark_parameter_evaluation.rst
+  analysis/index.rst
 
+
+==================
+API
+==================
+
+.. automodule::utils
 
 ==================
 Indices and tables

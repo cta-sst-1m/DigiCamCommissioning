@@ -1,4 +1,4 @@
-.. _protocols:
+.. _analysis.analyse_baseline_parameters:
 
 ==============================================
 Baseline parameters extraction
@@ -51,7 +51,7 @@ Step 1: Histogram building
 The histogram building phase uses the module data_treatement.adc_hist
 with ``h_type='MEANRMS'``
 
-.. automodapi:: DigicamCommissioning.data_treatement
+.. autofunction:: data_treatement.adc_hist.run
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Step 2: Analysis
@@ -67,3 +67,9 @@ Step 3: Display
 .. image:: BL_parameter_0.png
 .. image:: BL_parameter.png
 
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Step 4: Report
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The script generate a pdf report
