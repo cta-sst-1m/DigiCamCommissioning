@@ -113,7 +113,16 @@ def perform_analysis(options):
         gain = np.mean(np.diff(max_x))
         min_x = max_x + 0.5 * gain
         f = interp1d(dark_step_function.bin_centers, dark_step_function.data[pixel], kind='cubic')
-        counts = [f(min_x[0]), f(min_x[1])]
+
+        try:
+
+            counts = [f(min_x[0]), f(min_x[1])]
+
+        except IndexError:
+
+            log.warning('Could not find 0.5 p.e. and 1.5 p.e. for pixel %d' % options.pixel_list[pixel])
+            counts = [np.nan, np.nan]
+
         dark_count[pixel] = counts[0] / time
         cross_talk[pixel] = counts[1] / counts[0]
 
@@ -125,8 +134,11 @@ def perform_analysis(options):
             plt.axvline(min_x[1])
             plt.show()
 
-    np.savez(options.output_directory + options.analysis_result_filename, dark_count_rate=dark_count, cross_talk=cross_talk)
+    dark_step_function.fit_result = np.zeros((dark_step_function.data.shape[0], 2, 2))
+    dark_step_function.fit_result[:, 0, 0] = dark_count
+    dark_step_function.fit_result[:, 1, 0] = cross_talk
 
+    dark_step_function.save(options.output_directory + options.histo_filename)
     return
 
 
@@ -139,10 +151,12 @@ def display_results(options):
 
     # Load the data
     dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    data = np.load(options.output_directory + options.analysis_result_filename)
-    dark_count_rate = data['dark_count_rate']
-    cross_talk = data['cross_talk']
+    dark_count_rate = dark_step_function.fit_result[:, 0, 0]
+    cross_talk = dark_step_function.fit_result[:, 1, 0]
 
+    mask = ~np.isnan(dark_count_rate)
+    dark_count_rate = dark_count_rate[mask]
+    cross_talk = cross_talk[mask]
     # Display step function
     display.display_hist(dark_step_function, options=options)
 

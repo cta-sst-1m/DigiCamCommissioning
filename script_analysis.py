@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     # Output level
     parser.add_option("-v", "--verbose",
-                      action="store_false", dest="verbose", default=True,
+                      action="store_true", dest="verbose", default=False,
                       help="move to debug")
 
     # Steering of the passes
