@@ -1,0 +1,21 @@
+# Analysis module
+analysis_module   : analyse_dark_step_function
+
+# Input files
+file_basename :     dark_run/CameraDigicam@localhost.localdomain_0_000.%s.run_307.fits.fz
+baseline_param_data : baseline_parameters.npz
+file_list     :     [0,1]
+min_event         : 0
+max_event         : 10000
+
+# Output file
+histo_filename    : dark_adc_baseline.npz
+analysis_type    : fit_baseline
+
+# Event processing
+n_evt_per_batch   : 1000
+
+# Plot configuration
+adcs_min           : -50
+adcs_max           : 200
+adcs_binwidth      : 1

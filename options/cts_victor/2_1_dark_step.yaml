@@ -10,6 +10,7 @@ max_event         : 9000
 
 # Output file
 histo_filename    : dark_step_function.npz
+analysis_type    : step_function
 
 # Event processing
 n_evt_per_batch   : 1000

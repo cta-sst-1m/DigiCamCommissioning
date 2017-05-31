@@ -50,10 +50,11 @@ def create_histo(options):
         dark = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                    bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
                                    label='Pixel SPE', xlabel='Pixel ADC', ylabel='Count / ADC')
+        baseline_fit = histogram.Histogram(filename=options.output_directory + options.histo_dark,fit_only=True).fit_result
         # Get the adcs
-        adc_hist.run(dark, options, 'SPE')
+        adc_hist.run(dark, options, 'SPE', prev_fit_result=baseline_fit)
 
-    elif options.analysis_type == 'adc_template':
+    elif options.analysis_type == 'adc_template' or options.analysis_type == 'fit_baseline' :
         dark = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                    bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
                                    label='Dark LSB', xlabel='LSB', ylabel='entries')
@@ -82,6 +83,8 @@ def perform_analysis(options):
         step_function(options)
     elif options.analysis_type == 'adc_template':
         adc_template(options)
+    elif options.analysis_type == 'fit_baseline':
+        fit_baseline(options)
     elif options.analysis_type == 'single_photo_electron':
         single_photo_electron(options)
 
@@ -92,28 +95,48 @@ def display_results(options):
     :param options:
     :return:
     """
+    if options.analysis_type == 'step_function':
+        # Load the data
+        dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+        dark_count_rate = dark_step_function.fit_result[:, 0, 0]
+        cross_talk = dark_step_function.fit_result[:, 1, 0]
 
-    # Load the data
-    dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    dark_count_rate = dark_step_function.fit_result[:, 0, 0]
-    cross_talk = dark_step_function.fit_result[:, 1, 0]
+        mask = ~np.isnan(dark_count_rate)
+        dark_count_rate = dark_count_rate[mask]
+        cross_talk = cross_talk[mask]
+        # Display step function
+        display.display_hist(dark_step_function, options=options)
 
-    mask = ~np.isnan(dark_count_rate)
-    dark_count_rate = dark_count_rate[mask]
-    cross_talk = cross_talk[mask]
-    # Display step function
-    display.display_hist(dark_step_function, options=options)
+        # Display histograms of dark count rate and cross talk
+        plt.figure()
+        plt.hist(dark_count_rate * 1E3, bins='auto')
+        plt.xlabel('$f_{dark}$ [MHz]')
 
-    # Display histograms of dark count rate and cross talk
-    plt.figure()
-    plt.hist(dark_count_rate * 1E3, bins='auto')
-    plt.xlabel('$f_{dark}$ [MHz]')
+        plt.figure()
+        plt.hist(cross_talk, bins='auto')
+        plt.xlabel('XT')
 
-    plt.figure()
-    plt.hist(cross_talk, bins='auto')
-    plt.xlabel('XT')
+        plt.show()
 
-    plt.show()
+    elif options.analysis_type == 'single_photo_electron':
+
+        dark_spe = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+        #dark_spe.data = (np.cumsum(dark_spe.data,axis=-1)-np.sum(dark_spe.data,axis=-1).reshape(-1,1))*-1
+        #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+        #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+        #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+        display.display_hist(dark_spe, options=options)
+        input('press a key')
+
+    elif options.analysis_type == 'fit_baseline':
+
+        dark_adc = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+        #dark_adc.data = (np.cumsum(dark_adc.data,axis=-1)-np.sum(dark_adc.data,axis=-1).reshape(-1,1))*-1
+        # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+        # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+        # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+        display.display_hist(dark_adc, options=options, draw_fit=True, scale='linear')
+        input('press a key')
 
     return
 
@@ -325,3 +348,22 @@ def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,int
 
 def single_photo_electron(options):
     return
+
+
+def fit_baseline(options):
+    log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
+    log.info('Perform a gaussian fit of the left side of the dark (==> baseline and sigmae for full mpe)')
+
+    # Load the histogram
+    adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    # Fit the baseline and sigma_e of all pixels
+    adcs.fit(fit_dark_adc.fit_func, fit_dark_adc.p0_func, fit_dark_adc.slice_func, fit_dark_adc.bounds_func, \
+             labels_func=fit_dark_adc.labels_func)  # , limited_indices=tuple(options.pixel_list))
+    # adcs.fit(fit_2_gaussian.fit_func, fit_2_gaussian.p0_func, fit_2_gaussian.slice_func, fit_2_gaussian.bounds_func, \
+    #         labels_func=fit_2_gaussian.label_func)#, limited_indices=tuple(options.pixel_list))
+
+    # Save the fit
+    adcs.save(options.output_directory + options.histo_filename)
+
+    # Delete the histograms
+    del adcs
