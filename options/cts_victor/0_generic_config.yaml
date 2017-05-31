@@ -1,5 +1,5 @@
 # Logging
-verbose           : False
+verbose           : True
 log_file_basename : 20170508
 
 # Input files
