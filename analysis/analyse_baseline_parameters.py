@@ -153,9 +153,9 @@ def create_report(options):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     geometry_options = {
-        "head": "0.8in",
-        "margin": "1.in",
-        "bottom": "0.8in"
+        "head": "0.5in",
+        "margin": "0.5in",
+        "bottom": "0.5in"
     }
 
     doc = pl.Document('report',geometry_options=geometry_options)
@@ -165,6 +165,9 @@ def create_report(options):
     doc.preamble.append(pl.Command('date', pl.NoEscape(r'\today')))
 
     doc.append(pl.NoEscape(r'\maketitle'))
+
+    doc.append(pl.NoEscape(r'\tableofcontents'))
+    doc.append(pl.NoEscape(r'\newpage'))
 
     # SUMMARY
     with doc.create(pl.Section('Summary')):
@@ -184,10 +187,10 @@ def create_report(options):
 
         # BADLY RESPONDING PIXELS
         with doc.create(pl.Subsection('Badly responding Pixels')):
-            doc.append('Pixel showing a very small variation of the baseline:')
+            doc.append('Pixel showing a very small variation of the baseline, potential issue:')
             with doc.create(pl.Itemize()) as itemize:
-                means = adcs.data[0]
-                for p in np.where(np.nanstd(means,axis=-1)<0.2)[0]:
+                rmses = adcs.data[1]
+                for p in np.where(np.nanstd(rmses,axis=-1)<0.2)[0]:
                     itemize.add_item('Pixel %d, corresponding to AC LED %d and DC LED %d' %
                                      (options.pixel_list[p], options.cts.pixel_to_led['AC'][options.pixel_list[p]],
                                       options.cts.pixel_to_led['DC'][options.pixel_list[p]]))
@@ -245,12 +248,11 @@ def create_report(options):
             means = adcs.data[0]
             rmses = adcs.data[1]
             pixel_idx = i
-            if i > 20 : continue
             with doc.create(pl.Figure(position='h')) as plot:
                 plt.subplots(1, 1, figsize=(10, 8))
                 plt.hist(
-                    (means[pixel_idx].astype(float)),bins=200)
-                plt.xlabel('$<BL>_{%d}$' %(options.baseline_per_event_limit))
+                    (rmses[pixel_idx].astype(float)),bins=200)
+                plt.xlabel('$\sigma{BL}_{%d}$' %(options.baseline_per_event_limit))
                 plt.savefig(options.output_directory + '/reports/plots/pixel_%d_full1d.pdf'%p)
                 plt.close()
                 plt.subplots(1, 1, figsize=(10, 8))
@@ -281,17 +283,12 @@ def create_report(options):
                 plt.close()
                 with doc.create(pl.SubFigure(
                         position='b',
-                        width=pl.NoEscape(r'0.3\linewidth'))) as left_fig:
-                    left_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_full1d.pdf' % p, width='7cm')
-                    left_fig.add_caption('Average baselines, std_dev %f'%np.nanstd(means[pixel_idx]))
-                with doc.create(pl.SubFigure(
-                        position='b',
-                        width=pl.NoEscape(r'0.3\linewidth'))) as left_fig:
+                        width=pl.NoEscape(r'0.45\linewidth'))) as left_fig:
                     left_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_1d.pdf' % p, width='7cm')
                     left_fig.add_caption('Normalised std deviation of the baseline')
                 with doc.create(pl.SubFigure(
                         position='b',
-                        width=pl.NoEscape(r'0.3\linewidth'))) as right_fig:
+                        width=pl.NoEscape(r'0.45\linewidth'))) as right_fig:
                     right_fig.add_image(options.output_directory + '/reports/plots/pixel_%d_2d.pdf' % p, width='7cm')
                     right_fig.add_caption('Normalised std deviation vs normalised mode of the baseline')
                 plot.add_caption(
@@ -299,7 +296,7 @@ def create_report(options):
                         '\\textbf{(Pixel %d)} Baseline is evaluated over %d samples' %
                         (p,options.baseline_per_event_limit)))
 
-            if i%2 == 0:
+            if i%2 == 0 and i!=0:
                 doc.append(pl.NoEscape(r'\clearpage'))
     doc.generate_pdf(options.output_directory + '/reports/baseline_parameters', clean_tex=False)
 
