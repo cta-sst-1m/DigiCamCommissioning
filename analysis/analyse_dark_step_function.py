@@ -10,6 +10,7 @@ import logging,sys
 import numpy as np
 import peakutils
 from scipy.interpolate import interp1d
+from scipy.interpolate import splev, splrep
 
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
@@ -61,6 +62,7 @@ def perform_analysis(options):
     dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
     log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
 
+
     y = dark_step_function.data
     x = np.tile(dark_step_function.bin_centers, (y.shape[0], 1))
 
@@ -104,20 +106,33 @@ def perform_analysis(options):
             log.warning('Could not find 0.5 p.e. and 1.5 p.e. for pixel %d' % options.pixel_list[pixel])
             counts = [np.nan, np.nan]
 
+        # spline step function method
+
+        spline_step_function = splrep(dark_step_function.bin_centers, dark_step_function.data[pixel])
+
+        #x_around_minima = np.linspace(0, max_x[1] + 0.5 * gain, 100)
+        #spline_step_function_second_derivative = splev(x_around_minima, tck=spline_step_function, der=2)
+
+
         dark_count[pixel] = counts[0] / time
         cross_talk[pixel] = counts[1] / counts[0]
 
         if options.verbose:
-
+            x_spline = np.linspace(dark_step_function.bin_centers[0], dark_step_function.bin_centers[1],
+                        num=len(dark_step_function.bin_centers) * 20)
             plt.figure()
-            plt.semilogy(dark_step_function.bin_centers, dark_step_function.data[pixel])
+            plt.semilogy(x_spline, splev(x_spline, spline_step_function), label='spline')
+            plt.semilogy(x_spline, splev(x_spline, spline_step_function, der=2), label='spline second der')
+            plt.semilogy(dark_step_function.bin_centers, dark_step_function.data[pixel], label='data')
             plt.axvline(min_x[0])
             plt.axvline(min_x[1])
+            plt.legend()
             plt.show()
 
-    dark_step_function.fit_result = np.zeros((dark_step_function.data.shape[0], 2, 2))
+    dark_step_function.fit_result = np.zeros((dark_step_function.data.shape[0], 4, 2))
     dark_step_function.fit_result[:, 0, 0] = dark_count
     dark_step_function.fit_result[:, 1, 0] = cross_talk
+
 
     dark_step_function.save(options.output_directory + options.histo_filename)
     return
