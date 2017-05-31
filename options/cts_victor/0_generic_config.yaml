@@ -1,5 +1,5 @@
 # Logging
-verbose           : True
+verbose           : False
 log_file_basename : 20170508
 
 # Input files
@@ -11,7 +11,7 @@ output_directory  : /data/datasets/CTA/DATA/20170508/
 
 # Camera Configuration
 angle_cts         : 120.
-pixel_list : [700, 707]
+#pixel_list : [700, 707]
 
 
 # Base definition for the signal extraction
