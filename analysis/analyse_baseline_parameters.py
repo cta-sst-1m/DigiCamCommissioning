@@ -166,6 +166,9 @@ def create_report(options):
 
     doc.append(pl.NoEscape(r'\maketitle'))
 
+    doc.append(pl.NoEscape(r'\tableofcontents'))
+    doc.append(pl.NoEscape(r'\newpage'))
+
     # SUMMARY
     with doc.create(pl.Section('Summary')):
         # PIXEL LIST
@@ -184,7 +187,7 @@ def create_report(options):
 
         # BADLY RESPONDING PIXELS
         with doc.create(pl.Subsection('Badly responding Pixels')):
-            doc.append('Pixel showing a very small variation of the baseline:')
+            doc.append('Pixel showing a very small variation of the baseline, potential issue:')
             with doc.create(pl.Itemize()) as itemize:
                 rmses = adcs.data[1]
                 for p in np.where(np.nanstd(rmses,axis=-1)<0.2)[0]:
@@ -245,7 +248,6 @@ def create_report(options):
             means = adcs.data[0]
             rmses = adcs.data[1]
             pixel_idx = i
-            if i > 20 : continue
             with doc.create(pl.Figure(position='h')) as plot:
                 plt.subplots(1, 1, figsize=(10, 8))
                 plt.hist(
@@ -294,7 +296,7 @@ def create_report(options):
                         '\\textbf{(Pixel %d)} Baseline is evaluated over %d samples' %
                         (p,options.baseline_per_event_limit)))
 
-            if i%3 == 0 and i!=0:
+            if i%2 == 0 and i!=0:
                 doc.append(pl.NoEscape(r'\clearpage'))
     doc.generate_pdf(options.output_directory + '/reports/baseline_parameters', clean_tex=False)
 

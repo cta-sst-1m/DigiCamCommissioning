@@ -34,6 +34,8 @@ def create_histo(options):
         - 'adcs_binwidth'    : the bin width for the adcs histo                   (int)
     :return:
     """
+    dark = None
+
     if options.analysis_type == 'step_function':
         dark = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                 bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
@@ -41,8 +43,9 @@ def create_histo(options):
 
         # Get the adcs
         adc_hist.run(dark, options, h_type='STEPFUNCTION')
+
     elif options.analysis_type == 'single_photo_electron':
-        adcs = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+        dark = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                    bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
                                    label='Pixel SPE', xlabel='Pixel ADC', ylabel='Count / ADC')
         # Get the adcs
