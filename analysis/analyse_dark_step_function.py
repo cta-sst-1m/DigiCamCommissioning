@@ -11,6 +11,7 @@ import numpy as np
 import peakutils
 from scipy.interpolate import interp1d
 from scipy.interpolate import splev, splrep
+from spectra_fit import fit_dark_adc
 
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
@@ -77,10 +78,50 @@ def perform_analysis(options):
         - 'histo_filename'   : the name of the file containing the histogram      (str)
     :return:
     """
+    if options.analysis_type == 'step_function':
+        step_function(options)
+    elif options.analysis_type == 'adc_template':
+        adc_template(options)
+    elif options.analysis_type == 'single_photo_electron':
+        single_photo_electron(options)
+
+
+def display_results(options):
+    """
+    Display the analysis results
+    :param options:
+    :return:
+    """
+
+    # Load the data
+    dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    dark_count_rate = dark_step_function.fit_result[:, 0, 0]
+    cross_talk = dark_step_function.fit_result[:, 1, 0]
+
+    mask = ~np.isnan(dark_count_rate)
+    dark_count_rate = dark_count_rate[mask]
+    cross_talk = cross_talk[mask]
+    # Display step function
+    display.display_hist(dark_step_function, options=options)
+
+    # Display histograms of dark count rate and cross talk
+    plt.figure()
+    plt.hist(dark_count_rate * 1E3, bins='auto')
+    plt.xlabel('$f_{dark}$ [MHz]')
+
+    plt.figure()
+    plt.hist(cross_talk, bins='auto')
+    plt.xlabel('XT')
+
+    plt.show()
+
+    return
+
+
+def step_function(options):
 
     dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
     log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
-
 
     y = dark_step_function.data
     x = np.tile(dark_step_function.bin_centers, (y.shape[0], 1))
@@ -129,8 +170,8 @@ def perform_analysis(options):
 
         spline_step_function = splrep(dark_step_function.bin_centers, dark_step_function.data[pixel])
 
-        #x_around_minima = np.linspace(0, max_x[1] + 0.5 * gain, 100)
-        #spline_step_function_second_derivative = splev(x_around_minima, tck=spline_step_function, der=2)
+        # x_around_minima = np.linspace(0, max_x[1] + 0.5 * gain, 100)
+        # spline_step_function_second_derivative = splev(x_around_minima, tck=spline_step_function, der=2)
 
 
         dark_count[pixel] = counts[0] / time
@@ -138,7 +179,7 @@ def perform_analysis(options):
 
         if options.verbose:
             x_spline = np.linspace(dark_step_function.bin_centers[0], dark_step_function.bin_centers[1],
-                        num=len(dark_step_function.bin_centers) * 20)
+                                   num=len(dark_step_function.bin_centers) * 20)
             plt.figure()
             plt.semilogy(x_spline, splev(x_spline, spline_step_function), label='spline')
             plt.semilogy(x_spline, splev(x_spline, spline_step_function, der=2), label='spline second der')
@@ -152,39 +193,135 @@ def perform_analysis(options):
     dark_step_function.fit_result[:, 0, 0] = dark_count
     dark_step_function.fit_result[:, 1, 0] = cross_talk
 
-
     dark_step_function.save(options.output_directory + options.histo_filename)
     return
 
 
-def display_results(options):
-    """
-    Display the analysis results
-    :param options:
+def adc_template(options):
+    log = logging.getLogger(sys.modules['__main__'].__name__ + __name__)
+    log.info('Perform an analytic extraction of mu_XT ( ==> baseline and sigmae for full mpe )')
+
+    mpes_full = histogram.Histogram(filename=options.output_directory + options.full_histo_filename, fit_only=True)
+    mpes_full_fit_result = np.copy(mpes_full.fit_result)
+    del mpes_full
+
+    # Load the histogram
+    dark_hist = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    dark_hist_for_baseline = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    dark_hist_for_baseline.fit(fit_dark_adc.fit_func, fit_dark_adc.p0_func, fit_dark_adc.slice_func,
+                               fit_dark_adc.bounds_func, \
+                               labels_func=fit_dark_adc.labels_func)
+
+    dark_hist.fit_result = np.zeros((len(options.pixel_list), 3, 2))
+    dark_hist.fit_result_label = np.array(['baseline [LSB]', '$f_{dark}$ [MHz]', '$\mu_{XT}$'])
+
+    x = dark_hist.bin_centers
+
+    # print(mpes_full_fit_result.shape)
+    # print(mpes_full_fit_result[1 , 0, 0])
+    # print(mpes_full_fit_result[1 , 1, 0])
+    # print(mpes_full_fit_result[1 , 2, 0])
+    # print(mpes_full_fit_result[1 , 3, 0])
+    baseline = dark_hist.fit_result[..., 1, 0]
+    baseline_error = dark_hist.fit_result[..., 1, 1]
+    gain = mpes_full_fit_result[..., 1, 0]
+    gain_error = mpes_full_fit_result[..., 1, 1]
+    sigma_e = mpes_full_fit_result[..., 2, 0]
+    sigma_e_error = mpes_full_fit_result[..., 2, 1]
+    sigma_1 = mpes_full_fit_result[..., 3, 0]
+    sigma_1_error = mpes_full_fit_result[..., 3, 1]
+
+    print(baseline)
+
+    integ = np.load(options.output_directory + options.pulse_shape_filename)
+    integral = integ['integrals']
+    integral_square = integ['integrals_square']
+
+    for pixel in range(len(options.pixel_list)):
+
+        y = dark_hist.data[pixel]
+
+        if options.mc:
+            baseline = 2010
+            gain = 5.6
+            sigma_1 = 0.48
+            sigma_e = np.sqrt(0.86 ** 2.)
+
+        dark_parameters = compute_dark_parameters(x, y, baseline[pixel], gain[pixel], sigma_1[pixel], sigma_e[pixel],
+                                                  integral[pixel], integral_square[pixel])
+
+        # print(pixel)
+        # print(baseline)
+        # print(dark_hist.fit_result.shape)
+
+        dark_hist.fit_result[pixel, 1, 0] = dark_parameters[0, 0]
+        dark_hist.fit_result[pixel, 1, 1] = dark_parameters[0, 1]
+        dark_hist.fit_result[pixel, 2, 0] = dark_parameters[1, 0]
+        dark_hist.fit_result[pixel, 2, 1] = dark_parameters[1, 1]
+
+    dark_hist.fit_result[:, 0, 0] = baseline
+    dark_hist.fit_result[:, 0, 1] = baseline_error
+
+    # dark_hist.save(options.output_directory + options.histo_filename.split('.npz')[0]+'_xt.npz')
+    dark_hist.save(options.output_directory + options.histo_filename)
+    del dark_hist
+
+
+def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,integral_square):
+    '''
+    In developement
+    :param x:
+    :param y:
+    :param baseline:
+    :param gain:
+    :param sigma_1:
+    :param sigma_e:
     :return:
+    '''
+
+    x = x - baseline
+    sigma_1 = sigma_1/gain
+    mean_adc = np.average(x, weights=y)
+    sigma_2_adc = np.average((x - mean_adc) ** 2, weights=y) - 1./12.
+    pulse_shape_area = integral * gain
+    pulse_shape_2_area = integral_square * gain**2
+    alpha = (mean_adc * pulse_shape_2_area)/((sigma_2_adc - sigma_e**2)*pulse_shape_area)
+
+    if (1./alpha - sigma_1**2)<0 or np.isnan(1./alpha - sigma_1**2):
+        mu_borel = np.nan
+        mu_xt_dark = np.nan
+        f_dark = np.nan
+
+    elif np.sqrt(1./alpha - sigma_1**2)<1:
+
+        mu_xt_dark = 0.
+        f_dark = mean_adc / pulse_shape_area
+
+
+
+    else:
+
+        mu_borel = np.sqrt(1./alpha - sigma_1**2)
+#        mu_borel = 1./(1.-0.06)
+        mu_xt_dark = 1. - 1./mu_borel
+        f_dark = mean_adc / mu_borel / pulse_shape_area
+
+    f_dark_error = np.nan
+    mu_xt_dark_error = np.nan
+
+    """
+    print('gain [ADC/p.e.]: %0.4f'%gain)
+    print('baseline [LSB]: %0.4f'%baseline)
+    print('sigma_e [LSB]: %0.4f'%sigma_e)
+    print('sigma_1 [LSB]: %0.4f'%(sigma_1*gain))
+    print('mean adc [LSB]: %0.4f' % mean_adc)
+    print('sigma_2 adc [LSB]: %0.4f' % sigma_2_adc)
+    print ('mu_borel : %0.4f [p.e.]'%mu_borel)
+    print('f_dark %0.4f [MHz]' %(f_dark*1E3))
+    print('dark XT : %0.4f [p.e.]' %mu_xt_dark)
     """
 
-    # Load the data
-    dark_step_function = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    dark_count_rate = dark_step_function.fit_result[:, 0, 0]
-    cross_talk = dark_step_function.fit_result[:, 1, 0]
+    return np.array([[f_dark*1E3, f_dark_error*1E3], [mu_xt_dark, mu_xt_dark_error]])
 
-    mask = ~np.isnan(dark_count_rate)
-    dark_count_rate = dark_count_rate[mask]
-    cross_talk = cross_talk[mask]
-    # Display step function
-    display.display_hist(dark_step_function, options=options)
-
-    # Display histograms of dark count rate and cross talk
-    plt.figure()
-    plt.hist(dark_count_rate * 1E3, bins='auto')
-    plt.xlabel('$f_{dark}$ [MHz]')
-
-    plt.figure()
-    plt.hist(cross_talk, bins='auto')
-    plt.xlabel('XT')
-
-    plt.show()
-
+def single_photo_electron(options):
     return
-
