@@ -2,20 +2,12 @@
 
 
 # external modules
-import matplotlib.pyplot as plt
-import logging
-from tqdm import tqdm
+import random
 
 # internal modules
-from utils import display, histogram, geometry
-import logging,sys
-import numpy as np
-from utils.logger import TqdmToLogger
 from utils.pulse_template import PulseTemplate
+from data_treatement import pulse_shape
 
-
-from ctapipe import visualization
-import scipy
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
 
@@ -43,17 +35,37 @@ def create_histo(options):
     :return:
     """
 
+    # Create the pulse templates
     pulse_templates = PulseTemplate(n_pixels=len(options.pixel_list))
-
-
-
     average_pulses = pulse_shape.run(options=options)
 
-    print(average_pulses.shape)
-
+    # Interpolate data points to get pulse template (spline)
     pulse_templates.interpolate(pulse_data=average_pulses, pixels_id=options.pixel_list)
+
+    # Save pulse templates
+    pulse_templates.save(options.output_directory + options.histo_filename)
+
+    return
+
+
+def perform_analysis(options):
+
+    pulse_templates = PulseTemplate(filename=options.output_directory + options.histo_filename)
 
     pulse_templates.save(options.output_directory + options.histo_filename)
 
-
     return
+
+
+def display_results(options):
+
+    pulse_templates = PulseTemplate(filename=options.output_directory + options.histo_filename)
+
+    pixels_id = random.sample(options.pixel_list, 5)
+
+    pulse_templates.display(pixels_id, derivative=0, moment=1)
+    pulse_templates.display(pixels_id, derivative=1, moment=1)
+    pulse_templates.display(pixels_id, derivative=0, moment=2)
+    pulse_templates.display(pixels_id, derivative=1, moment=2)
+
+    return 
