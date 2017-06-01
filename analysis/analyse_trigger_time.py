@@ -41,12 +41,16 @@ def create_histo(options):
     """
 
     time = []
-    trigger_mask = []
+    #trigger_mask = []
+    trigger_mask = None
 
 
     trigger_time.run(time_list=time, options=options, trigger_mask=trigger_mask)
     time = np.array(time)
-    time_interval = np.diff(time)
+    time = np.swapaxes(time, 0, 1)
+    print(time.shape)
+    time_interval = np.diff(time, axis=1)
+    print(time_interval.shape)
     np.savez(options.output_directory + options.histo_filename, time=time, time_interval=time_interval, trigger_mask=trigger_mask)
 
     return
@@ -63,60 +67,96 @@ def perform_analysis(options):
     """
     import matplotlib.pyplot as plt
     data = np.load(options.output_directory + options.histo_filename)
-    time = data['time']
-    time_interval = data['time_interval']
-    trigger_mask = data['trigger_mask']
-    time_interval = time_interval[(time_interval<options.max_time) * (time_interval>=0)]
+    param = np.zeros((data['time'].shape[0], 2))
 
-    param = expon.fit(time_interval, floc=0)
-    np.savez(options.output_directory + options.histo_filename, time=time, time_interval=time_interval, trigger_mask=trigger_mask, param=param)
+    for i in range(data['time'].shape[0]):
+        time = data['time'][i]
+        time_interval = data['time_interval'][i]
+        trigger_mask = data['trigger_mask']
+        #time_interval = time_interval[(time_interval<options.max_time) * (time_interval >= 0)]
+        param[i] = expon.fit(time_interval, floc=0)
+
+    np.savez(options.output_directory + options.histo_filename, time=data['time'], time_interval=data['time_interval'], trigger_mask=trigger_mask, param=param)
+
+    time_local = data['time'][0]
+    print(time_local)
+    np.savetxt('time_stamps_ucts_local.txt', time_local)
 
     return
 
+
 def display_results(options):
+
+    data = np.load(options.output_directory + options.histo_filename)
+
+    import matplotlib.pyplot as plt
+
+    for i in range(data['time'].shape[0]):
+
+        time = data['time'][i]
+        time_interval = data['time_interval'][i]
+        trigger_mask = data['trigger_mask']
+
+        print(time.shape)
+        print((np.mean(time_interval)))
+        print(np.std(time_interval))
+
+        try:
+
+            param = data['param'][i]
+
+        except:
+
+            param = None
+
+        plt.figure()
+        hist = plt.hist(time_interval, bins=np.linspace(0, np.max(time_interval), 100), log=True, normed=False, align='mid')
+        n_entries = np.sum(hist[0])
+        bin_width = hist[1][1] - hist[1][0]
+
+        if param is not None:
+
+            pdf_fit = expon(loc=param[0], scale=param[1])
+            plt.plot(hist[1], n_entries*bin_width*pdf_fit.pdf(hist[1]), label='$f_{trigger}$ = %0.2f [Hz]' %(1E9/param[1]))
+            plt.xlabel('$\Delta t$ [ns]')
+            plt.legend(loc='best')
+
+
+        plt.figure()
+        plt.hist(time/1E9, bins=np.linspace(np.min(time), np.max(time), 40)/1E9)
+        plt.xlabel('t [s]')
+
+        plt.figure()
+        plt.bar(time / 1E9, np.ones(time.shape), width=0.001)
+        plt.xlabel('t [s]')
+
+        try:
+
+            plt.figure()
+            plt.bar(time[trigger_mask]/1E9, np.ones(time[trigger_mask].shape), width=param[1]/4/1E9, align='center', label='Above threshold', color='g')
+            plt.xlabel('t [s]')
+            plt.legend(loc='best')
+
+            plt.figure()
+            plt.bar(time[~trigger_mask]/1E9, np.ones(time[~trigger_mask].shape), width=param[1]/4/1E9, align='center', label='Below threshold', color='r')
+            plt.xlabel('t [s]')
+            plt.legend(loc='best')
+
+        except:
+
+            pass
+
+        return
+
+def save(options):
 
     data = np.load(options.output_directory + options.histo_filename)
     time = data['time']
     time_interval = data['time_interval']
     trigger_mask = data['trigger_mask']
 
-    try:
-
-        param = data['param']
-
-    except:
-
-        param = None
-
-    import matplotlib.pyplot as plt
-    plt.figure()
-    hist = plt.hist(time_interval, bins=np.linspace(0, options.max_time,100), log=True, normed=False)
-    n_entries = np.sum(hist[0])
-    bin_width = hist[1][1] - hist[1][0]
-
-    if param is not None:
-
-        pdf_fit = expon(loc=param[0], scale=param[1])
-        plt.plot(hist[1], n_entries*bin_width*pdf_fit.pdf(hist[1]), label='$f_{trigger}$ = %0.2f [Hz]' %(1E9/param[1]))
-        plt.xlabel('$\Delta t$ [ns]')
-        plt.legend(loc='best')
-
-    plt.figure()
-    plt.hist(time/1E9, bins=np.linspace(np.min(time), np.max(time), 40)/1E9)
-    plt.xlabel('t [s]')
-
-    plt.figure()
-    plt.bar(time[trigger_mask]/1E9, np.ones(time[trigger_mask].shape), width=param[1]/4/1E9, align='center', label='Above threshold', color='g')
-    plt.xlabel('t [s]')
-    plt.legend(loc='best')
-
-    plt.figure()
-    plt.bar(time[~trigger_mask]/1E9, np.ones(time[~trigger_mask].shape), width=param[1]/4/1E9, align='center', label='Below threshold', color='r')
-    plt.xlabel('t [s]')
-    plt.legend(loc='best')
+    np.savetxt('time_stamps_ucts.txt', time)
 
     return
-
-
 
 

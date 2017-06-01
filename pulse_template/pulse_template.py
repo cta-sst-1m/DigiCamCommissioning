@@ -1,16 +1,23 @@
 import numpy as np
 from scipy.optimize import splev, splrep, splint, splder
+import pickle
 
 
 class PulseTemplate:
 
-    def __init__(self, n_pixels=1296):
+    def __init__(self, n_pixels=1296, filename=None):
 
-        self.n_pixels = n_pixels
-        self.splines = [None]*self.n_pixels
-        self.splines_derivative = [None]*self.n_pixels
-        self.t_min = 0
-        self.t_max = None
+        if filename is not None:
+
+            self._load(filename)
+
+        else:
+
+            self.n_pixels = n_pixels
+            self.splines = [None]*self.n_pixels
+            self.splines_derivative = [None]*self.n_pixels
+            self.t_min = 0
+            self.t_max = None
 
     def interpolate(self, pulse_data, pixels_id, **kwargs):
 
@@ -26,9 +33,9 @@ class PulseTemplate:
 
             self.spines_derivative[pixel] = splder(self.splines[pixel])
 
-    def evaluate(self, time, pixels_id):
+    def evaluate(self, time, pixels_id, derivative=0):
 
-        return [splev(time, self.splines[pixel]) for pixel in pixels_id]
+        return [splev(time, self.splines[pixel], der=derivative) for pixel in pixels_id]
 
     def compute_integral(self, pixels_id):
 
@@ -38,7 +45,18 @@ class PulseTemplate:
 
         pass
 
+    def save(self, filename):
 
+        with open(filename, 'wb') as output:
+
+            pickle.dump(self.__dict__, output, pickle.HIGHEST_PROTOCOL)
+
+    def _load(self, filename):
+
+        with open(filename, 'rb') as output:
+
+            tmp_dict = pickle.load(output)
+            self.__dict__.update(tmp_dict)
 
 
 
