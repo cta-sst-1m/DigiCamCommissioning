@@ -3,9 +3,11 @@
 
 # external modules
 import random
+import matplotlib.pyplot as plt
+import numpy as np
 
 # internal modules
-from utils.pulse_template import PulseTemplate
+from utils.pulse_template import NPulseTemplate
 from data_treatement import pulse_shape
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
@@ -36,13 +38,13 @@ def create_histo(options):
     """
 
     # Create the pulse templates
-    pulse_templates = PulseTemplate(n_pixels=len(options.pixel_list))
+    pulse_templates = NPulseTemplate(shape=(len(options.ac_level), len(options.dc_level)))
     average_pulses = pulse_shape.run(options=options)
 
     # Interpolate data points to get pulse template (spline)
     pulse_templates.interpolate(pulse_data=average_pulses, pixels_id=options.pixel_list)
 
-    # Save pulse templates
+    # Save the pulse template
     pulse_templates.save(options.output_directory + options.histo_filename)
 
     return
@@ -50,22 +52,34 @@ def create_histo(options):
 
 def perform_analysis(options):
 
-    pulse_templates = PulseTemplate(filename=options.output_directory + options.histo_filename)
-
-    pulse_templates.save(options.output_directory + options.histo_filename)
-
+    print('Nothing implemented')
     return
 
 
 def display_results(options):
 
-    pulse_templates = PulseTemplate(filename=options.output_directory + options.histo_filename)
+    pulse_templates = NPulseTemplate(filename=options.output_directory + options.histo_filename)
 
-    pixels_id = random.sample(options.pixel_list, 5)
+    cluster = [482, 516, 517, 518, 519, 552, 553, 554, 555, 556, 588, 589, 590, 591, 624, 625, 626, 627, 628, 661, 662]
 
-    pulse_templates.display(pixels_id, derivative=0, moment=1)
-    pulse_templates.display(pixels_id, derivative=1, moment=1)
-    pulse_templates.display(pixels_id, derivative=0, moment=2)
-    pulse_templates.display(pixels_id, derivative=1, moment=2)
+    for i in range(len(options.ac_level)):
+        for j in range(len(options.dc_level)):
 
-    return 
+            fig = plt.figure(figsize=(10, 10))
+            axis = fig.add_subplot(111)
+            axis.set_title('AC : %d, DC : %d' % (options.ac_level[i], options.dc_level[j]))
+            pulse_templates.display(cluster, indices=(i, j), axis=axis)
+            integral = pulse_templates.pulse_template[i][j].integral
+            integral_square = pulse_templates.pulse_template[i][j].integral_square
+
+            plt.figure(figsize=(10, 10))
+            plt.hist(integral[cluster], bins='auto', label='AC : %d, DC : %d' % (options.ac_level[i], options.dc_level[j]))
+            plt.xlabel('pulse integral [ns]')
+            plt.legend()
+
+            plt.figure(figsize=(10, 10))
+            plt.hist(integral_square[cluster], bins='auto', label='AC : %d, DC : %d' % (options.ac_level[i], options.dc_level[j]))
+            plt.xlabel('pulse square integral [ns]')
+            plt.legend()
+
+    return

@@ -3,6 +3,7 @@ import numpy as np
 from ctapipe.io import zfits
 import sys
 import logging
+import matplotlib.pyplot as plt
 
 # internal modules
 from utils.event_iterator import EventCounter
@@ -17,7 +18,7 @@ def run(options):
 
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
-    event_counter = EventCounter(options.min_event, options.max_event, log)
+    event_counter = EventCounter(options.min_event, options.max_event, log, level_dc_min=0, level_dc_max=len(options.dc_level) - 1, level_ac_min=0, level_ac_max=len(options.ac_level) - 1, event_per_level=options.event_per_level, event_per_level_in_file=options.event_per_level)
 
     # Get the baseline parameters if running in per event baseline subtraction mode
     params = None
@@ -61,8 +62,13 @@ def run(options):
                 data = integrate(data, options)
                 # Initialise pulse_shape
                 if counter.event_id == 0:
-                    pulse_shape = np.zeros(data.shape)
+                    pulse_shape = np.zeros((len(options.ac_level), len(options.dc_level)) + data.shape)
 
-                pulse_shape += data
+                # if options.verbose:
+                #    plt.figure()
+                #    plt.plot(data[250])
+                #    plt.show()
 
-    return pulse_shape / event_counter.event_count
+                pulse_shape[counter.level_ac, counter.level_dc, :, :] += data
+
+    return pulse_shape
