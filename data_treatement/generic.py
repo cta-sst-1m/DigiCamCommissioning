@@ -32,9 +32,9 @@ def subtract_baseline(data,event_id,options,params,baseline=None):
                 baseline = _baseline
 
     if baseline is None:
-        return data
+        return data,baseline
     else :
-        return (data - baseline[:, None])[..., options.baseline_per_event_limit:]
+        return np.round(data.astype(float) - baseline[:, None],0).astype(int)[..., options.baseline_per_event_limit:],baseline
 
 
 # Define the integration function

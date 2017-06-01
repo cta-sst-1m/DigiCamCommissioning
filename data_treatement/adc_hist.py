@@ -72,7 +72,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
 
                 data = np.array(list(event.r0.tel[telid].adc_samples.values()))
                 # Subtract the baseline and get rid of unwanted pixels
-                data = subtract_baseline(data[options.pixel_list], counter.event_id,options, params, baseline)
+                data,baseline = subtract_baseline(data[options.pixel_list], counter.event_id,options, params, baseline)
                 # Perform integration
                 data = integrate(data, options)
 
@@ -82,21 +82,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                 if counter.event_id == 0 and counter.batch_size > 0:
                     batch = np.zeros((data.shape[0], counter.batch_size, data.shape[1]), dtype=int)
 
-                if counter.fill_batch:
-                    log.debug('Treating the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
-                    # Fill the necessary histo with batch
-                    if h_type == 'ADC':
-                        hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
-                    elif h_type == 'SPE':
-                        hist.fill_with_batch(
-                            spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
-                    elif h_type == 'STEPFUNCTION':
-                        hist.data+= compute_n_peaks(batch.reshape(batch.shape[0],-1), thresholds=hist.bin_centers,min_distance=options.min_distance)
-                    else:
-                        pass
-                    # Reset the batch
-                    batch = np.zeros((data.shape[0], counter.batch_size , data.shape[1]), dtype=int)
-                    log.debug('Reading  the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
+
 
                 # Data treatement ************************************
 
@@ -114,7 +100,32 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     hist.fill_with_batch(data)
                 else:
                     # Store in batch
-                    batch[:, counter.event_id % counter.batch_size, :] = data
+                    batch[:, counter.event_id % counter.batch_size , :] = data
+
+                if counter.fill_batch:
+                    log.debug('Treating the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
+                    # Fill the necessary histo with batch
+                    if h_type == 'ADC':
+                        hist.fill_with_batch(batch.reshape(batch.shape[0], batch.shape[1] * batch.shape[2]))
+                    elif h_type == 'SPE':
+                        if type(prev_fit_result).__name__=='ndarray' :
+                            hist.fill_with_batch(
+                                spe_peaks_in_event_list(batch, prev_fit_result[:, 1, 0], prev_fit_result[:, 2, 0]))
+                        elif hasattr(options, 'baseline_per_event_limit'):
+                            hist.fill_with_batch(
+                                spe_peaks_in_event_list(batch, np.zeros((len(options.pixel_list),)),
+                                                        np.ones((len(options.pixel_list),)) *0.7 * options.window_width))
+                        else:
+                            raise Exception
+
+                    elif h_type == 'STEPFUNCTION':
+                        hist.data+= compute_n_peaks(batch.reshape(batch.shape[0],-1), thresholds=hist.bin_centers,min_distance=options.min_distance)
+                    else:
+                        pass
+                    # Reset the batch
+                    batch = np.zeros((data.shape[0], counter.batch_size , data.shape[1]), dtype=int)
+                    log.debug('Reading  the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
+
 
 
     return

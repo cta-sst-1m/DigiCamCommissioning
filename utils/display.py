@@ -291,9 +291,9 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
 
 
     h = hist.data[index]
+
     h_err = hist.errors[index]
     x = hist.bin_centers
-
 
     #print(slice)
     h_to_return = h
