@@ -21,7 +21,7 @@ __all__ = [
 def cleaning_peaks( datain ,baseline,sigma):
     data = datain
     data=data-baseline
-    data[data<2*sigma]=0
+    data[data<3*sigma]=0
     peaks = peakdetect(data, lookahead=2)[0]
     new_peaks = []
     for pp in peaks:
