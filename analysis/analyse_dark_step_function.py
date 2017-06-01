@@ -196,7 +196,6 @@ def step_function(options):
         # x_around_minima = np.linspace(0, max_x[1] + 0.5 * gain, 100)
         # spline_step_function_second_derivative = splev(x_around_minima, tck=spline_step_function, der=2)
 
-
         dark_count[pixel] = counts[0] / time
         cross_talk[pixel] = counts[1] / counts[0]
 
