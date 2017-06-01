@@ -191,24 +191,26 @@ def step_function(options):
 
         # spline step function method
 
-        spline_step_function = splrep(dark_step_function.bin_centers, dark_step_function.data[pixel])
+        spline_step_function = splrep(dark_step_function.bin_centers, dark_step_function.data[pixel], k=3, w=1./np.sqrt(dark_step_function.data[pixel]), s=10)
 
         # x_around_minima = np.linspace(0, max_x[1] + 0.5 * gain, 100)
         # spline_step_function_second_derivative = splev(x_around_minima, tck=spline_step_function, der=2)
-
 
         dark_count[pixel] = counts[0] / time
         cross_talk[pixel] = counts[1] / counts[0]
 
         if options.verbose:
-            x_spline = np.linspace(dark_step_function.bin_centers[0], dark_step_function.bin_centers[1],
+            x_spline = np.linspace(dark_step_function.bin_centers[0], dark_step_function.bin_centers[-1],
                                    num=len(dark_step_function.bin_centers) * 20)
             plt.figure()
             plt.semilogy(x_spline, splev(x_spline, spline_step_function), label='spline')
-            plt.semilogy(x_spline, splev(x_spline, spline_step_function, der=2), label='spline second der')
-            plt.semilogy(dark_step_function.bin_centers, dark_step_function.data[pixel], label='data')
+            plt.semilogy(dark_step_function.bin_centers, dark_step_function.data[pixel], label='data', linestyle='None', marker='o')
             plt.axvline(min_x[0])
             plt.axvline(min_x[1])
+            plt.legend()
+
+            plt.figure()
+            plt.plot(x_spline, ((splev(x_spline, spline_step_function, der=2))), label='spline second der')
             plt.legend()
             plt.show()
 
