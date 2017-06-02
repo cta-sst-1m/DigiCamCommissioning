@@ -338,6 +338,9 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
 
     axis.set_xlabel(hist.xlabel)
     axis.set_ylabel(hist.ylabel)
+    if scale =='log':
+        axis.set_ylim(1.,4000000.)
+        axis.set_xlim(hist.bin_centers[0],hist.bin_centers[-1])
     #axis.set_ylim(bottom=1)
     axis.xaxis.get_label().set_ha('right')
     axis.xaxis.get_label().set_position((1, 0))

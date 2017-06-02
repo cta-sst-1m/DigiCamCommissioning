@@ -13,6 +13,8 @@ from scipy.interpolate import interp1d
 from scipy.interpolate import splev, splrep
 from spectra_fit import fit_dark_adc
 
+import matplotlib.cm as cm
+
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
@@ -120,22 +122,54 @@ def display_results(options):
 
     elif options.analysis_type == 'single_photo_electron':
 
+        from utils.peakdetect import peakdetect
+
         dark_spe = histogram.Histogram(filename=options.output_directory + options.histo_filename)
         #dark_spe.data = (np.cumsum(dark_spe.data,axis=-1)-np.sum(dark_spe.data,axis=-1).reshape(-1,1))*-1
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         display.display_hist(dark_spe, options=options)
+        peaks=peakdetect(dark_spe.data[0], lookahead=2)[0]
+        for i,p in enumerate(peaks):
+            print(dark_spe.bin_centers[p[0]],p[1])
+            if i==0:continue
+            print(peaks[i][1]/peaks[i-1][1])
+            print(dark_spe.bin_centers[peaks[i][0]]-dark_spe.bin_centers[peaks[i-1][0]])
+
         input('press a key')
 
     elif options.analysis_type == 'fit_baseline':
 
         dark_adc = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+        #print(col_curve)
+        #print(col_curve.shape)
+        plt.subplots(1,1,figsize=(10,8))
+        fadc_list = []
+        for i in range(dark_adc.data.shape[0]):
+            cmap = cm.get_cmap('nipy_spectral')
+            fadc_mult = options.cts.camera.Pixels[options.pixel_list[i]].fadc
+            sector = options.cts.camera.Pixels[options.pixel_list[i]].sector
+            fadc = fadc_mult + 9 * (sector-1)
+            #col_curve = cmap(float(i)/float(dark_adc.data.shape[0] + 1))
+            col_curve = cmap(float(fadc)/float(9*3))
+            if fadc in fadc_list:
+                plt.plot(dark_adc.bin_centers,dark_adc.data[i], color=col_curve, linestyle='-', linewidth=2)
+            else:
+                plt.plot(dark_adc.bin_centers,dark_adc.data[i], color=col_curve, linestyle='-', linewidth=2,label= "FADC %d Sector %d"%(fadc_mult,sector))
+                print(fadc,float(fadc)/float(9*3))
+            fadc_list.append(fadc)
+        plt.xlabel('LSB')
+        plt.ylabel('Counts')
+        plt.legend()
+        plt.yscale('log')
+        plt.ylim(1.,np.max(dark_adc.data*1.5))
+
         #dark_adc.data = (np.cumsum(dark_adc.data,axis=-1)-np.sum(dark_adc.data,axis=-1).reshape(-1,1))*-1
         # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
-        display.display_hist(dark_adc, options=options, draw_fit=True, scale='linear')
+        display.display_hist(dark_adc, options=options, draw_fit=True)
         input('press a key')
 
     return

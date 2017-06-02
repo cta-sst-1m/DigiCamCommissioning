@@ -6,6 +6,7 @@
 import logging
 import sys
 import pylatex as pl
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
@@ -254,6 +255,28 @@ def create_report(options):
                 plot.add_image(options.output_directory + 'reports/plots/summary_2.pdf'%p,width='7cm')
                 plot.add_image(options.output_directory + 'reports/plots/summary_3.pdf'%p,width='7cm')
                 plt.close()
+
+            with doc.create(pl.Figure(position='h')) as plot:
+                plt.subplots(1, 1, figsize=(10, 8))
+                for i in range(adcs.data.shape[1]):
+                    cmap = cm.get_cmap('viridis')
+                    col_curve = cmap(float(i) / float(adcs.data.shape[1] + 1))
+                    plt.plot(adcs.bin_centers, adcs.data[0,i], color=col_curve, linestyle='-', linewidth=2)
+                plt.xlabel('LSB')
+                plt.ylabel('Counts')
+                plt.ylim(1., np.max(adcs.data[0] * 1.2))
+                plt.savefig(options.output_directory + 'reports/plots/summary_4.pdf')
+                plot.add_caption('Baseline averages for %d samples distibutions for all pixels'%options.baseline_per_event_limit)
+                plt.subplots(1, 1, figsize=(10, 8))
+                for i in range(adcs.data.shape[1]):
+                    cmap = cm.get_cmap('viridis')
+                    col_curve = cmap(float(i) / float(adcs.data.shape[1] + 1))
+                    plt.plot(adcs.bin_centers, adcs.data[0,i], color=col_curve, linestyle='-', linewidth=2)
+                plt.xlabel('LSB')
+                plt.ylabel('Counts')
+                plt.ylim(1., np.max(adcs.data[1] * 1.2))
+                plt.savefig(options.output_directory + 'reports/plots/summary_4.pdf')
+                plot.add_caption('Baseline standard deviation for %d samples distibutions for all pixels'%options.baseline_per_event_limit)
 
     doc.append(pl.NoEscape(r'\clearpage'))
     
