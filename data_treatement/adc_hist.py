@@ -53,10 +53,10 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
         # Open the file
         _url = options.directory + options.file_basename % file
         if options.mc:
-            log.info('Running on MC data')
+            log.debug('Running on MC data')
             inputfile_reader = hdf5_mc_event_source(url=_url, max_event=options.max_event, events_per_dc_level=options.max_event, events_per_ac_level=0, dc_start=0, ac_start=0)
         else:
-            log.info('Running on DigiCam data')
+            log.debug('Running on DigiCam data')
             inputfile_reader = zfits.zfits_event_source(url=_url, max_events=options.max_event)
 
         log.debug('--|> Moving to file %s' % _url)
@@ -89,8 +89,9 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
                     # Get the mean and std deviations
                     _baseline = np.mean(data[..., 0:options.baseline_per_event_limit], axis=-1)
                     _rms = np.std(data[..., 0:options.baseline_per_event_limit], axis=-1)
-                    hist.data[0, ..., counter.event_id] = _baseline
-                    hist.data[1, ..., counter.event_id] = _rms
+                    hist.fill(np.append(_baseline.reshape(1,-1),_rms.reshape(1,-1),axis=0))
+                    #hist.data[0, ..., counter.event_id] = _baseline
+                    #hist.data[1, ..., counter.event_id] = _rms
                 #elif h_type == 'STEPFUNCTION':
                     # Get the number of peak above threshold
                 #    hist.data += compute_n_peaks(data, thresholds=hist.bin_centers, min_distance=options.min_distance)

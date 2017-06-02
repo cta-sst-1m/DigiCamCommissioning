@@ -4,7 +4,7 @@
 Parameters extraction from dark runs
 ==============================================
 
-.. currentmodule:: analysis.analyse_dark_step_function
+.. currentmodule:: analysis.analyse_dark
 
 The aim of this module is to evaluate the parameters of the pixels
 from dark runs. There are several analysis implemented:

@@ -23,7 +23,7 @@ def subtract_baseline(data,event_id,options,params,baseline=None):
 
             # Get the pixel for which the rms is good, ie. there have been no huge fluctuation in the
             # samples in which it was evaluated
-            ind_good_baseline = (_rms - params[:, 2]) / params[:, 3] < 0.5
+            ind_good_baseline = np.abs(_rms - params[1, :, 1 , 0]) / params[1, : , 2 , 0] < 2
             # If at least one event was computed, only update the previous baseline for the pixel with no
             # large fluctuations
             if event_id > 0:

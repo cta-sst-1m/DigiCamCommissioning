@@ -543,6 +543,7 @@ class Histogram:
                                                                        config=config[indices]),
                                                      fixed_param=list_fixed_param,force_quiet=force_quiet)
             # make sure sizes matches
+            print(indices,fit_res.shape,self.fit_result[indices].shape)
             if self.fit_result[indices].shape[-2] < fit_res.shape[-2]:
                 num_column_to_add = fit_res.shape[-2] - self.fit_result[indices].shape[-2]
                 additional_shape = list(self.fit_result.shape)

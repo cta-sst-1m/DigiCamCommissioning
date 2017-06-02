@@ -2,12 +2,16 @@
 analysis_module   : analyse_baseline_parameters
 
 # Input files
-file_basename :     dark_run/CameraDigicam@localhost.localdomain_0_000.%s.run_307.fits.fz
-file_list     :     [0]
+file_basename :     dark_run/CameraDigicam@localhost.localdomain_0_000.%s.run_368.fits.fz
+file_list     :     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                      21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                       40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
+                        60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+                        80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98]
 min_event         : 0
-max_event         : 9000
+max_event         : 500000
 
 # Output file
-output_directory  : /data/datasets/CTA/DATA/20170508/
+output_directory  : /data/datasets/CTA/DATA/20170601/
 histo_filename    : baseline_parameters.npz
 
