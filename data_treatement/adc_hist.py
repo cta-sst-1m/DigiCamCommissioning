@@ -9,6 +9,7 @@ from data_treatement.generic import subtract_baseline,integrate
 from utils.event_iterator import EventCounter
 from utils.histogram import Histogram
 from utils.peakdetect import spe_peaks_in_event_list,compute_n_peaks
+from utils.mc_reader import hdf5_mc_event_source
 
 def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
     """
@@ -53,9 +54,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None):
         _url = options.directory + options.file_basename % file
         if options.mc:
             log.debug('Running on MC data')
-            # TODO Update (Cyril)
-            inputfile_reader = None
-            # ToyReader(filename=_url, id_list=[0],max_events=options.evt_max,n_pixel=options.n_pixels)
+            inputfile_reader = hdf5_mc_event_source(url=_url, max_event=options.max_event, events_per_dc_level=options.max_event, events_per_ac_level=0, dc_start=0, ac_start=0)
         else:
             log.debug('Running on DigiCam data')
             inputfile_reader = zfits.zfits_event_source(url=_url, max_events=options.max_event)
