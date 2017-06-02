@@ -1,0 +1,16 @@
+# Analysis module
+analysis_module   : analyse_pulse_template
+
+# Input files
+file_basename :     pulse_template/CameraDigicam@localhost.localdomain_0_000.%s.run_326.fits.fz
+baseline_param_data : baseline_parameters.npz
+histo_dark          : dark_adc_baseline.npz
+file_list     :     [0, 1, 2, 3, 4, 5]
+ac_level : [300]
+dc_level : [0, 277, 288, 295, 306, 323, 333, 343, 353]
+min_event         : 0
+max_event         : 90000
+event_per_level : 10000
+
+# Output file
+histo_filename    : pulse_template.pk
