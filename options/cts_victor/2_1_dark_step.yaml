@@ -1,5 +1,5 @@
 # Analysis module
-analysis_module   : analyse_dark_step_function
+analysis_module   : analyse_dark
 analysis_type : step_function
 # Input files
 file_basename :     dark_run/CameraDigicam@localhost.localdomain_0_000.%s.run_307.fits.fz
