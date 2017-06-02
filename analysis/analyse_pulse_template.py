@@ -38,7 +38,7 @@ def create_histo(options):
     """
 
     # Create the pulse templates
-    pulse_templates = NPulseTemplate(shape=(len(options.ac_level), len(options.dc_level)))
+    pulse_templates = NPulseTemplate(ac_level=options.ac_level, dc_level=options.dc_level)
     average_pulses = pulse_shape.run(options=options)
 
     # Interpolate data points to get pulse template (spline)
@@ -51,6 +51,10 @@ def create_histo(options):
 
 
 def perform_analysis(options):
+
+    pulse_templates = NPulseTemplate(filename=options.output_directory + options.histo_filename)
+
+    print(pulse_templates.pulse_template[0][0].splines[482])
 
     print('Nothing implemented')
     return
@@ -83,3 +87,5 @@ def display_results(options):
             plt.legend()
 
     return
+
+
