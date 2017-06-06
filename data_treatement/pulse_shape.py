@@ -69,6 +69,6 @@ def run(options):
                 #    plt.plot(data[250])
                 #    plt.show()
 
-                pulse_shape[counter.level_ac, counter.level_dc, :, :] += data
+                pulse_shape[counter.level_ac, counter.level_dc, :, :] += data / counter.event_per_level
 
     return pulse_shape

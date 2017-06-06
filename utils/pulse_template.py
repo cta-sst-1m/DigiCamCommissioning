@@ -39,11 +39,13 @@ class PulseTemplate:
             t_temp = np.linspace(time_data[start_index], time_data[end_index], 100)
             self.splines[pixel] = splrep(time_data, pulse_data[i], **kwargs)
             maximum = np.max(splev(t_temp, self.splines[pixel]))
-
             self.splines[pixel] = splrep(time_data, pulse_data[i]/maximum, **kwargs)
             self.splines_square[pixel] = splrep(time_data, (pulse_data[i]/maximum)**2, **kwargs)
             self.integral[pixel] = self.compute_integral([pixel])
             self.integral_square[pixel] = self.compute_integral([pixel], moment=2)
+
+            self.splines[pixel] = splrep(time_data, pulse_data[i], **kwargs)
+            self.splines_square[pixel] = splrep(time_data, (pulse_data[i])**2, **kwargs)
 
     def evaluate(self, time, pixels_id, derivative=0, moment=1):
 
@@ -109,7 +111,7 @@ class PulseTemplate:
 
 class NPulseTemplate:
 
-    def __init__(self, shape=None, filename=None):
+    def __init__(self, ac_level=None, dc_level=None, filename=None):
 
         if filename is not None:
 
@@ -117,12 +119,10 @@ class NPulseTemplate:
 
         else:
 
-            self.shape = shape
-
-            if len(shape) != 2:
-                raise ValueError('Can treat only 2D pulse template')
-
-            self.pulse_template = [[None]*shape[1]]*shape[0]
+            self.shape = (len(ac_level), len(dc_level))
+            self.ac_level = ac_level
+            self.dc_level = dc_level
+            self.pulse_template = [[None]*self.shape[1]]*self.shape[0]
 
     def interpolate(self, pulse_data, pixels_id, **kwargs):
 
@@ -131,6 +131,10 @@ class NPulseTemplate:
 
                 self.pulse_template[i][j] = PulseTemplate()
                 self.pulse_template[i][j].interpolate(pulse_data[i, j], pixels_id, **kwargs)
+
+    def evaluate(self, t, photo_electron, nsb):
+
+        return
 
     def display(self, pixel_list, indices=(0, 0, ), derivative=0, moment=1, axis=None):
 
