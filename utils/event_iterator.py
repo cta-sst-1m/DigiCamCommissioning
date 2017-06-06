@@ -24,6 +24,7 @@ class EventCounter:
         self.level_dc = 0 # level id of event
         self.event_min = event_min
         self.event_max = event_max
+        self.level = 0
         self.level_ac_min = level_ac_min
         self.level_dc_min = level_dc_min
         self.level_ac_max = level_ac_max

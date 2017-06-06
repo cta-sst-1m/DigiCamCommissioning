@@ -105,6 +105,10 @@ if __name__ == '__main__':
 
         elif options.pixel_list == 'all':
             options.pixel_list = np.arange(0, 1296, 1)
+    else :
+        if not hasattr(options, 'pixel_list') or options.pixel_list == 'all':
+            options.pixel_list = np.arange(0, 1296, 1)
+
 
             
     # Some logging
