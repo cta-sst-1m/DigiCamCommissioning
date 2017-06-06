@@ -17,7 +17,6 @@ window_width      : 7
 window_start      : 3
 charge_extraction : integration_saturation
 
-
 # Event processing
 baseline_per_event_limit : 50
 n_samples : 92
