@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration",
-                      default='options/module.yaml')
+                      default='options/cts_victor/4_mpe.yaml')
 
     # Other options allows to overwrite the yaml_config interactively
     parser.add_option("-i", "--yaml_data_config", dest="yaml_data_config",
@@ -36,7 +36,7 @@ if __name__ == '__main__':
                       help="move to debug")
 
     # Steering of the passes
-    parser.add_option("-c", "--create_histo", dest="create_histo", action="store_true",
+    parser.add_option("-c", "--create_histo", dest="create_histo", action="store_false",
                       help="create the main histogram")
 
     parser.add_option("-a", "--perform_analysis", dest="perform_analysis", action="store_true",
@@ -59,12 +59,14 @@ if __name__ == '__main__':
     # Parse the options
     (options, args) = parser.parse_args()
 
+
     # Load the YAML configuration
     options_yaml = {}
     options_data_yaml = {}
 
     with open(options.yaml_data_config) as f:
         options_data_yaml.update(load(f))
+
 
     with open(options.yaml_config) as f:
         options_yaml.update(load(f))

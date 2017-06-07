@@ -109,18 +109,21 @@ def extract_charge(data,timing_mask,timing_mask_edge,peak,options,integration_ty
     local_max[ind_with_lt_th] = peak[ind_with_lt_th] - options.window_start
     local_max[local_max < 0] = 0
     index_max = (np.arange(0, data.shape[0]), local_max,)
-    sat_integration = np.zeros(data.shape[0],dtype=int)
+    charge = data[index_max]
     if np.any(is_saturated) and integration_type == 'integration_saturation':
-        sat_integration = np.apply_along_axis(contiguous_regions, 1, data)
+        sat_indices = tuple(np.where(is_saturated)[0])
+        _data = data[sat_indices,...]
+        charge[sat_indices,...] = np.apply_along_axis(contiguous_regions, 1, _data)
+
 
     if True == False:
         plt.ion()
         pix_2_inspect = options.pixel_list.index(10)
         test_window_of_arrival = np.zeros(data.shape)
-        test_window_of_arrival[pix_2_inspect, local_max[pix_2_inspect]] = sat_integration[pix_2_inspect]
+        test_window_of_arrival[pix_2_inspect, local_max[pix_2_inspect]] = charge[pix_2_inspect]
         print(peak)
         print('ref timing', peak[pix_2_inspect], 'moving timing', local_max[pix_2_inspect])
-        print('INT', sat_integration[pix_2_inspect])
+        print('INT', charge[pix_2_inspect])
         print('DATA', data[pix_2_inspect])
         print('MASK', timing_mask[pix_2_inspect])
         print('MASK_EDGE', timing_mask_edge[pix_2_inspect])
@@ -136,7 +139,7 @@ def extract_charge(data,timing_mask,timing_mask_edge,peak,options,integration_ty
 
         plt.clf()
 
-    return data[index_max]*~is_saturated+sat_integration*is_saturated
+    return charge
 
 
 def contiguous_regions(data):

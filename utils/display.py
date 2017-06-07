@@ -567,6 +567,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
                     if np.sum(hist.data[0,i])==0:
                         image[i] = 0.
                     else:
+
                         image[i] = np.average(hist.bin_centers, weights=hist.data[0, i])
 
             else:

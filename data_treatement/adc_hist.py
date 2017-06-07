@@ -93,7 +93,11 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None, peak_p
                 data = integrate(data, options)
                 # first batch creation
                 if counter.event_id == 0 and counter.batch_size > 0:
-                    batch = np.zeros((data.shape[0], counter.batch_size, data.shape[1]), dtype=int)
+                    if h_type != 'CHARGE_PER_LEVEL':
+                        batch = np.zeros((data.shape[0], counter.batch_size, data.shape[1]), dtype=int)
+                    else :
+                        batch = np.zeros((data.shape[0], counter.batch_size), dtype=int)
+
 
                 ###########################################################################
                 # DATA TREATEMENT : fill the batch or hist data with the requiered informations
@@ -112,7 +116,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None, peak_p
                 elif 'CHARGE' in h_type:
                     # Call the charge extraction function
                     data = extract_charge(data, mask, mask_edges, peak, options,integration_type='integration_saturation')
-                    batch[..., counter.batch_id ] = data.reshape(-1,1)
+                    batch[..., counter.event_id%counter.batch_size ] = data
                 else:
                     # Store in batch
                     batch[:, counter.event_id % counter.batch_size , :] = data
@@ -135,7 +139,9 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None, peak_p
                         else:
                             raise Exception
                     elif h_type == 'CHARGE_PER_LEVEL':
-                        hist.fill_with_batch(batch, indices=(counter.batch_id,))
+                        _dc_level = int((counter.batch_id-1) / len(options.ac_level) )
+                        _ac_level = (counter.batch_id-1) - ( _dc_level * len(options.ac_level) )
+                        hist.fill_with_batch(batch, indices=(_dc_level,_ac_level,))
                     elif h_type == 'CHARGE':
                         log.error("Not yet implemented......................")
                     elif h_type == 'STEPFUNCTION':
@@ -149,7 +155,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None, peak_p
                         log.debug('Reading  the batch #%d of %d events' % (counter.batch_id, counter.batch_size))
                     else :
                         # Batch per level
-                        batch = np.zeros((data.shape[0], counter.event_per_level), dtype=int)
+                        batch = np.zeros((data.shape[0], counter.batch_size), dtype=int)
                         log.debug('Reading  the level #%d of %d events' % (counter.batch_id, counter.batch_size))
 
 

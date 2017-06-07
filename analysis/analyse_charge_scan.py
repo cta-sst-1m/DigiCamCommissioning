@@ -96,8 +96,13 @@ def display_results(options):
 
     # Load the histogram
     mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
-
+    geom,pixlist = geometry.generate_geometry(options.cts)
+    mpes.data = mpes.data[0]
+    mpes.errors = mpes.errors[0]
+    options.scan_level = options.ac_level
+    display.display_hist(mpes,  options=options)
+    input('press a key')
+    '''
     try:
 
         display.display_hist(mpes, geom=geom, options=options, display_parameter=True, draw_fit=True)
@@ -110,6 +115,6 @@ def display_results(options):
 
     display.display_fit_result_level(mpes, options=options, scale='log')
     display.display_fit_result_level(mpes, options=options, scale='linear')
-
+    '''
 
     return

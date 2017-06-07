@@ -34,6 +34,7 @@ class EventCounter:
         self.progress_bar = tqdm(total=event_max)
         self.continuing = False # has to continue loop ?
         self.logger = log
+        self.event_step = int(float(self.event_max-self.event_min)/1000)+1
 
         self.batch_size = batch_size
         self.batch_id = 0
@@ -56,6 +57,8 @@ class EventCounter:
 
         self.event_id += 1
         self.event_id_in_level += 1
+        #if self.event_id % self.event_step < 1 :
+        #    self.progress_bar.update(self.event_step)
         self.progress_bar.update(1)
         self.fill_batch = False
 
