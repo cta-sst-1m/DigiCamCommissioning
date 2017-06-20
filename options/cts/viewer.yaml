@@ -6,9 +6,9 @@ mc                : False
 
 ## Input files
 
-file : CameraDigicam@localhost.localdomain_0_000.0.thr_50.fits.fz
+file : CameraDigicam@localhost.localdomain_0_000.0.run_337.fits.fz
 
-directory     :     /home/alispach/data/digicam_commissioning/cosmic/
+directory     :     /home/alispach/data/DATA/20170511/trigger_efficiency/
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
 telescope_id : 1
@@ -25,7 +25,7 @@ scale : lin # log not working
 bin_start : 9
 movie_filename : high_threshold_cluster_7_vert.mp4
 n_frames : 500
-limits_colormap : [15, 50]
+limits_colormap : #[0, 600]
 limits_readout : #2000, 2300]
 threshold : 20
 gain : 5.6
