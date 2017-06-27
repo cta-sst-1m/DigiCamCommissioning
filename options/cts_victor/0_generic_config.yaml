@@ -4,10 +4,10 @@ log_file_basename : 20170601
 
 # Input files
 mc            :     False
-directory     :     /data/datasets/CTA/DATA/20170602/
+directory     :     /data/datasets/CTA/DATA/20170613/
 
 # Output file
-output_directory  : /data/datasets/CTA/DATA/20170602/
+output_directory  : /data/datasets/CTA/DATA/20170613/
 
 # Camera Configuration
 angle_cts         : 120.

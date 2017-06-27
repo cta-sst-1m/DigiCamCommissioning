@@ -33,6 +33,7 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
     else:
         h = np.copy(hist.fit_result[:, index, 0])
 
+    print(hist.fit_result[0,index])
     h_to_return = h
 
     ### Avoid NANs
@@ -40,14 +41,14 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
     h_to_return[~mask] = np.nanmax(h_to_return)
     h = h[mask]
 
-    if limits:
-        h[(h>=limits[0]) * (h<=limits[1])]
+    if limits is not None:
+        h = h[(h>=limits[0]) * (h<=limits[1])]
 
     else:
         limits = [np.median(h) - np.std(h), np.median(h) + np.std(h)]
-        h[(h>=limits[0]) * (h<=limits[1])]
+        #h[(h>=limits[0]) * (h<=limits[1])]
 
-    histo = axis.hist(h, bins='auto', histtype='step', align='left', color='k', linewidth=1)
+    histo = axis.hist(h, bins=10, histtype='step', align='mid', color='k', linewidth=1)
 
     bin_edges = histo[1][0:-1]
     if len(bin_edges)==1:
@@ -68,8 +69,8 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
         anchored_text = AnchoredText(text_fit_result, loc=2, prop=dict(size=18))
         axis.add_artist(anchored_text)
 
-
-    axis.errorbar(bin_edges, histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %options.scan_level[level] if hasattr(options, 'scan_level') else 0)
+    print(np.mean(h))
+    axis.errorbar(bin_edges + bin_width/2., histo, yerr=np.sqrt(histo), fmt='ok', label='level : %d' %options.scan_level[level] if hasattr(options, 'scan_level') else 0)
     # Beautify
     axis.set_xlabel(hist.fit_result_label[index])
     axis.set_ylabel('$\mathrm{N_{pixel}/%.2f}$' % bin_width)
@@ -353,7 +354,7 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     return h_to_return
 
 
-def display_fit_result(hist, options, geom = None, limits=[0,4095], display_fit=False):
+def display_fit_result(hist, options, geom = None, limits=None, display_fit=False):
     """
     A function to display a vaiable both as an histogram and as a camera view
 
@@ -366,7 +367,7 @@ def display_fit_result(hist, options, geom = None, limits=[0,4095], display_fit=
     :return:
     """
 
-    fig = plt.figure(figsize=(20, 7))
+    fig = plt.figure(figsize=(10, 10))
     counter = Counter(hist.data.shape, param_len=hist.fit_result.shape[-2])
 
     def press(event):
@@ -375,9 +376,9 @@ def display_fit_result(hist, options, geom = None, limits=[0,4095], display_fit=
         if event.key == '.':
 
             counter.next_param()
+            print(counter.count_param)
             axis_param.cla()
-            image = draw_fit_result(axis_param, hist, options=options, index=counter.count_param, display_fit=display_fit)
-
+            image = draw_fit_result(axis_param, hist, options=options, index=counter.count_param, display_fit=display_fit, limits=limits)
             if geom is not None:
                 camera_visu.image = image
                 camera_visu.colorbar.set_label(hist.fit_result_label[counter.count_param])
@@ -408,9 +409,9 @@ def display_fit_result(hist, options, geom = None, limits=[0,4095], display_fit=
 
     else: # TODO check this case
         axis_param = fig.add_subplot(1, 1, 1)
-        draw_fit_result(axis_param, hist, options=options, index=counter.count_param, display_fit=display_fit)
+        draw_fit_result(axis_param, hist, options=options, index=counter.count_param, display_fit=display_fit, limits=limits)
 
-    fig.canvas.draw()
+    #fig.canvas.draw()
 
     return fig
 
@@ -430,7 +431,7 @@ def display_fit_pull(hist, geom = None , index_var=1, limits=None, true_value=No
 
     # Set the limits
     if geom: #TODO correct colobar on right instead of left
-        fig = plt.figure(figsize=(20, 7))
+        fig = plt.figure(figsize=(10, 10))
         ax_left = fig.add_subplot(1,2,1)
         ax_right = fig.add_subplot(1,2,2)
         vis_gain = visualization.CameraDisplay(geom, ax=ax_left, title='', norm='lin', cmap='viridis')
@@ -439,7 +440,7 @@ def display_fit_pull(hist, geom = None , index_var=1, limits=None, true_value=No
         h = draw_fit_pull(ax_right, hist, index=index_var, limits=limits, bin_width=bin_width, true_value=true_value, display_fit=display_fit)
         vis_gain.image = h
     else:
-        fig = plt.figure(figsize=(10, 7))
+        fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(1, 1, 1)
         h = draw_fit_pull(ax, hist, index=index_var, limits=limits, bin_width=bin_width, true_value=true_value, display_fit=display_fit)
 
@@ -465,7 +466,7 @@ def display_chi2(hist, geom = None, display_fit=False):
 
     # Set the limits
     if geom: #TODO correct colobar on right instead of left
-        fig = plt.figure(figsize=(20, 7))
+        fig = plt.figure(figsize=(20, 10))
         ax_left = fig.add_subplot(1,2,1)
         ax_right = fig.add_subplot(1,2,2)
         vis_gain = visualization.CameraDisplay(geom, ax=ax_left, title='', norm='lin', cmap='viridis')
@@ -474,7 +475,7 @@ def display_chi2(hist, geom = None, display_fit=False):
         h = draw_chi2(ax_right, hist, display_fit=display_fit)
         vis_gain.image = h
     else:
-        fig = plt.figure(figsize=(10, 7))
+        fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(1, 1, 1)
         h = draw_chi2(ax, hist, display_fit=display_fit)
 
@@ -491,7 +492,7 @@ def display_hist(hist, options, geom=None, display_parameter=False, draw_fit = F
     :return:
     """
 
-    fig = plt.figure(figsize=(48, 27))
+    fig = plt.figure(figsize=(10, 10))
 
     min_hist_x = np.min(hist.bin_centers)
     max_hist_x = np.min(hist.bin_centers)
@@ -615,7 +616,7 @@ def display_pulse_shape(hist, options, geom=None, display_parameter=False, draw_
     :return:
     """
 
-    fig = plt.figure(figsize=(48, 27))
+    fig = plt.figure(figsize=(10, 10))
 
     if display_parameter:
         counter = Counter(hist.data.shape, param_len=hist.fit_result.shape[-2])
@@ -712,7 +713,7 @@ def display_fit_result_level(hist, options, scale='linear', dark_x=False):
     """
     """
 
-    fig = plt.figure(figsize=(20, 20))
+    fig = plt.figure(figsize=(10, 10))
     counter = Counter(hist.data.shape, param_len=hist.fit_result.shape[-2])
 
     def press(event):
@@ -750,7 +751,7 @@ def display_fit_result_level(hist, options, scale='linear', dark_x=False):
 
 def display_xy_pixel(x, y):
 
-    fig = plt.figure(figsize=(20, 20))
+    fig = plt.figure(figsize=(10, 10))
     counter = Counter(x.shape)
 
     def press(event):

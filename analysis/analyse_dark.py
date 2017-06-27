@@ -383,6 +383,102 @@ def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,int
     return np.array([[f_dark*1E3, f_dark_error*1E3], [mu_xt_dark, mu_xt_dark_error]])
 
 def single_photo_electron(options):
+
+    from utils.peakdetect import peakdetect
+
+    dark_spe = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    # dark_spe.data = (np.cumsum(dark_spe.data,axis=-1)-np.sum(dark_spe.data,axis=-1).reshape(-1,1))*-1
+    # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+    # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+    # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+    display.display_hist(dark_spe, options=options)
+
+    dark_spe.fit_result = np.zeros((dark_spe.data.shape[0], 3, 2))
+    dark_spe.fit_result_label = np.array(['$f_{dark}$ [MHz]', 'XT', 'Gain [LSB/p.e.]'])
+
+    n_samples = options.n_samples - options.baseline_per_event_limit - options.window_width + 1
+
+
+
+    for pixel in range(dark_spe.data.shape[0]):
+
+        index_fifteen = (dark_spe.bin_centers <= 15)
+        dark_spe.data[pixel][index_fifteen] = 0
+        peaks = np.array(peakdetect(dark_spe.data[pixel], lookahead=2)[0])
+        n_events = options.max_event - options.min_event
+
+
+
+        try:
+            gain = np.mean(np.diff(peaks[:, 0][0:min(3, peaks.shape[0])]))
+            one_pe_count = dark_spe.data[pixel][
+                           max(0, peaks[0, 0] - gain // 2):min(dark_spe.data.shape[1], peaks[0, 0] + gain // 2):1]
+            one_pe_count = np.sum(one_pe_count)
+
+            #dark_count_rate = one_pe_count / (4. * n_samples * n_events) * 1E3
+            dark_count_rate = np.sum(dark_spe.data[pixel]) / (4. * n_samples * n_events) * 1E3
+
+            gain = dark_spe.bin_centers[peaks[0, 0]]
+        except:
+
+            dark_count_rate = np.nan
+
+        try :
+
+            #cross_talk = peaks[1][1]/peaks[0][1]
+            cross_talk = np.sum(dark_spe.data[pixel][
+                           max(0, peaks[1, 0] - gain // 2):min(dark_spe.data.shape[1], peaks[1, 0] + gain // 2):1])/ np.sum(dark_spe.data[pixel])
+
+        except:
+
+            cross_talk = np.nan
+        dark_spe.fit_result[pixel, 0, 0] = dark_count_rate
+        dark_spe.fit_result[pixel, 1, 0] = cross_talk
+        dark_spe.fit_result[pixel, 2, 0] = gain
+
+    limits = [[1.5, 2.75],[0.05, 0.2], [18, 26]]
+    for i in range(dark_spe.fit_result.shape[1]):
+        fig = plt.figure(figsize=(10, 10))
+        axis = fig.add_subplot(111)
+        display.draw_fit_result(axis, dark_spe, options, level=0, index=i, limits=limits[i], display_fit=True)
+    #display.draw_fit_result(axis, dark_spe, options, level=0, index=1, limits=None)
+    #display.draw_fit_result(axis, dark_spe, options, level=0, index=2, limits=None)
+
+
+    #display.display_fit_result(dark_spe, options, limits=[1.8, 2.25], display_fit=True)
+
+    """
+
+    cmap = cm.get_cmap('viridis')
+
+
+    fig = plt.figure()
+    axis_good = fig.add_subplot(121)
+    axis_bad = fig.add_subplot(122)
+
+    fig_2 = plt.figure(figsize=(10, 10))
+    axis_all = fig_2.add_subplot(111)
+
+    for i in range(dark_spe.data.shape[0]):
+        col_curve = cmap(float(i) / float(len(options.pixel_list) + 1))
+
+        if dark_spe.fit_result[i, 0, 0] > 1.:
+
+            axis_good.semilogy(dark_spe.bin_centers/dark_spe.fit_result[pixel, 2, 0], dark_spe.data[i], color=col_curve, linestyle='-', linewidth=2, alpha=0.2)
+
+        else:
+
+            axis_bad.semilogy(dark_spe.bin_centers/dark_spe.fit_result[pixel, 2, 0], dark_spe.data[i], color=col_curve, linestyle='-', linewidth=2, alpha=0.2)
+
+        axis_all.semilogy(dark_spe.bin_centers / dark_spe.fit_result[pixel, 2, 0], dark_spe.data[i], color=col_curve,
+                          linestyle='-', linewidth=2, alpha=0.2)
+
+        axis_all.set_xlabel('[LSB]')
+        axis_all.set_ylabel('Counts')
+    """
+
+    plt.show()
+    input('press a key')
     return
 
 
