@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 from matplotlib.widgets import Button
 from matplotlib.widgets import Button
-from spectra_fit import fit_low_light
-from spectra_fit import fit_low_light,fit_high_light
+#from spectra_fit import fit_low_light
+#from spectra_fit import fit_low_light,fit_high_light
 from utils.histogram import Histogram
 
 

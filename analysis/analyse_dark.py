@@ -11,7 +11,7 @@ import numpy as np
 import peakutils
 from scipy.interpolate import interp1d
 from scipy.interpolate import splev, splrep
-from spectra_fit import fit_dark_adc
+from spectra_fit import fit_dark_adc, fit_multiple_gaussians
 
 import matplotlib.cm as cm
 
@@ -129,13 +129,14 @@ def display_results(options):
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
-        display.display_hist(dark_spe, options=options)
-        peaks=peakdetect(dark_spe.data[0], lookahead=2)[0]
-        for i,p in enumerate(peaks):
-            print(dark_spe.bin_centers[p[0]],p[1])
-            if i==0:continue
-            print(peaks[i][1]/peaks[i-1][1])
-            print(dark_spe.bin_centers[peaks[i][0]]-dark_spe.bin_centers[peaks[i-1][0]])
+        display.display_hist(dark_spe, options=options, draw_fit=True)
+
+        for i in range(dark_spe.fit_result.shape[1]):
+            fig = plt.figure(figsize=(10, 10))
+            axis = fig.add_subplot(111)
+            display.draw_fit_result(axis, dark_spe, options, level=0, index=i, limits=None, display_fit=True)
+
+        plt.show()
 
         input('press a key')
 
@@ -393,6 +394,13 @@ def single_photo_electron(options):
     # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
     display.display_hist(dark_spe, options=options)
 
+    dark_spe.fit(fit_multiple_gaussians.fit_func, fit_multiple_gaussians.p0_func, fit_multiple_gaussians.slice_func, fit_multiple_gaussians.bounds_func, \
+             labels_func=fit_multiple_gaussians.labels_func)
+
+    dark_spe.save(options.output_directory + options.histo_filename)
+
+
+    """
     dark_spe.fit_result = np.zeros((dark_spe.data.shape[0], 3, 2))
     dark_spe.fit_result_label = np.array(['$f_{dark}$ [MHz]', 'XT', 'Gain [LSB/p.e.]'])
 
@@ -436,18 +444,18 @@ def single_photo_electron(options):
         dark_spe.fit_result[pixel, 1, 0] = cross_talk
         dark_spe.fit_result[pixel, 2, 0] = gain
 
-    limits = [[1.5, 2.75],[0.05, 0.2], [18, 26]]
+    """
+    #limits = [[1.5, 2.75],[0.05, 0.2], [18, 26]]
     for i in range(dark_spe.fit_result.shape[1]):
         fig = plt.figure(figsize=(10, 10))
         axis = fig.add_subplot(111)
-        display.draw_fit_result(axis, dark_spe, options, level=0, index=i, limits=limits[i], display_fit=True)
+        display.draw_fit_result(axis, dark_spe, options, level=0, index=i, limits=None, display_fit=True)
     #display.draw_fit_result(axis, dark_spe, options, level=0, index=1, limits=None)
     #display.draw_fit_result(axis, dark_spe, options, level=0, index=2, limits=None)
 
 
     #display.display_fit_result(dark_spe, options, limits=[1.8, 2.25], display_fit=True)
 
-    """
 
     cmap = cm.get_cmap('viridis')
 
@@ -475,7 +483,7 @@ def single_photo_electron(options):
 
         axis_all.set_xlabel('[LSB]')
         axis_all.set_ylabel('Counts')
-    """
+
 
     plt.show()
     input('press a key')
