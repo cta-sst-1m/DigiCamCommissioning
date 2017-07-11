@@ -67,5 +67,4 @@ def hdf5_mc_event_source(url, events_per_dc_level, events_per_ac_level, dc_start
             dc_level += 1
 
 
-
         yield data

@@ -1,0 +1,41 @@
+# Analysis module
+analysis_module : analyse_dark_v2
+
+# Logging
+verbose           : False
+log_file_basename : log
+debug : True
+
+mc : False
+
+
+# Input files
+
+file_basename : dark.%d.fits.fz
+directory     :     /home/alispach/data/digicam_commissioning/dark_count/
+file_list     :     [0]
+
+# Output files
+output_directory     :     /home/alispach/data/digicam_commissioning/dark_count/
+histo_filename : dark_regular.npz
+
+# Event processing
+event_max          : 10000
+event_min          : 0
+
+# Peak detection
+min_distance : 3
+
+# Camera Configuration
+pixel_list : [0, 1] #all #[0, 1, 2, 3, 4]
+#n_pixels : all
+# Histogram
+adcs_min : 3500
+adcs_max : 4000
+adcs_binwidth : 1
+
+# Data
+n_bins : 92
+window_width : 7
+
+

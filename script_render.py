@@ -82,3 +82,5 @@ if __name__ == '__main__':
     log.info('-|')
 
     render_module.plot(options)
+
+    render_module.plot_mc_vs_data(options)

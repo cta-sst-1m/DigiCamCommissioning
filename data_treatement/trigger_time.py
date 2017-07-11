@@ -35,8 +35,10 @@ def run(time_list, options, trigger_mask=None):
 
             for telescope_id in event.r0.tels_with_data:
 
-                time = event.r0.tel[telescope_id].local_camera_clock
-                time_list.append(time)
+                time_1 = event.r0.tel[telescope_id].local_camera_clock
+                time_2 = event.r0.tel[telescope_id].gps_time
+                time_list.append([time_1, time_2])
+
 
                 if trigger_mask is not None:
 

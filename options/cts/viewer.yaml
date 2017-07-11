@@ -6,18 +6,9 @@ mc                : False
 
 ## Input files
 
-#file : CameraDigicam@localhost.localdomain_0_000.0.run_218.fits.fz
-#file : CameraDigicam@localhost.localdomain_0_000.7.thr7_40_thr19_50_DAC323.fits.fz
-#file : nsb_scan_camera+1cluster_0.hdf5
-#file : dark.fits.fz
-#file : dac_333.fits.fz
-file : CameraDigicam@localhost.localdomain_0_000.1.run_326.fits.fz
+file : CameraDigicam@localhost.localdomain_0_000.0.run_337.fits.fz
 
-#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170504/mapping_ac_led_3/
-#directory     :     /home/alispach/data/digicam_commissioning/trigger/20170508/
-#directory     :     /home/alispach/data/digicam_commissioning/trigger/mc/
-directory     :     /home/alispach/data/digicam_commissioning/baseline_shift/
-directory     :     /home/alispach/data/digicam_commissioning/dc_calibration/nsb+signal/
+directory     :     /home/alispach/data/DATA/20170511/trigger_efficiency/
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
 telescope_id : 1
@@ -28,13 +19,13 @@ angle_cts : 240
 pixel_start : 0
 view_type : pixel # pixel, cluster_7, patch
 camera_view : max #, mean, sum, std, max, mode, baseline_substracted, stacked
-event_min : 0
+event_min : 10
 event_max : 10000
 scale : lin # log not working
 bin_start : 9
 movie_filename : high_threshold_cluster_7_vert.mp4
 n_frames : 500
-limits_colormap : #[4, 100]
+limits_colormap : #[0, 600]
 limits_readout : #2000, 2300]
 threshold : 20
 gain : 5.6

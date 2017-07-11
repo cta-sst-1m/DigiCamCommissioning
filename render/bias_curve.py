@@ -4,10 +4,16 @@ from scipy.interpolate import InterpolatedUnivariateSpline,UnivariateSpline
 import logging,sys
 from utils import histogram
 
-def plot_gain_drop(datas,labels,xaxis='pe',colors=['k','b','g','r','c'],style=[],xlim=[0,200], ylim=[5e-3,1e8], title= 'Rates'):
+def plot_gain_drop(datas,labels,xaxis='pe',colors=['k','b','g','r','c'],style=[],xlim=[0,200], ylim=[5e-3,1e8], title= 'Rates', axis=None):
     log = logging.getLogger(sys.modules['__main__'].__name__)
     fig = plt.figure(figsize=(14, 12))
-    ax1 = fig.add_subplot(111)
+
+    if axis is None:
+        ax1 = fig.add_subplot(111)
+
+    else:
+
+        ax1 = axis
     #ax2 = ax1.twiny()
     if xaxis=='pe':
         index=5
@@ -72,6 +78,8 @@ def plot_gain_drop(datas,labels,xaxis='pe',colors=['k','b','g','r','c'],style=[]
 
     plt.show()
 
+    return ax1
+
 def load_mc(file,var,nsb,offset = 0.):
     h = histogram.Histogram(filename=file)
     d = np.append(h.bin_centers.reshape(1,-1)+offset,h.bin_centers.reshape(1,-1),axis=0)
@@ -81,16 +89,15 @@ def load_mc(file,var,nsb,offset = 0.):
     d = np.append(d,(d[0]*4/5.6/ (1. / (1 + 10000. * float(nsb) * 85e-15)) ).reshape(1,-1),axis=0)
     #
 
-    print(d)
-
     return d
 
 def load_care(file, nsb, offset = 0.):
     h = np.genfromtxt(file).T
 
-    d = [h[0], h[0], h[0], h[1], h[2], h[0]*4/5.6/ (1. / (1 + 10000. * float(nsb) * 85e-15))]
+    #print(h.shape)
 
-    print(d)
+    d = [h[0]+offset, h[0], h[0], h[1], h[2], h[0]*4/5.6/ (1. / (1 + 10000. * float(nsb) * 85e-15))]
+
 
     return d
 
@@ -98,13 +105,14 @@ def load_data(file):
     f = open(file,'r')
     keys = []
     line = ''
+    #print(file)
     while '# HEADER' not in line:
         line = f.readline()
     keys = f.readline().split('# ')[1].split('\n')[0].split('\t')
     while '# DATA' not in line:
         line = f.readline()
     readlines = f.readlines()
-    print(len(readlines[0].split('\n')[0].split('\t')))
+    #print(len(readlines[0].split('\n')[0].split('\t')))
     #lines = []
     #for i in range(len(readlines[0].split('\n')[0].split('\t'))):
     #    lines+=[[]]
@@ -151,7 +159,7 @@ def get_datasets(options):
     for i,legend in enumerate(options.legends):
         datasets.append([])
         for j, l in enumerate(legend):
-            if l.count('Toy')>0.:
+            if l.count('TOY')>0.:
                 data = load_mc(options.base_directory+options.dataset[i][j],options.variable[i][j], nsb=options.NSB[i][j],offset=options.offset[i][j])
                 datasets[-1].append(data )
 
@@ -170,4 +178,67 @@ def plot(options):
     datasets = get_datasets(options)
     for i,d in enumerate(datasets):
         plot_gain_drop(d,labels=options.legends[i],xaxis=options.xaxis[i],colors=options.color[i],style=options.style[i],xlim=options.x_lim[i],ylim=options.y_lim[i],title=options.title[i])
+
+
+def plot_mc_vs_data(options):
+
+    datasets = np.array(get_datasets(options=options))
+    print(datasets.shape)
+
+    import matplotlib.gridspec as gridspec
+    from scipy.interpolate import interp1d
+
+    gs = gridspec.GridSpec(2, 1, width_ratios=[1], height_ratios=[3, 1], hspace=0.05)
+
+    color = ['r', 'g']
+
+    plt.figure(figsize=(10, 10))
+    axis_histogram = plt.subplot(gs[0])
+    axis_residue = plt.subplot(gs[1])
+    #axis_slope = plt.subplot(gs[2])
+
+    plot_gain_drop(datasets[1], labels=options.legends[1], xaxis=options.xaxis[1], colors=options.color[1],
+                   style=options.style[1], xlim=options.x_lim[1], ylim=options.y_lim[1], title=options.title[1], axis=axis_histogram)
+
+
+    data = datasets[1][0]
+    toy = datasets[1][1]
+    care = datasets[1][2]
+    print(toy)
+
+    x_residu = np.linspace(max(np.min(data[0]), np.min(toy[0]), min(care[0])), min(np.max(data[0]), toy[0][np.where(toy[3]==0)[0][0]-1], np.max(care[0])), num=20)
+
+    print(x_residu)
+    print(np.max(toy[0]))
+    print(toy[3])
+    print(toy[0][np.where(toy[3] == 0)[0][0]])
+    print(np.where(toy[3] == 0)[0][0])
+    y_data = interp1d(data[0], data[3], kind='linear')(x_residu)
+    y_toy = interp1d(toy[0], toy[3], kind='linear')(x_residu)
+    y_care = interp1d(care[0], care[3], kind='linear')(x_residu)
+    err_data = interp1d(data[0], data[4], kind='linear')(x_residu)
+    err_toy = interp1d(toy[0], toy[4], kind='linear')(x_residu)
+    err_care = interp1d(care[0], care[4], kind='linear')(x_residu)
+
+    axis_residue.errorbar(x_residu, np.abs(y_toy/y_data), yerr=np.sqrt((err_data/y_data)**2 + (err_toy/y_toy)**2), color=color[0], linestyle='None', marker='o')
+    axis_residue.errorbar(x_residu, np.abs(y_care/y_data), yerr=np.sqrt((err_data/y_data)**2 + (err_care/y_care)**2), color=color[1], linestyle='None', marker='o')
+    #axis_slope.errorbar((x_residu[1:] + x_residu[:-1]) / 2, np.abs(np.diff(y_data) - np.diff(y_toy)), color=color[0], linestyle='None', marker='o')
+    #axis_slope.errorbar((x_residu[1:] + x_residu[:-1]) / 2, np.abs(np.diff(y_data) - np.diff(y_care)), color=color[1], linestyle='None', marker='o')
+
+
+
+
+    axis_histogram.legend(loc='best')
+    axis_histogram.set_yscale('log')
+    axis_residue.set_yscale('log')
+    #axis_slope.set_yscale('log')
+    axis_residue.set_xlabel('[LSB]')
+    axis_residue.set_ylabel('MC over Data', fontsize=12)
+    axis_histogram.axes.get_xaxis().set_visible(False)
+    lims = np.arange(0, 22, 2)
+    axis_residue.set_xticks(lims)
+    axis_histogram.set_xlim(lims[0], lims[-1])
+
+
+    plt.show()
 

@@ -31,7 +31,7 @@ class EventViewer():
         self.scale = options.scale
         self.gain = options.gain
         self.colorbar_limits = options.limits_colormap if options.limits_colormap is not None else [0, np.inf]
-        expert_mode = options.trigger_trace_readout
+        self.expert_mode = options.trigger_trace_readout
 
         if self.mc:
 
@@ -39,8 +39,7 @@ class EventViewer():
             self.event_iterator = mc_events_reader.hdf5_mc_event_source(url=self.filename, events_per_dc_level=100, events_per_ac_level=0, dc_start=5, ac_start=0, max_events=options.event_max)
         else:
 
-            self.event_iterator = zfits.zfits_event_source(url=self.filename, max_events=options.event_max, expert_mode=expert_mode)
-
+            self.event_iterator = zfits.zfits_event_source(url=self.filename, max_events=options.event_max, expert_mode=self.expert_mode)
 
 
         self.event_id = 0
@@ -57,10 +56,10 @@ class EventViewer():
         self.image = np.zeros(self.data.shape[0])
 
 
-        if expert_mode and not mc:
+        if self.expert_mode:
 
-            self.trigger_output_patch7 = np.array(list(self.r0_container.tel[self.telescope_id].trigger_output_patch7.values()))
-            self.trigger_output_patch19 = np.array(list(self.r0_container.tel[self.telescope_id].trigger_output_patch19.values()))
+            self.trigger_output = np.array(list(self.r0_container.tel[self.telescope_id].trigger_output_patch7.values()))
+            self.trigger_input = np.array(list(self.r0_container.tel[self.telescope_id].trigger_input_traces.values()))
             #print(self.trigger_output_patch7)
 
 
@@ -78,7 +77,7 @@ class EventViewer():
         #print(self.camera.__dict__.keys())
 
         self.view_type = options.view_type
-        self.view_types = ['pixel', 'patch', 'cluster_7']#, 'cluster_9']
+        self.view_types = ['pixel', 'patch', 'cluster_7', 'trigger_out', 'trigger_in']#, 'cluster_9']
         self.iterator_view_type = cycle(self.view_types)
         self.camera_view = options.camera_view
         self.camera_views = ['sum', 'mean', 'max', 'std', 'time', 'baseline_substracted', 'stacked', 'p.e.']
@@ -152,7 +151,10 @@ class EventViewer():
                 self.r0_container = self.event_iterator.__next__().r0
 
             self.data = np.array(list(self.r0_container.tel[self.telescope_id].adc_samples.values()))
-                #self.event_id += 1
+                #self.event_id +=
+            if self.expert_mode:
+                self.trigger_output = np.array(list(self.r0_container.tel[self.telescope_id].trigger_output_patch7.values()))
+                self.trigger_input = np.array(list(self.r0_container.tel[self.telescope_id].trigger_output_patch7.values()))
 
         self.local_time = self.r0_container.tel[self.telescope_id].local_camera_clock
         self.update()
@@ -170,12 +172,13 @@ class EventViewer():
     def next_camera_view(self, camera_view, event=None):
 
         self.camera_view = camera_view
-        self.update()
         if camera_view == 'p.e.':
             self.camera_visu.colorbar.set_label('[p.e.]')
 
         else:
-            self.camera_visu.colorbar.set_label('[ADC]')
+            self.camera_visu.colorbar.set_label('[LSB]')
+        self.update()
+
 
     def next_view_type(self, view_type, event=None):
 
@@ -231,7 +234,6 @@ class EventViewer():
         #self.axis_readout.set_yticks(np.linspace(np.min(y), np.max(y), 8).astype(int))
         self.axis_readout.set_ylim(limits_y)
         self.axis_readout.legend(loc='upper right')
-        print(self.camera.Pixels[pix].__dict__)
 
 
         #self.axis_readout.cla()
@@ -273,6 +275,14 @@ class EventViewer():
                         print('Cluster 19 not implemented')
 
                         image = np.zeros(self.data.shape)
+
+                    elif self.view_type == 'trigger_out':
+
+                        image[pixel_id] = self.trigger_output[self.camera.Pixels[pixel_id].patch]
+
+
+
+                print(image.shape)
 
         return image
 
@@ -346,6 +356,14 @@ class EventViewer():
         if event.key=='-':
 
             self.set_pixel(self.pixel_id - 1)
+
+        if event.key == 'h':
+            self.axis_next_event_button.set_visible(False)
+
+        if event.key == 'v':
+            self.axis_next_event_button.set_visible(True)
+
+        self.update()
 
     def save(self, filename='test.png'):
 

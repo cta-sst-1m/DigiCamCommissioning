@@ -210,7 +210,7 @@ def display_results(options):
 
     return
 
-def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,integral_square):
+def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral, integral_square):
     '''
     In developement
     :param x:

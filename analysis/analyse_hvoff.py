@@ -66,7 +66,7 @@ def perform_analysis(options):
     # Fit the baseline and sigma_e of all pixels
     #TODO include the limited indicie
     adcs.fit(fit_hv_off.fit_func, fit_hv_off.p0_func, fit_hv_off.slice_func, fit_hv_off.bounds_func, \
-            labels_func=fit_hv_off.labels_func)  # , limited_indices=tuple(options.pixel_list))
+            labels_func=fit_hv_off.labels_func)#, limited_indices=tuple(options.pixel_list))
     #adcs.fit(fit_2_gaussian.fit_func, fit_2_gaussian.p0_func, fit_2_gaussian.slice_func, fit_2_gaussian.bounds_func, \
     #         labels_func=fit_2_gaussian.label_func)#, limited_indices=tuple(options.pixel_list))
 

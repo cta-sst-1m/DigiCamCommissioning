@@ -146,19 +146,13 @@ if __name__ == '__main__':
             exit()
 
 
-    if hasattr(options, 'threshold'):
-
-        if hasattr(options, 'threshold_min'):
-
-            options.threshold = np.arange(options.threshold_min, options.threshold_max, options.threshold_step)
-
     if hasattr(options, 'clusters'):
 
         if options.clusters=='all' or options.clusters is None:
 
             options.clusters = [i for i in range(432)]
 
-            
+
     # Some logging
     log = logging.getLogger(sys.modules['__main__'].__name__)
     log.info('\t\t-|> Will run %s with the following configuration:'%options.analysis_module)

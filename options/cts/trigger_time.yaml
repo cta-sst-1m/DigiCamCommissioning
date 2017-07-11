@@ -7,22 +7,20 @@ mc                : False
 log_file_basename : 20161214
 
 # Input files
-file_basename : CameraDigicam@localhost.localdomain_0_000.%d.thr7_20_FADC_2048.fits.fz
-directory     :     /home/alispach/data/digicam_commissioning/trigger/20170504/
+file_basename : CameraDigicam@localhost.localdomain_0_000.%d.ucts_zen_capture.fits.fz
+directory     :     /data/datasets/CTA/DATA/20170531/
 file_list     :     [1]
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 
 # Output files
-output_directory  :  /home/alispach/data/digicam_commissioning/trigger/20170504/
+output_directory  :  /data/datasets/CTA/DATA/20170531/
 histo_filename    : time_list.npz
 
 ## Camera Configuration
 angle_cts : 240
 n_pixels          : 1296
 min_events : 0
-max_events : 5000
-
-max_time : 20000000
+max_events : 10000
 
 ## Trigger config
 threshold : 20

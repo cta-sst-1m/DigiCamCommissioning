@@ -61,6 +61,9 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
 
                 if options.mc:
 
+                    baseline = np.mean(data, axis=1)
+
+                    """
                     if baseline_counter < options.baseline_window_width :
                         baseline.append(data)
                         baseline_counter += data.shape[-1]
@@ -74,6 +77,7 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
                         baseline = np.mean(np.mean(np.array(baseline), axis=0), axis=-1).astype(int)
                         baseline_computed = True
                         log.debug('Baseline recomputed for level %d : = %d [LSB]' % (level, np.mean(baseline)))
+                    """
 
                     data = data[options.pixel_list, :] - baseline[:, np.newaxis]
 
@@ -109,18 +113,27 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
                     data = data[options.pixel_list, :] - baseline[:, np.newaxis]
 
 
+
                 if options.blinding:
 
                     if data.shape[-1] < options.window_width:
                         time[level] += data.shape[-1]
 
-                    elif options.window_width % data.shape[-1] == options.window_width:
-
-                        time[level] += options.window_width
-
                     else:
                         time[level] += data.shape[-1] - data.shape[-1] % options.window_width
                         print(data.shape)
+
+                    """
+                    elif options.window_width % data.shape[-1] == options.window_width:
+
+                        print (options.window_width)
+                        print (data.shape[-1])
+                        print (options.window_width % data.shape[-1])
+                        print(level)
+                        time[level] += data.shape[-1]
+                        print('hello')
+                    """
+
 
                 else:
 

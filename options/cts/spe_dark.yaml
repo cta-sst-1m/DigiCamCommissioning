@@ -1,0 +1,36 @@
+# Analysis module
+analysis_module : analyse_spe
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20161214
+
+# Input files
+mc            :     False
+file_basename :     dark.%d.fits.fz
+directory     :     /home/alispach/data/digicam_commissioning/dark_count/
+file_list     :     [0]
+
+# Output files
+output_directory  : /home/alispach/data/digicam_commissioning/dark_count/
+histo_filename    : spe.npz
+hv_off_histo_filename    : hv_off/hv_off.npz
+
+# Event processing
+evt_max           : 20000
+n_evt_per_batch   : 500
+
+# Camera Configuration
+n_pixels          : 1296
+
+# Plot configuration
+adcs_min           : 0
+adcs_max           : 4095
+adcs_binwidth      : 1
+
+

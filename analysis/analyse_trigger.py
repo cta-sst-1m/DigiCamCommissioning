@@ -129,7 +129,7 @@ def display_results(options):
     axis_1.set_ylabel(triggers.ylabel)
     axis_1.set_yscale('log')
 
-    """
+
     plt.figure()
     for i in range(3):
 
@@ -153,7 +153,7 @@ def display_results(options):
     plt.show()
 
     #exit()
-    """
+
 
     """
     plt.figure()
