@@ -107,7 +107,7 @@ def display_results(options):
 
     :return:
     """
-    cts_path = '/Users/mheller/Documents/CTA/ctasoft/CTS/'
+    cts_path = '/data/software/DigiCamCommissioning/'
     cts = CTS(cts_path + 'config/cts_config_' + str(0) + '.cfg',
                       cts_path + 'config/camera_config.cfg', angle=0, connected=True)
 

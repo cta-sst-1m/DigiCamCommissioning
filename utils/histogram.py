@@ -517,13 +517,13 @@ class Histogram:
                         list_fixed_param[1].append(config[indices][p[1]])
                     else:
                         list_fixed_param[1].append(p[1])
-
+            if np.sum(self.data[indices])==0: continue
             if type(config).__name__ != 'ndarray':
                 _slice = slice_func(self.data[indices], self.bin_centers,config=None)
                 self.fit_slices[indices][0]= _slice[0]
                 self.fit_slices[indices][1]= _slice[1]
                 fit_res, chi2, ndof = self._axis_fit(indices, func,
-                                                     p0_func(self.data[indices], self.bin_centers,
+                                                     p0_func(self.data[indices],self.bin_centers,
                                                              config=None),
                                                      slice_list= _slice ,
                                                      bounds=bound_func(self.data[indices], self.bin_centers,

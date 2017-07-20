@@ -1,13 +1,13 @@
 # Logging
 verbose           : True
-log_file_basename : 20170601
+log_file_basename : 20170714
 
 # Input files
 mc            :     False
-directory     :     /data/datasets/CTA/DATA/20170613/
+directory     :     /data/datasets/CTA/DATA/FULLSEQ/
 
 # Output file
-output_directory  : /data/datasets/CTA/DATA/20170613/
+output_directory  : /data/datasets/CTA/DATA/FULLSEQ/
 
 # Camera Configuration
 angle_cts         : 120.

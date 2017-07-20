@@ -36,7 +36,7 @@ if __name__ == '__main__':
                       help="move to debug")
 
     # Steering of the passes
-    parser.add_option("-c", "--create_histo", dest="create_histo", action="store_false",
+    parser.add_option("-c", "--create_histo", dest="create_histo", action="store_true",
                       help="create the main histogram")
 
     parser.add_option("-a", "--perform_analysis", dest="perform_analysis", action="store_true",
@@ -123,6 +123,7 @@ if __name__ == '__main__':
         log.info('\t\t |--|> %s : \t %s'%(key,val))
     log.info('-|')
 
+    print('options.create_histo',options.create_histo)
     # Histogram creation
     if options.create_histo:
         # Call the histogram creation function

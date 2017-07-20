@@ -44,7 +44,8 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None, peak_p
         # Initialise the baseline holder
         baseline = np.zeros((len(options.pixel_list),), dtype = float)
         # change central timing
-        options.central_sample = options.central_sample - options.baseline_per_event_limit
+        if not (h_type in ['ADC','SPE']):
+            options.central_sample = options.central_sample - options.baseline_per_event_limit
 
     # Get the reference timing and masks if needed
     peak, mask, mask_edges = None, None , None
@@ -52,7 +53,7 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None, peak_p
         if not type(peak_position).__name__ == 'ndarray':
             peak_position = fake_timing_hist(options,options.n_samples-options.baseline_per_event_limit)
         peak, mask, mask_edges = generate_timing_mask(options,peak_position)
-    if 'CHARGE_PER_LEVEL':
+    if 'CHARGE_PER_LEVEL' in h_type :
         options.n_evt_per_batch = options.events_per_level
 
     # Start the logging

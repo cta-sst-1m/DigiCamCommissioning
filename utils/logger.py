@@ -18,7 +18,7 @@ def initialise_logger(options,module):
     logger = logging.getLogger(sys.modules['__main__'].__name__)
     logger.setLevel(logging.INFO if options.verbose else logging.DEBUG)
     # define file handler and stream handler
-    fh = logging.FileHandler('%s_%s.log' % (module,options.log_file_basename))
+    fh = logging.FileHandler(options.output_directory+'%s_%s.log' % (module,options.log_file_basename))
     fh.setLevel(logging.INFO if options.verbose else logging.DEBUG)
     ch = logging.StreamHandler()
     ch.setLevel(level= logging.INFO if options.verbose else logging.DEBUG)

@@ -49,9 +49,12 @@ def create_histo(options):
         adc_hist.run(dark, options, h_type='STEPFUNCTION')
 
     elif options.analysis_type == 'single_photo_electron':
+        print('#################################3 here')
+        print(dir(options))
         dark = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
                                    bin_width=options.adcs_binwidth, data_shape=(len(options.pixel_list),),
                                    label='Pixel SPE', xlabel='Pixel ADC', ylabel='Count / ADC')
+        print('#################################3 there')
         baseline_fit = histogram.Histogram(filename=options.output_directory + options.histo_dark,fit_only=True).fit_result
         # Get the adcs
         adc_hist.run(dark, options, 'SPE', prev_fit_result=baseline_fit)
@@ -122,9 +125,35 @@ def display_results(options):
 
     elif options.analysis_type == 'single_photo_electron':
 
-        from utils.peakdetect import peakdetect
-
         dark_spe = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+        from utils.peakdetect import peakdetect
+        plt.subplots(1, 1, figsize=(10, 16))
+        fadc_list = []
+        for i in range(dark_spe.data.shape[0]):
+            pixel_idx = i
+            cmap = cm.get_cmap('viridis')
+            fadc_mult = options.cts.camera.Pixels[options.pixel_list[i]].fadc
+            sector = options.cts.camera.Pixels[options.pixel_list[i]].sector
+            fadc = fadc_mult + 9 * (sector - 1)
+            # col_curve = cmap(float(i)/float(dark_adc.data.shape[0] + 1))
+            col_curve = cmap(float(fadc) / float(9 * 3))
+            if sector == 1:
+                col_curve = (1. - (float(fadc_mult - 1) / 9./2.+0.5), 0., 0., 0.4)
+            elif sector == 2:
+                col_curve = (0., 1. - (float(fadc_mult - 1) / 9./2.+0.5), 0., 0.4)
+            elif sector == 3:
+                col_curve = (0., 0., 1. - (float(fadc_mult - 1) /9./2.+0.5), 0.4)
+            if fadc in fadc_list:
+                plt.subplot( 1, 1,1)
+                plt.plot(dark_spe.bin_centers/dark_spe.fit_result[pixel_idx, 2, 0], dark_spe.data[pixel_idx], color=col_curve, linestyle='-', linewidth=2)
+            else:
+                plt.subplot( 1, 1,1)
+                plt.plot(dark_spe.bin_centers,
+                         dark_spe.data[ pixel_idx], color=col_curve, linestyle='-', linewidth=2,
+                         label="FADC %d Sector %d" % (fadc_mult, sector))
+            fadc_list.append(fadc)
+
+        plt.yscale('log')
         #dark_spe.data = (np.cumsum(dark_spe.data,axis=-1)-np.sum(dark_spe.data,axis=-1).reshape(-1,1))*-1
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
