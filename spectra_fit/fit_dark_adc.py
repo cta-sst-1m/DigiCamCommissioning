@@ -16,11 +16,7 @@ def p0_func(y,x,*args, config=None, **kwargs):
     mean = np.average(x[np.where(y != 0)[0][0]: np.argmax(y)+5: 1], weights=y[np.where(y != 0)[0][0]: np.argmax(y)+5: 1])
     param += [np.sum(y[np.where(y != 0)[0][0]: np.argmax(y)+5: 1])]
     param += [mean]
-    print(y)
-    print(np.argmax(y))
     g = np.average((x[np.where(y != 0)[0][0]: np.argmax(y)+5: 1] - mean) ** 2, weights=y[np.where(y != 0)[0][0]:np.argmax(y)+5: 1])
-    print(g,0.05)
-    print(min(0.05,g))
     param += [max(0.05,
                      np.average((x[np.where(y != 0)[0][0]: np.argmax(y)+5: 1] - mean) ** 2,
                                 weights=y[np.where(y != 0)[0][0]:np.argmax(y)+5: 1]))]
@@ -36,7 +32,6 @@ def bounds_func(y,x, *args, config=None, **kwargs):
     bound_max += [np.max(x)]
     bound_min += [0.05]
     bound_max += [np.inf]
-    print(bound_min,bound_max)
 
     return bound_min,bound_max
 
@@ -47,10 +42,7 @@ def slice_func(y, x, *args, **kwargs):
         return [0, 1, 1]
     #if  np.argmax(y)-2>-0.5:
     #    return [np.argmax(y)-2, np.where(y != 0)[0][-1], 1]
-    print(y[np.where(y != 0)[0][0]:np.argmax(y)+5: 1])
-    print(x[np.where(y != 0)[0][0]:np.argmax(y)+5: 1])
-    print('slice',np.where(y != 0)[0][0], np.argmax(y)+5)
-    return [np.where(y != 0)[0][0], np.argmax(y)+5, 1]
+    return [np.where(y != 0)[0][0], np.argmax(y)+4, 1]
 
 
 # noinspection PyUnusedLocal

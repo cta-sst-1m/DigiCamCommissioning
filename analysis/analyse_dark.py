@@ -11,7 +11,7 @@ import numpy as np
 import peakutils
 from scipy.interpolate import interp1d
 from scipy.interpolate import splev, splrep
-from spectra_fit import fit_dark_adc, fit_multiple_gaussians
+from spectra_fit import fit_dark_adc, fit_multiple_gaussians_spe
 
 import matplotlib.cm as cm
 
@@ -138,14 +138,19 @@ def display_results(options):
             # col_curve = cmap(float(i)/float(dark_adc.data.shape[0] + 1))
             col_curve = cmap(float(fadc) / float(9 * 3))
             if sector == 1:
-                col_curve = (1. - (float(fadc_mult - 1) / 9./2.+0.5), 0., 0., 0.4)
+                col_curve =(1.,0.,0.,0.4)#, (1. - (float(fadc_mult - 1) / 9./2.+0.5), 0., 0., 0.4)
             elif sector == 2:
-                col_curve = (0., 1. - (float(fadc_mult - 1) / 9./2.+0.5), 0., 0.4)
+                col_curve = (0.,1.,0.,0.4)#(0., 1. - (float(fadc_mult - 1) / 9./2.+0.5), 0., 0.4)
             elif sector == 3:
-                col_curve = (0., 0., 1. - (float(fadc_mult - 1) /9./2.+0.5), 0.4)
+                col_curve = (0.,0.,1.,0.4)#(0., 0., 1. - (float(fadc_mult - 1) /9./2.+0.5), 0.4)
+            col_curve=(0.,0.,0.,0.05)
+
+            if dark_spe.fit_result[pixel_idx, 1, 0]<15: continue
             if fadc in fadc_list:
-                plt.subplot( 1, 1,1)
-                plt.plot(dark_spe.bin_centers/dark_spe.fit_result[pixel_idx, 2, 0], dark_spe.data[pixel_idx], color=col_curve, linestyle='-', linewidth=2)
+                plt.subplot(1, 1,1)
+                x_1 = (dark_spe.bin_centers-dark_spe.fit_result[pixel_idx, 0, 0])/dark_spe.fit_result[pixel_idx, 1, 0]
+                y_1 =  dark_spe.data[pixel_idx]
+                plt.plot(x_1,y_1, color=col_curve, linestyle='-', linewidth=2)
             else:
                 plt.subplot( 1, 1,1)
                 plt.plot(dark_spe.bin_centers,
@@ -153,20 +158,68 @@ def display_results(options):
                          label="FADC %d Sector %d" % (fadc_mult, sector))
             fadc_list.append(fadc)
 
+        plt.subplot(1, 1, 1)
+
         plt.yscale('log')
+        plt.xlim(0,10)
+
+        n_pes = (np.repeat(dark_spe.bin_centers.reshape(1,-1),dark_spe.data.shape[0], axis=0)-dark_spe.fit_result[:, 0, 0].reshape(-1,1))/dark_spe.fit_result[:, 1, 0].reshape(-1,1)
+        entries = dark_spe.data
+        n_pes=n_pes[dark_spe.fit_result[:, 1, 0]>15]
+        entries = entries[dark_spe.fit_result[:, 1, 0]>15]
+
+        x = np.arange(-1.,9.1,0.1)
+        distrib = np.ones((x.shape[0],entries.shape[0]*entries.shape[1]))*np.nan
+        r_npes = n_pes.reshape(-1)
+        r_entries = entries.reshape(-1)
+        for i,j in enumerate(x):
+            print(i,j)
+            mask = ((r_npes>(j-0.05))* (r_npes<(j+0.05)))
+            entries_reduced = r_entries[mask]
+            distrib[i,0:entries_reduced.shape[0]]=entries_reduced
+
+        #plt.subplot(1, 1, 1)
+        print(x)
+        plt.fill_between(x,np.nanmean(distrib,axis=-1)+1*np.nanstd(distrib,axis=-1),
+                         np.nanmean(distrib, axis=-1) - 1*np.nanstd(distrib, axis=-1),
+                         alpha=0.5, edgecolor='r' , facecolor='r',
+                        zorder = 10)
+
+
+        plt.plot(x,np.nanmean(distrib,axis=-1),color='r')
+        plt.xlabel('N(p.e.)')
+        plt.ylabel('N_{peaks}')
+        plt.show()
         #dark_spe.data = (np.cumsum(dark_spe.data,axis=-1)-np.sum(dark_spe.data,axis=-1).reshape(-1,1))*-1
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+        '''
         display.display_hist(dark_spe, options=options, draw_fit=True)
 
-        for i in range(dark_spe.fit_result.shape[1]):
+        for i in [0,1,2,3]:#range(dark_spe.fit_result.shape[1]):
             fig = plt.figure(figsize=(10, 10))
             axis = fig.add_subplot(111)
             display.draw_fit_result(axis, dark_spe, options, level=0, index=i, limits=None, display_fit=True)
 
-        plt.show()
 
+        plt.show()
+        plt.subplots(1,2)
+        plt.subplot(1,2,1)
+        one = dark_spe.fit_result[:,4,0]
+        xt = dark_spe.fit_result[:,5,0][one>0]/one[one>0]
+        xt=xt[xt<0.5]
+        xt=xt[xt>0.]
+        print(xt)
+        print(np.min(xt),np.max(xt))
+        dc = (dark_spe.fit_result[:,5,0]+dark_spe.fit_result[:,6,0]+dark_spe.fit_result[:,7,0]+
+              dark_spe.fit_result[:,8,0] +dark_spe.fit_result[:,9,0]+dark_spe.fit_result[:,4,0])/(4. * 42. * 1000000.) * 1E3
+        plt.hist(xt,bins=100)
+
+        plt.subplot(1,2,2)
+        plt.hist(dc[~np.isnan(dc)],bins=50)
+        plt.show()
+        '''
         input('press a key')
 
     elif options.analysis_type == 'fit_baseline':
@@ -182,7 +235,9 @@ def display_results(options):
             sector = options.cts.camera.Pixels[options.pixel_list[i]].sector
             fadc = fadc_mult + 9 * (sector-1)
             #col_curve = cmap(float(i)/float(dark_adc.data.shape[0] + 1))
-            col_curve = cmap(float(fadc)/float(9*3))
+            col_curve = (0.,0.,0.,0.05)#cmap(float(fadc)/float(9*3))
+            if dark_adc.fit_chi2_ndof[i,0]/dark_adc.fit_chi2_ndof[i,1]>5000 or dark_adc.fit_result[i,1,0]>50: continue
+
             if fadc in fadc_list:
                 plt.plot(dark_adc.bin_centers,dark_adc.data[i], color=col_curve, linestyle='-', linewidth=2)
             else:
@@ -192,14 +247,20 @@ def display_results(options):
         plt.xlabel('LSB')
         plt.ylabel('Counts')
         plt.legend()
-        plt.yscale('log')
+        #plt.yscale('log')
         plt.ylim(1.,np.max(dark_adc.data*1.5))
 
         #dark_adc.data = (np.cumsum(dark_adc.data,axis=-1)-np.sum(dark_adc.data,axis=-1).reshape(-1,1))*-1
         # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
-        display.display_hist(dark_adc, options=options, draw_fit=True)
+        display.display_hist(dark_adc, options=options, draw_fit=True,scale='linear')
+
+        for i in [0,1,2]:#range(dark_spe.fit_result.shape[1]):
+            fig = plt.figure(figsize=(10, 10))
+            axis = fig.add_subplot(111)
+            display.draw_fit_result(axis, dark_adc, options, level=0, index=i, limits=None, display_fit=True)
+        plt.show()
         input('press a key')
 
     return
@@ -421,11 +482,15 @@ def single_photo_electron(options):
     # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
     # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
     # dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
+
+    hist_dark_fit_result = histogram.Histogram(filename=options.output_directory + options.histo_dark, fit_only=True).fit_result
     display.display_hist(dark_spe, options=options)
+    #fixed_param = [ [0, (1, 0)],[2, (2, 0)] ]
+    fixed_param = [[2, (2, 0)] ]
+    dark_spe.fit(fit_multiple_gaussians_spe.fit_func, fit_multiple_gaussians_spe.p0_func, fit_multiple_gaussians_spe.slice_func, fit_multiple_gaussians_spe.bounds_func, \
+             labels_func=fit_multiple_gaussians_spe.labels_func,config=hist_dark_fit_result)#, fixed_param=fixed_param)
 
-    dark_spe.fit(fit_multiple_gaussians.fit_func, fit_multiple_gaussians.p0_func, fit_multiple_gaussians.slice_func, fit_multiple_gaussians.bounds_func, \
-             labels_func=fit_multiple_gaussians.labels_func)
-
+    display.display_hist(dark_spe, options=options, draw_fit=True)
     dark_spe.save(options.output_directory + options.histo_filename)
 
 
@@ -473,7 +538,6 @@ def single_photo_electron(options):
         dark_spe.fit_result[pixel, 1, 0] = cross_talk
         dark_spe.fit_result[pixel, 2, 0] = gain
 
-    """
     #limits = [[1.5, 2.75],[0.05, 0.2], [18, 26]]
     for i in range(dark_spe.fit_result.shape[1]):
         fig = plt.figure(figsize=(10, 10))
@@ -516,6 +580,8 @@ def single_photo_electron(options):
 
     plt.show()
     input('press a key')
+
+    """
     return
 
 

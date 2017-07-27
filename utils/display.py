@@ -48,7 +48,7 @@ def draw_fit_result(axis, hist, options, level=0, index=0, limits = None, displa
         limits = [np.median(h) - np.std(h), np.median(h) + np.std(h)]
         #h[(h>=limits[0]) * (h<=limits[1])]
 
-    histo = axis.hist(h, bins=10, histtype='step', align='mid', color='k', linewidth=1)
+    histo = axis.hist(h, bins=30, histtype='step', align='mid', color='k', linewidth=1)
 
     bin_edges = histo[1][0:-1]
     if len(bin_edges)==1:
@@ -312,11 +312,11 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
     h_err = h_err[mask]
     x = x[mask]
     axis.step(x, h, color=color, where='mid')
-    axis.errorbar(x, h, yerr=h_err, fmt='ok', label=pixel_label)
+    axis.errorbar(x, h, yerr=h_err, fmt='ok', label=pixel_label,markersize=2)
     text_fit_result = ''
 
     if draw_fit:
-        reduced_axis = x
+        reduced_axis = x#[hist.fit_slices[index][0]:hist.fit_slices[index][1]:1]
         fit_axis = np.linspace(reduced_axis[0], reduced_axis[-1]+1E-8, 10*reduced_axis.shape[0])
         reduced_func = hist.fit_function
         #if hist.fit_result[index][0, 0]<30.:
