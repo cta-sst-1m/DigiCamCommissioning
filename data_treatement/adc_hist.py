@@ -41,6 +41,8 @@ def run(hist, options, h_type='ADC', prev_fit_result=None, baseline=None, peak_p
     params = None
     if hasattr(options, 'baseline_per_event_limit') and not h_type == 'MEANRMS':
         params = Histogram(filename=options.output_directory + options.baseline_param_data, fit_only=True).fit_result
+        if params.shape[1]==1296 and h_type == 'CHARGE_PER_LEVEL':
+            params=np.take(params,options.pixel_list,axis=1)
         # Initialise the baseline holder
         baseline = np.zeros((len(options.pixel_list),), dtype = float)
         # change central timing

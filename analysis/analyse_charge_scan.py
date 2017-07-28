@@ -58,11 +58,16 @@ def create_histo(options):
     # Get the baseline if needed
     if hasattr(options,'histo_dark_adc'):
         baseline_fit = histogram.Histogram(filename=options.output_directory + options.histo_dark_adc, fit_only=True).fit_result
-
+        if baseline_fit.shape[0]==1296:
+            baseline_fit = np.take(baseline_fit,options.pixel_list)
     # Get the reference sampling time
     peaks = None
     if hasattr(options,'synch_histo_filename'):
         peaks = histogram.Histogram(filename = options.output_directory + options.synch_histo_filename)
+
+        if peaks.shape[0]==1296:
+            peaks = np.take(peaks,options.pixel_list)
+                                
 
     # Construct the histogram
     adc_hist.run(mpes, options, 'CHARGE_PER_LEVEL',peak_position=peaks.data if hasattr(options,'synch_histo_filename') else None,
