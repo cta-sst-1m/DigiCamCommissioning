@@ -194,7 +194,7 @@ def display_results(options):
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
-        '''
+
         display.display_hist(dark_spe, options=options, draw_fit=True)
 
         for i in [0,1,2,3]:#range(dark_spe.fit_result.shape[1]):
@@ -219,7 +219,7 @@ def display_results(options):
         plt.subplot(1,2,2)
         plt.hist(dc[~np.isnan(dc)],bins=50)
         plt.show()
-        '''
+
         input('press a key')
 
     elif options.analysis_type == 'fit_baseline':
