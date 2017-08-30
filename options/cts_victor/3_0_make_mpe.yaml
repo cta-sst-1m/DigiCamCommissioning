@@ -18,7 +18,7 @@ baseline_param_data : baseline_parameters.npz
 
 # Event processing
 integration_method : integration_saturation
-threshold_sat      : 3500
+threshold_sat      : 20000
 central_sample    : 60
 timing_width      : 3
 events_per_level  : 20000
@@ -27,5 +27,5 @@ max_event           : 1240000
 
 # Plot configuration
 adcs_min           : -500
-adcs_max           : 21000
+adcs_max           : 20100
 adcs_binwidth      : 4

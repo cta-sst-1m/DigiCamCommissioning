@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # Job configuration (the only mandatory option)
     parser.add_option("-y", "--yaml_config", dest="yaml_config",
                       help="full path of the yaml configuration",
-                      default='options/cts_victor/3_0_gain_evaluation.yaml')
+                      default='options/cts_victor/3_0_make_mpe.yaml')
 
     # Other options allows to overwrite the yaml_config interactively
     parser.add_option("-i", "--yaml_data_config", dest="yaml_data_config",
