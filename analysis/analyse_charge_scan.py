@@ -5,6 +5,7 @@
 # internal modules
 from data_treatement import adc_hist
 from utils import display, histogram, geometry
+from spectra_fit import fit_multiple_gaussians_full_mpe
 import logging,sys
 import numpy as np
 import logging
@@ -53,7 +54,7 @@ def create_histo(options):
                                bin_width=options.adcs_binwidth, data_shape=(len(options.dc_level),
                                                                             len(options.ac_level),
                                                                             len(options.pixel_list),),
-                               label='MPE',xlabel='ADC',ylabel = '$\mathrm{N_{entries}}$')
+                               label='MPE',xlabel='LSB',ylabel = '$\mathrm{N_{entries}}$')
 
     # Get the baseline if needed
     if hasattr(options,'histo_dark_adc'):
@@ -67,7 +68,7 @@ def create_histo(options):
 
         if peaks.shape[0]==1296:
             peaks = np.take(peaks,options.pixel_list)
-                                
+
 
     # Construct the histogram
     adc_hist.run(mpes, options, 'CHARGE_PER_LEVEL',peak_position=peaks.data if hasattr(options,'synch_histo_filename') else None,
@@ -84,6 +85,32 @@ def create_histo(options):
 
 
 def perform_analysis(options):
+
+    # Load mpes
+    mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+
+    # Create the full mpes
+    full_mpes = histogram.Histogram(bin_center_min=options.adcs_min, bin_center_max=options.adcs_max,
+                               bin_width=options.adcs_binwidth, data_shape=(len(options.dc_level), len(options.pixel_list), ),
+                               label='Full MPE',xlabel='LSB',ylabel = '$\mathrm{N_{entries}}$')
+    full_mpes.data = np.sum(mpes.data, axis=1)
+    full_mpes.errors = np.sqrt(full_mpes.data)
+
+    if True:
+        options.scan_level = options.dc_level
+        display.display_hist(full_mpes, options=options)
+        import matplotlib.pyplot as plt
+        plt.show()
+
+    # Fit the full mpes
+
+    full_mpes.fit(fit_multiple_gaussians_full_mpe.fit_func, fit_multiple_gaussians_full_mpe.p0_func, fit_multiple_gaussians_full_mpe.slice_func, fit_multiple_gaussians_full_mpe.bounds_func, \
+         labels_func=fit_multiple_gaussians_full_mpe.labels_func, config=None)
+
+    full_mpes.save(options.output_directory + options.full_histo_filename)
+
+    del mpes, full_mpes
+
     return
 
 
@@ -99,14 +126,33 @@ def display_results(options):
     :return:
     """
 
-    # Load the histogram
-    mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    # Load the histograms
+    #mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    full_mpes = histogram.Histogram(filename=options.output_directory + options.full_histo_filename)
+
+    print(full_mpes.fit_result.shape)
+    """
     geom,pixlist = geometry.generate_geometry(options.cts)
     mpes.data = mpes.data[0]
     mpes.errors = mpes.errors[0]
     options.scan_level = options.ac_level
     display.display_hist(mpes,  options=options)
+    """
+
+    #full_mpes.data = full_mpes.data[0]
+    #full_mpes.errors = full_mpes.errors[0]
+
+    options.scan_level = options.dc_level
+    display.display_hist(full_mpes, options=options, draw_fit=True)
+
+    axes = fig.get_axes()
+    axis_histo = axes[0]
+
+
     input('press a key')
+
+
+
     '''
     try:
 

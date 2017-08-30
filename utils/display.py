@@ -324,6 +324,8 @@ def draw_hist(axis, hist, options, index, draw_fit=False, color='k', scale = 'lo
         #    reduced_func = tmpfct.fit_func
         #print(index)
         #print(hist.fit_result)
+        print(index)
+        print(hist.fit_result.shape)
         axis.plot(fit_axis, reduced_func(hist.fit_result[index][:, 0], fit_axis), label='fit', color='r')
 
         text_fit_result += '$\chi^{2}/ndf : %f$\n'%(hist.fit_chi2_ndof[index][0]/hist.fit_chi2_ndof[index][1])

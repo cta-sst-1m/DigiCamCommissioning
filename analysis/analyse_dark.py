@@ -154,8 +154,8 @@ def display_results(options):
             else:
                 plt.subplot( 1, 1,1)
                 plt.plot(dark_spe.bin_centers,
-                         dark_spe.data[ pixel_idx], color=col_curve, linestyle='-', linewidth=2,
-                         label="FADC %d Sector %d" % (fadc_mult, sector))
+                         dark_spe.data[ pixel_idx], color=col_curve, linestyle='-', linewidth=2)#,
+                         #label="FADC %d Sector %d" % (fadc_mult, sector))
             fadc_list.append(fadc)
 
         plt.subplot(1, 1, 1)
@@ -180,16 +180,19 @@ def display_results(options):
 
         #plt.subplot(1, 1, 1)
         print(x)
-        plt.fill_between(x,np.nanmean(distrib,axis=-1)+1*np.nanstd(distrib,axis=-1),
-                         np.nanmean(distrib, axis=-1) - 1*np.nanstd(distrib, axis=-1),
+        n_sigma = 1
+        plt.fill_between(x,np.nanmean(distrib,axis=-1)+n_sigma*np.nanstd(distrib,axis=-1),
+                         np.nanmean(distrib, axis=-1) - n_sigma*np.nanstd(distrib, axis=-1),
                          alpha=0.5, edgecolor='r' , facecolor='r',
-                        zorder = 10)
+                        zorder = 10, label='%d $\sigma$' %n_sigma)
 
 
         plt.plot(x,np.nanmean(distrib,axis=-1),color='r')
         plt.xlabel('N(p.e.)')
-        plt.ylabel('N_{peaks}')
+        plt.ylabel('$N_{peaks}$')
+        plt.legend()
         plt.show()
+
         #dark_spe.data = (np.cumsum(dark_spe.data,axis=-1)-np.sum(dark_spe.data,axis=-1).reshape(-1,1))*-1
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
@@ -486,7 +489,7 @@ def single_photo_electron(options):
     hist_dark_fit_result = histogram.Histogram(filename=options.output_directory + options.histo_dark, fit_only=True).fit_result
     display.display_hist(dark_spe, options=options)
     #fixed_param = [ [0, (1, 0)],[2, (2, 0)] ]
-    fixed_param = [[2, (2, 0)] ]
+    fixed_param = [[2, (2, 0)]]
     dark_spe.fit(fit_multiple_gaussians_spe.fit_func, fit_multiple_gaussians_spe.p0_func, fit_multiple_gaussians_spe.slice_func, fit_multiple_gaussians_spe.bounds_func, \
              labels_func=fit_multiple_gaussians_spe.labels_func,config=hist_dark_fit_result)#, fixed_param=fixed_param)
 
