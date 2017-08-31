@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from utils.event_iterator import EventCounter
 
 
-def run(arrival_time, options):
+def run(options):
     """
     Fill the adcs Histogram out of darkrun/baseline runs
     :param h_type: type of Histogram to produce: ADC for all samples adcs or SPE for only peaks
@@ -21,9 +21,13 @@ def run(arrival_time, options):
     :param prev_fit_result: fit result of a previous step needed for the calculations
     :return:
     """
+    arrival_time = np.zeros((len(options.ac_level), len(options.dc_level), len(options.pixel_list), options.events_per_level))
+
+
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     # Reading the file
-    event_counter = EventCounter(options.min_event, options.max_event, options.scan_level[0], options.scan_level[-1], 0, 0, options.events_per_level, options.events_per_level_in_file, log)
+
+    event_counter = EventCounter(event_min=options.min_event, event_max=options.max_event, log=log, batch_size=1, level_dc_min=options.dc_level[0], level_dc_max=options.dc_level[-1], level_ac_min=options.ac_level[0], level_ac_max=options.ac_level[-1], event_per_level=options.events_per_level, event_per_level_in_file=options.events_per_level_in_file)
 
     for file in options.file_list:
         # Open the file
@@ -54,7 +58,8 @@ def run(arrival_time, options):
                 for pixel_id, pixel_soft_id in enumerate(options.pixel_list):
 
                     fit_result = compute_time(data[pixel_id], time, errors, options, pixel_soft_id)
-                    arrival_time[counter.level_dc, pixel_id, counter.event_count_in_level] = fit_result[0]
+                    # print(counter.level_ac, counter.level_dc, pixel_id, counter.event_id_in_level)
+                    arrival_time[counter.level_ac, counter.level_dc, pixel_id, counter.event_count_in_level] = fit_result[0]
 
                     if options.debug:
 
@@ -70,7 +75,7 @@ def run(arrival_time, options):
                         plt.show()
 
 
-    return
+    return arrival_time
 
 
 def residual_function(function, p, x, y, y_err, pixel_id):
@@ -99,10 +104,12 @@ def compute_time(data, time, errors, options, pixel_soft_id):
 
     except:
 
-        plt.figure()
-        plt.step(time, data)
-        plt.show()
-        print(starting_parameters)
+        if options.debug:
+
+            plt.figure()
+            plt.step(time, data)
+            plt.show()
+            print(starting_parameters)
 
         return starting_parameters
 

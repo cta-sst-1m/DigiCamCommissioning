@@ -43,6 +43,7 @@ class EventCounter:
                 'batch_size : %d should be a multiple of event_per_level : %d' % (batch_size, event_per_level))
 
         if (level_ac_max * level_dc_max * event_per_level_in_file) > event_max:
+
             raise ValueError('Not enough events in file')
 
     def __iter__(self):
@@ -100,14 +101,14 @@ class EventCounter:
 
 if __name__ == '__main__':
     event_min = 0
-    event_max = 360000
-    level_dc_min = -1
+    event_max = 100000
+    level_dc_min = 0
     level_dc_max = 1
     level_ac_min = 0
     level_ac_max = 1
     event_per_level = 10
-    event_per_level_in_file = 1000
-    events_per_file = 20000
+    event_per_level_in_file = 100
+    events_per_file = 200
     batch_size = 10 ## still in dev !
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     gen = EventCounter(event_min, event_max, log, batch_size, level_dc_min, level_dc_max, level_ac_min, level_ac_max, event_per_level, event_per_level_in_file)

@@ -191,7 +191,7 @@ def display_results(options):
                 y_e_0 = interp1d(x, yerr, kind='linear')(x_residu)
                 y_e_1 = interp1d(x_data, yerr_data, kind='linear')(x_residu)
 
-                axis_residue.errorbar(x_residu, np.abs(y_0/y_1), yerr=np.sqrt((y_e_0/y_0)**2 + (y_e_1/y_1)**2), color=color, linestyle='None', marker='o')
+                axis_residue.errorbar(x_residu, np.abs(y_0/y_1), yerr=np.abs(y_0/y_1) * np.sqrt((y_e_0/y_0)**2 + (y_e_1/y_1)**2), color=color, linestyle='None', marker='o')
 
 
             # print(np.average(histo.bin_centers, weights=histo.data[pixel_id]))
@@ -200,15 +200,17 @@ def display_results(options):
 
             axis_histogram.errorbar(x, y, yerr=yerr, label=labels[i][j], color=color, linestyle='-', marker='o')
 
-
+        axis_residue.axhline(1, linestyle='--', color='k')
         axis_histogram.legend(loc='best')
         axis_histogram.set_yscale('log')
-        axis_residue.set_yscale('log')
+        axis_residue.set_yscale('linear')
         axis_residue.set_xlabel('[LSB]')
-        axis_residue.set_ylabel('MC over Data', fontsize=12)
+        axis_residue.set_ylabel('MC / Data', fontsize=12)
+        axis_histogram.set_ylabel('[a.u.]', fontsize=18)
         axis_histogram.axes.get_xaxis().set_visible(False)
         lims = [np.min(x_data), np.max(x_data)]
         axis_residue.set_xlim(lims)
+        axis_residue.set_ylim(0, 10)
         axis_histogram.set_xlim(lims)
 
     plt.show()

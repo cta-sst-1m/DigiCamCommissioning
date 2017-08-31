@@ -1,26 +1,42 @@
 render_module : bias_curve
-title    :  ['Trigger Rates DATA', ' ']
+title    :  ['Trigger Rates DATA', ' ', ' ', ' ']
 legends  :  [['HV OFF','Dark (3MHz)','NSB 40 MHz','NSB 80 MHz', 'NSB 125 MHz' , 'NSB 250 MHz','NSB 660 MHz'],
-             ['Dark (3MHz)', 'TOY Dark (3MHz)', 'CARE Dark (3 MHz)']]
-xaxis    :  ['ADC', 'ADC']
+             ['Dark ', 'TOY Dark (2.08MHz)', 'CARE Dark (3 MHz)'],
+             ['Dark ', 'TOY Dark (2.08MHz)'],
+             ['Dark ', 'CARE Dark (2.08MHz)']]#, 'Toy Dark (2.08MHz)']]
+xaxis    :  ['ADC', 'ADC', 'pe', 'pe']
 dataset  :  [['DarkWOnoise_HVOff.txt','Dark_without_noisy_channel.txt','NSB_DAC277_without_noisy_channel.txt','NSB_DAC288_without_noisy_channel.txt',
              'NSB_DAC295_without_noisy_channel.txt','NSB_DAC306_without_noisy_channel.txt','NSB_DAC323_without_noisy_channel.txt'],
-             ['Dark_without_noisy_channel.txt', 'trigger.npz', 'care_dark.txt']]
+             ['Dark_without_noisy_channel.txt', 'trigger_15.npz', 'care_dark.txt', 'trigger_3.npz'],
+             ['Dark_without_noisy_channel.txt', 'trigger_15.npz'],
+              ['Dark_without_noisy_channel.txt', 'care_dark.txt']]
 variable :  [['trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt','trigger_cnt'],
-              ['trigger_cnt', 1, 1]]
+              ['trigger_cnt', 1, 1, 1],
+              ['trigger_cnt', 1],
+              ['trigger_cnt', 1]]
 offset   :   [[0, 0, 0, 0, 0, 0],
-              [0, 1., 1.5]]
+              [0, -0.8, 1.5, 0],
+              [0, -0.8],
+              [0, 1.5]]
 NSB      :  [[0.,3.e6,40.7e6,80.e6,125.e6,250.e6,660.e6],
-             [3.e6, 3.e6, 3.e6]]
+             [3.e6, 2.08e6, 3.e6, 2.08e6],
+             [3.e6, 2.08e6],
+             [3e6, 3e6]]
 style    :  [[':','-','-','-','-','-','-'],
-              ['-', '-', '-']]
+              ['-', '-', '-', '-'],
+              ['-','-'],
+              ['-','-']]
 color    :  [['k','#00134d','#002699','#0039e6','#3366ff','#809fff','#ccd9ff'],
-              ['k', 'r', 'g']]
+              ['k', 'r', 'g', 'b'],
+              ['k', 'r'],
+              ['k', 'g']]
 
 x_lim    :  [[0,70],
-             [0,70]]
+             [0,70],
+             [0, 70],
+             [0, 70]]
 y_lim    :  [[1e-1,1e7],
+             [1e-1,1e7],
+             [1e-1,1e7],
              [1e-1,1e7]]
 base_directory : 'data/'
-
-

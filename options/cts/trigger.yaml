@@ -7,21 +7,21 @@ mc                : True
 log_file_basename : 20161214
 
 # Input files
-file_basename : CameraDigicam@localhost.localdomain_0_000.%d.run_337.fits.fz
-file_basename : nsb_scan_camera+1cluster_%d.hdf5
-directory     : /data/datasets/CTA/DATA/20170511/trigger_efficiency/
+#file_basename : CameraDigicam@localhost.localdomain_0_000.%d.run_337.fits.fz
+file_basename : nsb_scan_full_camera_long_window_%d.hdf5
+#directory     : /data/datasets/CTA/DATA/20170511/trigger_efficiency/
 directory     : /home/alispach/data/digicam_commissioning/trigger/mc/
-scan_level : [0, 1, 2, 3, 4, 5]# len(scan_level) == len(nsb_rate)
-nsb_rate : [0, 3, 40, 80, 125, 660] # nsb rates [MHz]
-file_list     :     [0]#, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+scan_level : [0, 1, 2, 3]#, 3, 4, 5]# len(scan_level) == len(nsb_rate)
+nsb_rate : [0, 2.06, 2.08, 2.1]#, 40, 80, 125, 660] # nsb rates [MHz]
+file_list     :     [15]#, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
 cts_directory :     /home/alispach/Documents/PhD/ctasoft/CTS/
 # Output files
 output_directory  : /data/datasets/CTA/DATA/20170511/trigger_efficiency/
 output_directory  : /home/alispach/data/digicam_commissioning/trigger/mc/
-histo_filename    : trigger_5.npz
-cluster_histo_filename  : cluster_5.npz
-patch_histo_filename    : patch_5.npz
-max_cluster_histo_filename : max_cluster_5.npz
+histo_filename    : trigger_15.npz
+cluster_histo_filename  : cluster_15.npz
+patch_histo_filename    : patch_15.npz
+max_cluster_histo_filename : max_cluster_15.npz
 
 ## Camera Configuration
 pixel_list : all
@@ -30,15 +30,29 @@ clusters : all
 window_width : 50 # bins
 baseline_bins : 1024 # bins to compute baseline
 evt_min : 0
-evt_max : 60
+evt_max : 40
 n_evt_per_batch : 10000000000000000 #TODO make this work
 events_per_level : 10
 crate : [True, True, True]
 pdp : [True, True, True]
 
 ## Trigger parameters
-baseline_window_width : 1024
-threshold : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+threshold : [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,
+        13,  14,  15,  16,  17,  18,  19,  20,  21,  22,  23,  24,  25,
+        26,  27,  28,  29,  30] #,  31,  32,  33,  34,  35,  36,  37,  38,
+        #39,  40,  41,  42,  43,  44,  45,  46,  47,  48,  49,  50,  51,
+        #52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
+        #65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,
+        #78,  79,  80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,
+        #91,  92,  93,  94,  95,  96,  97,  98,  99, 100, 101, 102, 103,
+       #104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116,
+       #117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+       #130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+       #143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155,
+       #156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
+       #169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181,
+       #182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194,
+       #195, 196, 197, 198, 199]
 cluster_size : 7
 compression_factor : 4
 clipping_patch : 255

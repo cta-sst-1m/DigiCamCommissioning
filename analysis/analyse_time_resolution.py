@@ -19,9 +19,7 @@ __all__ = ["create_histo", "perform_analysis", "display_results"]
 
 def create_histo(options):
 
-    arrival_time = np.zeros((len(options.scan_level), len(options.pixel_list), options.events_per_level))
-    timing.run(arrival_time, options)
-
+    arrival_time = timing.run(options)
     np.savez(file=options.output_directory + options.timing_filename, arrival_time=arrival_time)
 
     return

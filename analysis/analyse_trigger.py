@@ -118,7 +118,7 @@ def display_results(options):
 
     fig_1 = plt.figure(figsize=(10,5))
     axis_1 = fig_1.add_subplot(111)
-    axis_1.set_title('Blinding : %s | $N_{pixels}$ : %d | Baseline bins : %d | Window bins : %d' % (options.blinding, len(options.pixel_list), options.baseline_window_width, options.window_width), fontsize=14)
+    axis_1.set_title('Blinding : %s | $N_{pixels}$ : %d | Baseline bins : %d | Window bins : %d' % (options.blinding, len(options.pixel_list), options.baseline_bins, options.window_width), fontsize=14)
     for i, level in enumerate((options.scan_level)):
 
         axis_1.errorbar(x=triggers.bin_centers, y=triggers.data[level], yerr=triggers.errors[level], label='$f_{nsb} = $ %0.1f [MHz]' %(options.nsb_rate[level]), linestyle='-', fmt='o')

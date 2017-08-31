@@ -58,13 +58,12 @@ def hdf5_mc_event_source(url, events_per_dc_level, events_per_ac_level, dc_start
             data.r0.tel[telescope_id].adc_samples = dict_data
 
         count += 1
-        if events_per_ac_level != 0 and (count % events_per_ac_level) == 0:
+        if events_per_ac_level != 0 and (count % events_per_ac_level) == 0 and count !=0:
             count = 0
             ac_level += 1
 
-        if events_per_dc_level != 0 and (count % events_per_dc_level) == 0:
+        if events_per_dc_level != 0 and (count % events_per_dc_level) == 0 and count !=0:
             count = 0
             dc_level += 1
-
 
         yield data

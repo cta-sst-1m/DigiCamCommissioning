@@ -1,0 +1,35 @@
+# Analysis module
+analysis_module : analyse_time_resolution
+
+# Logging
+verbose           : False
+log_file_basename : log
+debug : False
+
+# MC input
+mc        : True
+dc_start  : 0
+ac_start  : 0
+dc_step   : 80000
+ac_step   : 5000
+
+
+# Input files
+file_basename :     time_resolution_1_pixel_%d.hdf5
+directory     :    /home/alispach/data/digicam_commissioning/trigger/mc/
+file_list     :     [1]
+dc_level    :     [0]
+ac_level    :     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+# Output files
+output_directory        : /home/alispach/data/digicam_commissioning/trigger/mc/
+timing_filename        : timing_1_pixel.npz
+
+# Event processing
+max_event          : 75000
+min_event          : 0
+events_per_level   : 50
+events_per_level_in_file : 5000
+
+# Camera Configuration
+pixel_list : [0]

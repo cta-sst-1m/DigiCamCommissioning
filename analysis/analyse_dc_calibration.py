@@ -14,6 +14,7 @@ import utils.display as display
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.interpolate import splrep, splev, splint
+from scipy.optimize import curve_fit
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
@@ -71,6 +72,7 @@ def perform_analysis(options):
     nsb = Histogram(filename=options.output_directory + options.dc_scan_filename)
     nsb_and_signal = Histogram(filename=options.output_directory + options.ac_dc_scan_filename)
     pulse_shape = np.load(options.output_directory + 'temp.npz')['pulse_shape']
+    pulse_shape_error = np.zeros(pulse_shape.shape)
 
     baseline = np.zeros((nsb.data.shape[0], nsb.data.shape[1]))
     baseline_shift = np.zeros((nsb.data.shape[0], nsb.data.shape[1]))
@@ -79,6 +81,15 @@ def perform_analysis(options):
     gain_drop = np.zeros((nsb_and_signal.data.shape[0], nsb_and_signal.data.shape[1]))
     nsb_rate = np.zeros((nsb_and_signal.data.shape[0], nsb_and_signal.data.shape[1]))
     delta_t = np.zeros(nsb_and_signal.data.shape[1])
+
+    baseline_error = np.zeros((nsb.data.shape[0], nsb.data.shape[1]))
+    baseline_shift_error = np.zeros((nsb.data.shape[0], nsb.data.shape[1]))
+    baseline_gain_error = np.zeros((nsb.data.shape[0], nsb.data.shape[1]))
+    peak_amplitude_error = np.zeros((nsb_and_signal.data.shape[0], nsb_and_signal.data.shape[1]))
+    gain_drop_error = np.zeros((nsb_and_signal.data.shape[0], nsb_and_signal.data.shape[1]))
+    nsb_rate_error = np.zeros((nsb_and_signal.data.shape[0], nsb_and_signal.data.shape[1]))
+    delta_t_error = np.zeros(nsb_and_signal.data.shape[1])
+
     pulse_shape_spline = [None]*pulse_shape.shape[0]
     mu_xt = 0.07
     gain = 5.8
@@ -90,16 +101,20 @@ def perform_analysis(options):
         for pixel in range(nsb.data.shape[1]):
 
             baseline[dc_level, pixel] = np.average(nsb.bin_centers, weights=nsb.data[dc_level, pixel])
+            baseline_error[dc_level, pixel] = np.sqrt(np.average(nsb.bin_centers, weights=(nsb.data[dc_level, pixel]-baseline[dc_level, pixel])**2) / nsb.bin_centers.shape[0])
+
 
             if dc_level == 0:
 
                 pulse_shape[pixel] = pulse_shape[pixel] - baseline[0, pixel]
+                pulse_shape_error[pixel] = np.sqrt(pulse_shape_error[pixel]**2 + baseline_error[0, pixel]**2)
                 pulse_shape_spline[pixel] = splrep(t, pulse_shape[pixel])
                 max_index = np.argmax(pulse_shape[pixel])
                 t_temp = np.linspace(t[max_index-1], t[max_index+1], 100)
                 data_max = splev(t_temp, pulse_shape_spline[pixel])
                 data_max = np.max(data_max)
                 pulse_shape[pixel] = pulse_shape[pixel] / data_max
+                pulse_shape_error[pixel] = pulse_shape_error[pixel] / data_max
                 #data_range = [np.where(pulse_shape[pixel] > 0.05)[0][0] - 1, pulse_shape.shape[1]]
                 #t_temp = np.arange(0, data_range[1] - data_range[0], 1) * 4
                 #y_temp = pulse_shape[pixel][data_range[0]:data_range[1]]
@@ -114,12 +129,25 @@ def perform_analysis(options):
                 #delta_t[pixel] = np.trapz(pulse_shape[pixel], x=np.arange(0, pulse_shape.shape[1], 1)*4)
 
             baseline_shift[dc_level, pixel] = baseline[dc_level, pixel] - baseline[0, pixel]
+            baseline_shift_error[dc_level, pixel] = np.sqrt(baseline_error[dc_level, pixel]**2 + baseline_error[0, pixel]**2)
+
             baseline_gain[dc_level, pixel] = baseline_shift[dc_level, pixel] / baseline[0, pixel]
+            baseline_gain_error[dc_level, pixel] = baseline_gain[dc_level, pixel] * np.sqrt((baseline_shift_error[dc_level, pixel]/baseline_shift[dc_level, pixel])**2 + (baseline_error[0, pixel]/baseline[0, pixel])**2)
 
             peak_amplitude[dc_level, pixel] = np.average(nsb_and_signal.bin_centers, weights=nsb_and_signal.data[dc_level, pixel])
+            peak_amplitude_error[dc_level, pixel] = np.sqrt(np.average(nsb_and_signal.bin_centers, weights=(nsb_and_signal.data[dc_level, pixel]-peak_amplitude[dc_level, pixel])**2)/nsb_and_signal.bin_centers.shape[0])
             peak_amplitude[dc_level, pixel] = peak_amplitude[dc_level, pixel] - baseline[dc_level, pixel]
+            peak_amplitude_error[dc_level, pixel] = np.sqrt(peak_amplitude_error[dc_level, pixel]**2 + baseline_error[dc_level, pixel]**2)
+
+
             gain_drop[dc_level, pixel] = peak_amplitude[dc_level, pixel] / peak_amplitude[0, pixel]
+            gain_drop_error[dc_level, pixel] = gain_drop[dc_level, pixel] * np.sqrt((peak_amplitude_error[dc_level, pixel]/peak_amplitude[dc_level, pixel])**2 + (peak_amplitude_error[0, pixel]/peak_amplitude[0, pixel])**2)
+
+
             nsb_rate[dc_level, pixel] = baseline_shift[dc_level, pixel] / (delta_t[pixel] * (1. / (1 - mu_xt)) * gain * gain_drop[dc_level, pixel])
+
+
+            nsb_rate_error[dc_level, pixel] = nsb_rate[dc_level, pixel] * np.sqrt((baseline_shift_error[dc_level, pixel]/baseline_shift[dc_level, pixel])**2 + (delta_t_error[pixel]/delta_t[pixel])**2 + (gain_drop_error[dc_level, pixel]/gain_drop[dc_level, pixel])**2)
 
     parameter = np.empty((nsb.data.shape[1], 3))
     options.scan_level = np.array(options.scan_level)
@@ -136,14 +164,21 @@ def perform_analysis(options):
              pixel_id=options.pixel_list, \
              dc_level=options.scan_level,
              baseline=baseline,
+             baseline_error=baseline_error,
              baseline_shift=baseline_shift,
+             baseline_shift_error=baseline_shift_error,
              peak_amplitude=peak_amplitude,
+             peak_amplitude_error=peak_amplitude_error,
              gain_drop=gain_drop,
+             gain_drop_error=gain_drop_error,
              nsb_rate=nsb_rate,
+             nsb_rate_error=nsb_rate_error,
              fit_parameters=parameter,
              pulse_shape=pulse_shape,
+             pulse_shape_error=pulse_shape_error,
              pulse_shape_spline=pulse_shape_spline,
-             baseline_gain=baseline_gain)
+             baseline_gain=baseline_gain,
+             baseline_gain_error=baseline_gain_error)
 
     np.savez(options.output_directory + options.pulse_shape_filename, pixel_id=options.pixel_list, spline=pulse_shape_spline)
 
@@ -161,6 +196,9 @@ def display_results(options):
 
     :return:
     """
+    import matplotlib as mpl
+
+    mpl.rcParams['figure.figsize'] = (10, 10)
 
     nsb = Histogram(filename=options.output_directory + options.dc_scan_filename)
     nsb_and_signal = Histogram(filename=options.output_directory + options.ac_dc_scan_filename)
@@ -177,7 +215,9 @@ def display_results(options):
     baseline_shift = data['baseline_shift'][mask]
     peak_amplitude = data['peak_amplitude'][mask]
     gain_drop = data['gain_drop'][mask]
+    gain_drop_error = data['gain_drop_error'][mask]
     nsb_rate = data['nsb_rate'][mask]
+    nsb_rate_error = data['nsb_rate_error'][mask]
     fit_parameters = data['fit_parameters']
     baseline_gain = data['baseline_gain'][mask]
     pulse_shape = data['pulse_shape']
@@ -202,16 +242,23 @@ def display_results(options):
     axis.set_ylabel('Gain drop')
     axis.legend(loc='best', prop={'size': 6})
 
-    fig = plt.figure()
+    fig = plt.figure()#figsize=(5,10))
     axis = fig.add_subplot(111)
     for pixel in range(len(pixel_id)):
-        axis.loglog(nsb_rate[..., pixel] * 1E3, gain_drop[..., pixel], marker='x', linestyle='None',
-                      label='pixel : %d' % pixel_id[pixel])
-    x = np.linspace(np.min(nsb_rate), np.max(nsb_rate), 1000)
-    axis.loglog(x * 1E3, gain_drop_function(x), label='model', linestyle='-')
+        if pixel != 0: continue
+
+
+        axis.errorbar(nsb_rate[..., pixel] * 1E3, gain_drop[..., pixel], xerr=5*nsb_rate_error[..., pixel], yerr=5*gain_drop_error[..., pixel], marker='o', linestyle='None',
+                      label='pixel : %d' % pixel_id[pixel], color='k')
+        out = curve_fit(gain_drop_function, nsb_rate[..., pixel], gain_drop[..., pixel], p0=85*1E-15, sigma=1./np.sqrt(nsb_rate_error[..., pixel]**2 + gain_drop_error[..., pixel]**2))
+        x = np.linspace(np.min(nsb_rate), np.max(nsb_rate), 1000)
+        axis.loglog(x * 1E3, gain_drop_function(x, out[0][0]), label='fit : $C_{cell} = $ %0.2f [fF]' % (out[0][0]*1E15) , linestyle='-')
+
+    #axis.set_ylim(0.1, 1)
     axis.set_xlabel('$f_{nsb}$ [MHz]')
+    axis.set_ylim([0.1, 1.5])
     axis.set_ylabel('Gain drop')
-    axis.legend(loc='best', prop={'size': 6})
+    axis.legend(loc='best')
 
     fig = plt.figure()
     axis = fig.add_subplot(111)
@@ -295,6 +342,6 @@ def dc_led_fit_function(x, a, b, c):
 
     return a * np.exp(b * x) + c
 
-def gain_drop_function(x) :
-
-    return 1. /  (1 + 1E4*85*1E-15*x*1E9)
+def gain_drop_function(x, c_cell=85*1E-15) :
+    r_bias = 1E4
+    return 1. /  (1 + r_bias*c_cell*x*1E9)

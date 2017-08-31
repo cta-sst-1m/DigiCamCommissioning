@@ -177,6 +177,8 @@ def plot(options):
     plt.ion()
     datasets = get_datasets(options)
     for i,d in enumerate(datasets):
+
+        print (i)
         plot_gain_drop(d,labels=options.legends[i],xaxis=options.xaxis[i],colors=options.color[i],style=options.style[i],xlim=options.x_lim[i],ylim=options.y_lim[i],title=options.title[i])
 
 
@@ -188,13 +190,13 @@ def plot_mc_vs_data(options):
     import matplotlib.gridspec as gridspec
     from scipy.interpolate import interp1d
 
-    gs = gridspec.GridSpec(2, 1, width_ratios=[1], height_ratios=[3, 1], hspace=0.05)
+    # gs = gridspec.GridSpec(2, 1, width_ratios=[1], height_ratios=[3, 1], hspace=0.05)
 
     color = ['r', 'g']
 
     plt.figure(figsize=(10, 10))
-    axis_histogram = plt.subplot(gs[0])
-    axis_residue = plt.subplot(gs[1])
+    axis_histogram = plt.subplot()
+    #axis_residue = plt.subplot(gs[1])
     #axis_slope = plt.subplot(gs[2])
 
     plot_gain_drop(datasets[1], labels=options.legends[1], xaxis=options.xaxis[1], colors=options.color[1],
@@ -220,8 +222,8 @@ def plot_mc_vs_data(options):
     err_toy = interp1d(toy[0], toy[4], kind='linear')(x_residu)
     err_care = interp1d(care[0], care[4], kind='linear')(x_residu)
 
-    axis_residue.errorbar(x_residu, np.abs(y_toy/y_data), yerr=np.sqrt((err_data/y_data)**2 + (err_toy/y_toy)**2), color=color[0], linestyle='None', marker='o')
-    axis_residue.errorbar(x_residu, np.abs(y_care/y_data), yerr=np.sqrt((err_data/y_data)**2 + (err_care/y_care)**2), color=color[1], linestyle='None', marker='o')
+    #axis_residue.errorbar(x_residu, np.abs(y_toy/y_data), yerr=np.sqrt((err_data/y_data)**2 + (err_toy/y_toy)**2), color=color[0], linestyle='None', marker='o')
+    #axis_residue.errorbar(x_residu, np.abs(y_care/y_data), yerr=np.sqrt((err_data/y_data)**2 + (err_care/y_care)**2), color=color[1], linestyle='None', marker='o')
     #axis_slope.errorbar((x_residu[1:] + x_residu[:-1]) / 2, np.abs(np.diff(y_data) - np.diff(y_toy)), color=color[0], linestyle='None', marker='o')
     #axis_slope.errorbar((x_residu[1:] + x_residu[:-1]) / 2, np.abs(np.diff(y_data) - np.diff(y_care)), color=color[1], linestyle='None', marker='o')
 
@@ -230,13 +232,13 @@ def plot_mc_vs_data(options):
 
     axis_histogram.legend(loc='best')
     axis_histogram.set_yscale('log')
-    axis_residue.set_yscale('log')
+    #axis_residue.set_yscale('log')
     #axis_slope.set_yscale('log')
-    axis_residue.set_xlabel('[LSB]')
-    axis_residue.set_ylabel('MC over Data', fontsize=12)
-    axis_histogram.axes.get_xaxis().set_visible(False)
+    #axis_residue.set_xlabel('[LSB]')
+    #axis_residue.set_ylabel('MC over Data', fontsize=12)
+    # axis_histogram.axes.get_xaxis().set_visible(False)
     lims = np.arange(0, 22, 2)
-    axis_residue.set_xticks(lims)
+    #axis_residue.set_xticks(lims)
     axis_histogram.set_xlim(lims[0], lims[-1])
 
 

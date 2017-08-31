@@ -6,6 +6,7 @@ from utils.logger import TqdmToLogger
 from utils.toy_reader import ToyReader
 from utils.mc_events_reader import hdf5_mc_event_source
 from cts_core.camera import Camera
+from scipy.ndimage import convolve1d
 
 
 def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=None, max_cluster_hist=None,
@@ -58,10 +59,14 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
             for telid in event.r0.tels_with_data:
 
                 data = np.array(list(event.r0.tel[telid].adc_samples.values()))
+                data = data[options.pixel_list]
+
+                data = data[:, 0:data.shape[-1]//2]
 
                 if options.mc:
 
-                    baseline = np.mean(data, axis=1)
+                    data = substract_baseline(data, options.baseline_bins)
+                    #baseline = np.mean(data, axis=1)
 
                     """
                     if baseline_counter < options.baseline_window_width :
@@ -79,7 +84,7 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
                         log.debug('Baseline recomputed for level %d : = %d [LSB]' % (level, np.mean(baseline)))
                     """
 
-                    data = data[options.pixel_list, :] - baseline[:, np.newaxis]
+                    #data = data - baseline[:, np.newaxis]
 
                     """
                     for i in range(len(options.crate)):
@@ -137,7 +142,7 @@ def run(trigger_rate_camera, options, min_evt=0, cluster_hist=None, patch_hist=N
 
                 else:
 
-                    time[level] += data.shape[-1]
+                    time[level] += (data.shape[-1] - 1)
                 cluster_trace, patch_trace = compute_cluster_trace(data, options, log)
                 cluster_max_sector, cluster_max, cluster_max_time, cluster_max_id = compute_trigger_info(cluster_trace,
                                                                                                          options)
@@ -177,7 +182,7 @@ def compute_cluster_trace(data, options, log=None):
             for pixel in patch.pixels:
                 patch_trace[patch.ID] += data[pixel.ID]
 
-            patch_trace[patch.ID] /= options.compression_factor
+            patch_trace[patch.ID] //= options.compression_factor
             patch_trace[patch.ID] = np.clip(patch_trace[patch.ID], 0., options.clipping_patch).astype(int)
             cluster_trace[cluster.ID] += patch_trace[patch.ID]
 
@@ -214,7 +219,7 @@ def compute_trigger_count(cluster_trace, options, log):
 
         t = 0
 
-        while t < cluster_trace.shape[-1] - (cluster_trace.shape[-1] % options.window_width):
+        while t < cluster_trace.shape[-1]:# - (cluster_trace.shape[-1] % options.window_width):
 
             if np.any(cluster_trace[:, t] > threshold):
 
@@ -222,8 +227,23 @@ def compute_trigger_count(cluster_trace, options, log):
                 log.debug('Trigger at time %d [ns] for threshold %d [ADC]' % (t * 4, threshold))
 
                 if options.blinding:
-                    t += options.window_width + 1
+                    t += options.window_width
 
             t += 1
 
     return trigger_count
+
+
+def substract_baseline(data, baseline_window_length):
+
+    filter = np.ones(baseline_window_length)
+    baseline = np.zeros((data.shape[0], max(data.shape[-1], filter.shape[-1]) - min(data.shape[-1], filter.shape[-1]) + 1), dtype=int)
+
+    for pixel in range(data.shape[0]):
+
+        baseline[pixel] = np.convolve(data[pixel], filter, mode='valid') // baseline_window_length
+
+    data_baseline_substracted = data[:, data.shape[1]-baseline.shape[1]: data.shape[1]] - baseline
+    data_baseline_substracted = np.clip(data_baseline_substracted, 0, 4095).astype(int)
+
+    return data_baseline_substracted
