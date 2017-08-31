@@ -3,7 +3,6 @@
 # external modules
 
 # internal modules
-from data_treatement import mpe_hist
 from spectra_fit import fit_full_mpe
 from utils import display, histogram, geometry
 import logging,sys
@@ -37,7 +36,7 @@ def create_histo(options):
 
     :return:
     """
-
+    prev_fit_result = None
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' +  __name__)
     log.info('\t-|> Get various inputs')
 
@@ -56,7 +55,7 @@ def create_histo(options):
     # Define the histograms
     mpes = histogram.Histogram(filename = options.output_directory + options.mpes_histo_filename)
 
-    mpes_full = histogram.Histogram(data=np.zeros(mpes.data[0].shape),bin_centers=mpes.bin_centers, xlabel='ADC',
+    mpes_full = histogram.Histogram(data=np.zeros(mpes.data[0,0].shape),bin_centers=mpes.bin_centers, xlabel='ADC',
                           ylabel='$\mathrm{N_{trigger}}$', label='Summed MPE')
 
     # Add an Histogram corresponding to the sum of all other only if the mu is above a certain threshold
@@ -66,6 +65,7 @@ def create_histo(options):
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     log.info('\t-|> Summing the MPEs:')
+    print('Shape of MPE',mpes.data.shape)
     for i in range(mpes.data.shape[0]):
         for j in range(mpes.data.shape[1]):
 
@@ -75,13 +75,18 @@ def create_histo(options):
                 if (i*mpes.data.shape[1]+j) %int(pbar.total/1000)==0: pbar.update(pbar.total/1000)
             # put the slice or remove empty bins
 
-            if not options.mc and (prev_fit_result is not None):
+            if not options.mc :
                 if np.where(mpes.data[i,j] != 0)[0].shape[0]==0 : continue
                 s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
                 if s[0]==s[1]:continue
                 mpe_tmp = mpes.data[i,j]
-                mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
-                                  weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,1,0]
+                if (prev_fit_result is not None):
+                    mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
+                                    weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,1,0]
+                else :
+                    #case where we already are baseline subtracted
+                    print(mpe_tmp.shape)
+                    mean = np.average(mpes.bin_centers, weights=mpe_tmp)
                 if mean < options.mean_range_for_mpe[0] or mean > options.mean_range_for_mpe[1] : continue
                 mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
             else:
@@ -208,17 +213,18 @@ def display_results(options, param_to_display=1):
     adcs = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     # Define Geometry
-
-    geom = geometry.generate_geometry_0(pixel_list=options.pixel_list)
-
-    # Perform some plots
     display_fit = True
 
-    adcs.fit_result_label[0:4] = ['Baseline [LSB]', 'Gain [LSB / p.e.]', '$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]']
-    adcs.xlabel = 'LSB'
 
     print(adcs.data.shape)
 
+    options.scan_level = [0,1]
+    display.display_hist(adcs, options=options, draw_fit=False)
+    return
+    adcs.fit_result_label[0:4] = ['Baseline [LSB]', 'Gain [LSB / p.e.]', '$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]']
+    adcs.xlabel = 'LSB'
+
+    '''
     display.display_hist(adcs, options=options, draw_fit=True)
     display.display_hist(adcs, options=options, geom=geom, display_parameter=True, draw_fit=True)
     display.display_fit_result(adcs, geom=geom, options=options, display_fit=display_fit)
@@ -241,5 +247,5 @@ def display_results(options, param_to_display=1):
                 fig_pull.savefig(options.output_directory + 'figures/%s_pull.png' % (param_names[i]))
 
     input('press button to quit')
-
+    '''
     return

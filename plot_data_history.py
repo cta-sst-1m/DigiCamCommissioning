@@ -43,14 +43,15 @@ if __name__ == '__main__':
     file_basename = 'CameraDigicam@localhost.localdomain_0_000.%d.run_452.fits.fz'
     # file_basename = 'ac_level_%d.hdf5'
     directory = '/data/datasets/CTA/DATA/FULLSEQ/ac_scan_120/'
+    #directory = '/user_data/TEMP/scan_ac_240/'
     temp_filename = 'temp_120_fullseq.npz'
     filename = directory + file_basename
     pixel = [60, 115]
 
-#    data_max_min, data_mean, data_std, time = run(filename=filename, file_list=file_list, pixels=pixel)
+    data_max_min, data_mean, data_std, time = run(filename=filename, file_list=file_list, pixels=pixel)
 
-#   np.savez(temp_filename, max_min=data_max_min, mean=data_mean, std=data_std, time=time)
-
+    np.savez(temp_filename, max_min=data_max_min, mean=data_mean, std=data_std, time=time)
+    '''
     data = np.load(temp_filename)
 
     data_max_min = data['max_min']
@@ -59,6 +60,7 @@ if __name__ == '__main__':
     time = data['time']
 
     plt.figure()
+    plt.title(temp_filename)
     colors = ['g', 'r']
     # plt.semilogy(np.diff(time), label='$\Delta t$')
     for pixel in range(data_max_min.shape[1]):
@@ -70,3 +72,4 @@ if __name__ == '__main__':
     plt.xlabel('event number')
     plt.legend()
     plt.show()
+    '''
