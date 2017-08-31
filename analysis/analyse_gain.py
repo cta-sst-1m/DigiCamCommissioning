@@ -42,12 +42,11 @@ def create_histo(options):
 
     # recover previous fit
     if options.mc:
-
-        prev_fit_result = np.ones((len(options.pixel_list), 8, 2))
-
+        print('################### DETELED THE CODE IN AS COMMIT ')
+        return 5./0
     elif hasattr(options,'hv_off_histo_filename'):
 
-        hv_off_hist = histogram.Histogram(filename=options.output_directory + options.hv_off_histo_filename, fit_only=True)
+        hv_off_hist = histogram.Histogram(filename=options.output_directory + options.baseline_param, fit_only=True)
         prev_fit_result = np.copy(hv_off_hist.fit_result)
         del hv_off_hist
 
@@ -60,38 +59,40 @@ def create_histo(options):
 
     # Add an Histogram corresponding to the sum of all other only if the mu is above a certain threshold
 
-    pbar = tqdm(total=mpes.data.shape[0]*mpes.data.shape[1])
+    pbar = tqdm(total=mpes.data.shape[1]*mpes.data.shape[2])
     #print(pbar.total)
     tqdm_out = TqdmToLogger(log, level=logging.INFO)
 
     log.info('\t-|> Summing the MPEs:')
     print('Shape of MPE',mpes.data.shape)
-    for i in range(mpes.data.shape[0]):
-        for j in range(mpes.data.shape[1]):
+    for i in range(mpes.data[0].shape[0]):
+        for j in range(mpes.data[0].shape[1]):
 
             if pbar.total<=1000:
                 pbar.update(1)
             else:
-                if (i*mpes.data.shape[1]+j) %int(pbar.total/1000)==0: pbar.update(pbar.total/1000)
+                if (i*mpes.data[0].shape[1]+j) %int(pbar.total/1000)==0: pbar.update(pbar.total/1000)
             # put the slice or remove empty bins
 
             if not options.mc :
-                if np.where(mpes.data[i,j] != 0)[0].shape[0]==0 : continue
-                s = [np.where(mpes.data[i,j] != 0)[0][0], np.where(mpes.data[i,j] != 0)[0][-1]]
+                if np.where(mpes.data[0][i,j] != 0)[0].shape[0]==0 : continue
+                s = [np.where(mpes.data[0][i,j] != 0)[0][0], np.where(mpes.data[0][i,j] != 0)[0][-1]]
                 if s[0]==s[1]:continue
-                mpe_tmp = mpes.data[i,j]
+                mpe_tmp = mpes.data[0][i,j]
+                '''
                 if (prev_fit_result is not None):
                     mean = np.average(mpes.bin_centers[np.nonzero(mpe_tmp)],
                                     weights=mpe_tmp[np.nonzero(mpe_tmp)]) -prev_fit_result[j,1,0]
                 else :
+                '''
                     #case where we already are baseline subtracted
-                    print(mpe_tmp.shape)
-                    mean = np.average(mpes.bin_centers, weights=mpe_tmp)
+                print(mpe_tmp.shape)
+                mean = np.average(mpes.bin_centers, weights=mpe_tmp)
                 if mean < options.mean_range_for_mpe[0] or mean > options.mean_range_for_mpe[1] : continue
-                mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
+                mpes_full.data[j]=mpes_full.data[j]+mpes.data[0][i,j]
             else:
 
-                mpes_full.data[j]=mpes_full.data[j]+mpes.data[i,j]
+                mpes_full.data[j]=mpes_full.data[j]+mpes.data[0][i,j]
 
 
     mpes_full._compute_errors()
@@ -122,15 +123,15 @@ def perform_analysis(options):
     mpes_full = histogram.Histogram(filename=options.output_directory + options.histo_filename)
 
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
-
+    prev_fit_result = None
     if options.mc:
 
         prev_fit_result = None
 
      # recover previous fit
-    else:
+    elif hasattr(options,'baseline_param'):
 
-        hv_off_histo = histogram.Histogram(filename=options.output_directory + options.hv_off_histo_filename,fit_only=True)
+        hv_off_histo = histogram.Histogram(filename=options.output_directory + options.baseline_param,fit_only=True)
         prev_fit_result = np.copy(hv_off_histo.fit_result)
         del hv_off_histo
 
@@ -167,10 +168,14 @@ def perform_analysis(options):
                                                                                        **kwargs)
                 reduced_slice = lambda *args, config=None, **kwargs: fit_full_mpe.slice_func(*args, n_peaks=i,
                                                                                              config=config, **kwargs)
-                mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
-                              reduced_bounds, config=prev_fit_result ,limited_indices=(pix,),force_quiet=True,
-                              labels_func=fit_full_mpe.label_func)
-                i-=1
+                i=i-1
+                try:
+                    mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
+                                 reduced_bounds, config=prev_fit_result, limited_indices=(pix,), force_quiet=True,
+                                  labels_func=fit_full_mpe.label_func)
+                except Exception:
+                    pass
+
 
         if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]):
             i = n_peak-1
@@ -181,10 +186,13 @@ def perform_analysis(options):
                                                                                        **kwargs)
                 reduced_slice = lambda *args, config=None, **kwargs: fit_full_mpe.slice_func(*args, n_peaks=i,
                                                                                              config=config, **kwargs)
-                mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
-                              reduced_bounds, config=prev_fit_result ,limited_indices=(pix,),force_quiet=True,
-                              labels_func=fit_full_mpe.label_func)
-                i-=1
+                i -= 1
+                try:
+                    mpes_full.fit(fit_full_mpe.fit_func, reduced_p0, reduced_slice,
+                                  reduced_bounds, config=prev_fit_result ,limited_indices=(pix,),force_quiet=True,
+                                    labels_func=fit_full_mpe.label_func)
+                except Exception:
+                    pass
 
 
     for pix,pix_fit_result in enumerate(mpes_full.fit_result):
@@ -219,7 +227,7 @@ def display_results(options, param_to_display=1):
     print(adcs.data.shape)
 
     options.scan_level = [0,1]
-    display.display_hist(adcs, options=options, draw_fit=False)
+    display.display_hist(adcs, options=options, draw_fit=True)
     return
     adcs.fit_result_label[0:4] = ['Baseline [LSB]', 'Gain [LSB / p.e.]', '$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]']
     adcs.xlabel = 'LSB'

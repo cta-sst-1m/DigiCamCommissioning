@@ -25,12 +25,10 @@ dc_level      :     [0]
 # Output files
 
 # Output files
-histo_filename    : mpe_0.npz
-full_histo_filename   : full_mpe_0.npz
-baseline_param_data : baseline_parameters.npz
 histo_filename    : full_mpe_0.npz
+baseline_param : dark_adc_baseline.npz
 mpes_histo_filename   : mpe_0.npz
 
 # Histo config
 mean_range_for_mpe : [40, 100000]
-mpe_max_peaks_to_fit : 25
+mpe_max_peaks_to_fit : 60
