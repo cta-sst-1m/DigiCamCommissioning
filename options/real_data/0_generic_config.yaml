@@ -4,10 +4,10 @@ log_file_basename : 20170714
 
 # Input files
 mc            :     False
-directory     :     /data/datasets/CTA/REALDATA/
+directory     :     /calib_data/first_light/20170831/
 
 # Output file
-output_directory  : /data/datasets/CTA/REALDATA/
+output_directory  : /calib_data/first_light/20170831/
 
 # Camera Configuration
 angle_cts         : 0.
