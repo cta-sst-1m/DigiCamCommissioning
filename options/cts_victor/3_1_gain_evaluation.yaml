@@ -31,4 +31,4 @@ mpes_histo_filename   : mpe_0.npz
 
 # Histo config
 mean_range_for_mpe : [40, 100000]
-mpe_max_peaks_to_fit : 60
+mpe_max_peaks_to_fit : 100
