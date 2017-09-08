@@ -151,6 +151,7 @@ def perform_analysis(options):
 
 
     # get the bad fits
+
     log.info('\t-|> Try to correct the pixels with wrong fit results')
     for pix,pix_fit_result in enumerate(mpes_full.fit_result):
 
@@ -179,7 +180,7 @@ def perform_analysis(options):
 
         if np.isnan(pix_fit_result[0,1]) and not np.isnan(pix_fit_result[0,0]):
             i = n_peak-1
-            while  np.isnan(mpes_full.fit_result[pix,0,1]) and i > 15:
+            while  np.isnan(mpes_full.fit_result[pix,0,1]) and i > options.mpe_max_peaks_to_fit*0.8:
                 reduced_bounds = lambda *args, config=None, **kwargs: fit_full_mpe.bounds_func(*args, n_peaks = i ,
                                                                                              config=config, **kwargs)
                 reduced_p0 = lambda *args, config=None, **kwargs: fit_full_mpe.p0_func(*args, n_peaks = i , config=config,
@@ -227,14 +228,15 @@ def display_results(options, param_to_display=1):
     print(adcs.data.shape)
 
     options.scan_level = [0,1]
-    #display.display_hist(adcs, options=options, draw_fit=True)
-    #return
+    display.display_hist(adcs, options=options, draw_fit=True)
+    return
     adcs.fit_result_label[0:4] = ['Baseline [LSB]', 'Gain [LSB / p.e.]', '$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]']
     adcs.xlabel = 'LSB'
 
+    '''
     display.display_hist(adcs, options=options, draw_fit=True)
-    display.display_hist(adcs, options=options, geom=options.geom, display_parameter=True, draw_fit=True)
-    #display.display_fit_result(adcs, geom=options.geom, options=options, display_fit=display_fit)
+    display.display_hist(adcs, options=options, geom=geom, display_parameter=True, draw_fit=True)
+    display.display_fit_result(adcs, geom=geom, options=options, display_fit=display_fit)
 
     if display_fit:
         fig_chi2 = display.display_chi2(adcs, geom, display_fit=display_fit)
@@ -254,5 +256,5 @@ def display_results(options, param_to_display=1):
                 fig_pull.savefig(options.output_directory + 'figures/%s_pull.png' % (param_names[i]))
 
     input('press button to quit')
-
+    '''
     return
