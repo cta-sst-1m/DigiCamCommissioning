@@ -1,0 +1,21 @@
+# Logging
+verbose           : True
+log_file_basename : 20170714
+
+# Input files
+mc            :     False
+directory     :     /data/datasets/CTA/REALDATA/
+
+# Output file
+output_directory  : /data/datasets/CTA/REALDATA/
+
+# Camera Configuration
+angle_cts         : 0.
+
+# Base definition for the signal extraction
+window_width      : 7
+window_start      : 3
+charge_extraction : integration_saturation
+
+# Event processing
+n_samples : 50

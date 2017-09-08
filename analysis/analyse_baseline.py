@@ -25,10 +25,9 @@ def create_histo(options):
     """
 
     # Define the array
-    print(len(options.pixel_list))
     baseline = np.zeros((len(options.pixel_list  ),options.evt_max+1),dtype=float)
     rms = np.zeros((len(options.pixel_list  ),options.evt_max+1),dtype=float)
-    print(baseline.shape)
+    triggered_patch = []
 
     log = logging.getLogger(sys.modules['__main__'].__name__+'.'+__name__)
     # Reading the file

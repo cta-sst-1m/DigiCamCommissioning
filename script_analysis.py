@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # Other options allows to overwrite the yaml_config interactively
     parser.add_option("-i", "--yaml_data_config", dest="yaml_data_config",
                       help="full path of the yaml data configuration",
-                      default='options/cts_victor/0_generic_config.yaml')
+                      default='options/real_data/0_generic_config.yaml')
 
     # Output level
     parser.add_option("-v", "--verbose",
