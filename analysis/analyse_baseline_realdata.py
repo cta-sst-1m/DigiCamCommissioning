@@ -57,6 +57,7 @@ def create_histo(options):
     prev_event = None
     next_event = None
     next_event_time = None
+    
 
     mask_baseline = np.zeros((1296, n_int_base ), dtype=bool)
     baseline = np.zeros((1296, n_int_base ), dtype=int)
