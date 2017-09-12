@@ -229,9 +229,12 @@ def display_results(options, param_to_display=1):
 
     options.scan_level = [0,1]
     display.display_hist(adcs, options=options, draw_fit=True)
+    # adcs.fit_result_label[0:4] = ['Baseline [LSB]', 'Gain [LSB / p.e.]', '$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]']
+    # adcs.xlabel = 'LSB'
+
+
+    display.display_chi2(adcs)#, display_fit=True)
     return
-    adcs.fit_result_label[0:4] = ['Baseline [LSB]', 'Gain [LSB / p.e.]', '$\sigma_e$ [LSB]', '$\sigma_1$ [LSB]']
-    adcs.xlabel = 'LSB'
 
     '''
     display.display_hist(adcs, options=options, draw_fit=True)

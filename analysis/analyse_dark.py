@@ -198,7 +198,7 @@ def display_results(options):
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
         #dark_spe.data = np.diff(dark_spe.data,n=1,axis=-1)*-1.
 
-        display.display_hist(dark_spe, options=options, draw_fit=True)
+        display.display_hist(dark_spe, options=options, draw_fit=True, geom=geometry.generate_geometry(options.cts, all_camera=True)[0])
 
         for i in [0,1,2,3]:#range(dark_spe.fit_result.shape[1]):
             fig = plt.figure(figsize=(10, 10))
@@ -223,7 +223,10 @@ def display_results(options):
         plt.hist(dc[~np.isnan(dc)],bins=50)
         plt.show()
 
+        display.display_chi2(dark_spe, geom=geometry.generate_geometry(options.cts, all_camera=True)[0])
+
         input('press a key')
+
 
     elif options.analysis_type == 'fit_baseline':
 
@@ -475,6 +478,7 @@ def compute_dark_parameters(x, y, baseline, gain, sigma_1, sigma_e, integral,int
     """
 
     return np.array([[f_dark*1E3, f_dark_error*1E3], [mu_xt_dark, mu_xt_dark_error]])
+
 
 def single_photo_electron(options):
 
