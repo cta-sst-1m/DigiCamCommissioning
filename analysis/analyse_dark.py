@@ -11,9 +11,10 @@ import numpy as np
 import peakutils
 from scipy.interpolate import interp1d
 from scipy.interpolate import splev, splrep
-from spectra_fit import fit_dark_adc, fit_multiple_gaussians_spe
+from spectra_fit import fit_dark_adc, fit_multiple_gaussians_spe, fit_gaussian_sum
 
 import matplotlib.cm as cm
+
 
 
 __all__ = ["create_histo", "perform_analysis", "display_results"]
@@ -210,7 +211,7 @@ def display_results(options):
         plt.subplots(1,2)
         plt.subplot(1,2,1)
         one = dark_spe.fit_result[:,4,0]
-        xt = dark_spe.fit_result[:,5,0][one>0]/one[one>0]
+        xt = dark_spe.fit_result[:,5,0][one>0]/ (one[one>0] + dark_spe.fit_result[:,5,0][one>0])
         xt=xt[xt<0.5]
         xt=xt[xt>0.]
         print(xt)
@@ -226,7 +227,6 @@ def display_results(options):
         display.display_chi2(dark_spe, geom=geometry.generate_geometry(options.cts, all_camera=True)[0])
 
         input('press a key')
-
 
     elif options.analysis_type == 'fit_baseline':
 
@@ -494,8 +494,50 @@ def single_photo_electron(options):
     display.display_hist(dark_spe, options=options)
     #fixed_param = [ [0, (1, 0)],[2, (2, 0)] ]
     fixed_param = [[2, (2, 0)]]
+
+
+    """
+    threshold = 0.1
+    min_dist = 10
+
+    n_removed_points = np.zeros(dark_spe.data.shape[0])
+
+    for pixel in range(dark_spe.data.shape[0]):
+
+        y = dark_spe.data[pixel]
+        if np.sum(y) != 0:
+            print(y)
+            peak_index = peakutils.indexes(y, threshold, min_dist)
+            #peak_index = dark_spe.bin_centers[peak_index]
+            print(peak_index)
+            indices_around = min(6, min_dist)
+            list_indices = [peak_index[j] + i for j in range(len(peak_index)) for i in range(-indices_around,
+                                                                                             indices_around + 1, 1)]
+            print(list_indices)
+            list_indices = list(set(range(len(dark_spe.bin_centers))) - set(list_indices))
+            print(dark_spe.data.shape)
+            print(list_indices)
+            print(pixel)
+
+            n_removed_points[pixel] = len(list_indices)
+            dark_spe.errors[pixel][list_indices] = 1E6
+
+    """
+
     dark_spe.fit(fit_multiple_gaussians_spe.fit_func, fit_multiple_gaussians_spe.p0_func, fit_multiple_gaussians_spe.slice_func, fit_multiple_gaussians_spe.bounds_func, \
-             labels_func=fit_multiple_gaussians_spe.labels_func,config=hist_dark_fit_result)#, fixed_param=fixed_param)
+             labels_func=fit_multiple_gaussians_spe.labels_func, config=hist_dark_fit_result)  #, limited_indices=(7,))#, fixed_param=fixed_param)
+
+    """
+    dark_spe.fit(fit_multiple_gaussians_full_mpe.fit_func, fit_multiple_gaussians_full_mpe.p0_func,
+                 fit_multiple_gaussians_full_mpe.slice_func, fit_multiple_gaussians_full_mpe.bounds_func, \
+                 labels_func=fit_multiple_gaussians_full_mpe.labels_func, config=None,
+                 limited_indices=(7,))  # , fixed_param=fixed_param)
+  
+
+    dark_spe.fit_chi2_ndof[..., 1] -= n_removed_points
+    dark_spe.errors = np.sqrt(dark_spe.data)
+    dark_spe.errors[dark_spe.errors == 0] = 1
+    """
 
     display.display_hist(dark_spe, options=options, draw_fit=True)
     dark_spe.save(options.output_directory + options.histo_filename)

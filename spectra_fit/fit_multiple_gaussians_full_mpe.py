@@ -122,6 +122,11 @@ def slice_func(y, x, *args, n_peaks=6, config=None, **kwargs):
                 shift = 5
             return [np.where(y != 0)[0][0]+shift, np.where(y != 0)[0][-1], 1]
 
+    else:
+
+        shift = 3
+        return [np.argmax(y) - shift, np.where(y != 0)[0][-1], 1]
+
 
 def bounds_func(y, x, *args, n_peaks = 6, config=None, **kwargs):
     """

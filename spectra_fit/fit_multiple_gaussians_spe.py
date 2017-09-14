@@ -138,6 +138,7 @@ def slice_func(y, x, *args, n_peaks=6, config=None, **kwargs):
 
     #if config is None:
 
+
     if np.where(y != 0)[0].shape[0] < 2:
         return [0, 1, 1]
 
