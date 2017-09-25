@@ -5,7 +5,7 @@
 # internal modules
 from data_treatement import adc_hist
 from utils import display, histogram, geometry
-from spectra_fit import fit_multiple_gaussians_full_mpe
+#from spectra_fit import fit_multiple_gaussians_full_mpe
 import logging,sys
 import numpy as np
 import logging
@@ -127,10 +127,10 @@ def display_results(options):
     """
 
     # Load the histograms
-    #mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
-    full_mpes = histogram.Histogram(filename=options.output_directory + options.full_histo_filename)
+    mpes = histogram.Histogram(filename=options.output_directory + options.histo_filename)
+    #full_mpes = histogram.Histogram(filename=options.output_directory + options.full_histo_filename)
 
-    print(full_mpes.fit_result.shape)
+    #print(full_mpes.fit_result.shape)
     """
     geom,pixlist = geometry.generate_geometry(options.cts)
     mpes.data = mpes.data[0]
@@ -143,7 +143,7 @@ def display_results(options):
     #full_mpes.errors = full_mpes.errors[0]
 
     options.scan_level = options.dc_level
-    display.display_hist(full_mpes, options=options, draw_fit=True)
+    display.display_hist(mpes, options=options, draw_fit=False)
 
     axes = fig.get_axes()
     axis_histo = axes[0]
