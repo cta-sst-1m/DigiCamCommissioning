@@ -10,7 +10,7 @@ directory     :     /data/datasets/CTA/DATA/FULLSEQ/
 output_directory  : /data/datasets/CTA/DATA/FULLSEQ/
 
 # Camera Configuration
-angle_cts         : 0.
+angle_cts         : 120.
 
 # Base definition for the signal extraction
 window_width      : 7

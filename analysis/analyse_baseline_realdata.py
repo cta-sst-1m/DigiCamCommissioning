@@ -16,6 +16,10 @@ import matplotlib
 from tqdm import tqdm
 from cts_core.cameratestsetup import CTS
 
+from data_treatement.generic import subtract_baseline,integrate,extract_charge,fake_timing_hist,generate_timing_mask
+
+
+
 __all__ = ["create_histo", "perform_analysis", "display_results"]
 
 
@@ -43,7 +47,7 @@ def create_histo(options):
     suprious_mask = np.zeros((432),dtype = bool)
     suprious_mask[[391,392,403,404,405,416,417]]= True
 
-    n_int_base = 50000
+    n_int_base = options.baseline_integration
 
     # the final arrays
     # testbase = np.zeros((1296,(options.max_event) * 50 ), dtype=int)
@@ -57,16 +61,28 @@ def create_histo(options):
     prev_event = None
     next_event = None
     next_event_time = None
-    
+    baseline_tmp = None
+    std_tmp = None
 
     mask_baseline = np.zeros((1296, n_int_base ), dtype=bool)
     baseline = np.zeros((1296, n_int_base ), dtype=int)
     time = np.zeros((n_int_base ), dtype=int)
 
+
+
+    ## data for charge extraction
+    peak, mask, mask_edges = None, None , None
+    peak_position = fake_timing_hist(options,options.n_samples-options.baseline_per_event_limit)
+    peak, mask, mask_edges = generate_timing_mask(options,peak_position)
+
+    hist = np.zeros((1296,1000),dtype = int)
+    hist2 = np.zeros((1296,1000),dtype = int)
+    batch = np.zeros((1296,10000),dtype = int)
+    cnt_good = 0
     for file in options.file_list:
+        if cnt_good>batch.shape[1]:continue
         if event_number > options.max_event :
             break
-        if event_number%100000==0: print('################### event NUM %d'%event_number)
         # Open the file
         _url = options.directory + options.file_basename % file
 
@@ -79,63 +95,81 @@ def create_histo(options):
         for event in inputfile_reader:
             if event_number > options.max_event:
                 break
-            if event_number%int(1000) == 0 :
-                pbar.update(int(1000))
+            if event_number%int(float(options.max_event)/100) == 0 :
+                pbar.update(int(float(options.max_event)/100))
 
             prev_event = central_event
             central_event = next_event
             central_event_time = next_event_time
             telid = event.r0.tels_with_data[0]
-            trigger_out = np.array(list(event.r0.tel[telid].trigger_output_patch7.values()))
-
-
-            # Check if the central event was ok:
-            event_number+=1
+            trigger_out = np.array(list(event.r0.tel[telid].trigger_output_patch7.values()), dtype=int)
             # Skip non-spurious events
-            if np.sum(trigger_out[suprious_mask])<0.5 or np.sum(trigger_out[~suprious_mask])>0.5:
-                continue
+            if ( np.sum(trigger_out[suprious_mask])<0.5 or np.sum(trigger_out[~suprious_mask])>0.5 ) and not (baseline_tmp is None) and cnt_good<batch.shape[1]:
+                # subtract the baseline
+                data = np.array(list(event.r0.tel[telid].adc_samples.values()))
+                data = data - baseline_tmp.reshape(-1,1)
+                data_tmp1 = np.copy(data)
+                # Perform integration
+                data = integrate(data, options)
+                data_tmp = np.copy(data)
+                data_tmp[data_tmp<5*10]=0
+                data_tmp1[data_tmp1<5*8]=0
+                if cnt_good < 1000 :
+                    hist[:,cnt_good]=np.argmax(data_tmp,axis=-1)
+                    hist2[:,cnt_good]=np.argmax(data_tmp1,axis=-1)
+                # integrate
+                data = extract_charge(data, mask, mask_edges, peak, options, integration_type='integration_saturation')
 
-            next_event = np.array(list(event.r0.tel[telid].adc_samples.values()))
-            next_event_time = event.r0.tel[telid].local_camera_clock
+                batch[..., cnt_good] = data
+                cnt_good+=1
+            elif ( np.sum(trigger_out[suprious_mask])>0.5 and np.sum(trigger_out[~suprious_mask])<0.5 ):
+                next_event = np.array(list(event.r0.tel[telid].adc_samples.values()))
+                next_event_time = event.r0.tel[telid].local_camera_clock
+
+                # Check if the central event was ok:
+                event_number += 1
+
+                if prev_event is None:
+                    continue
+
+                if i_int < 0:
+                    i_int = 0
+                ## Save the value if enough events
+                if i_int * 50 > (n_int_base - 1) and event_number > 0:
+                    # Save the value...
+                    # print(cnt,event_number,i_int*50 ,full_baseline.shape)
+                    baseline = baseline.astype(dtype=float)
+                    baseline[~mask_baseline] = np.nan
+                    full_baseline[:, cnt] = np.nanmean(baseline, axis=-1)
+                    full_std[:, cnt] = np.nanstd(baseline, axis=-1)
+                    full_time[cnt] = np.mean(time)
+                    baseline_tmp = full_baseline[:, cnt]
+                    std_tmp = full_std[:, cnt]
+
+                    mask_baseline = np.zeros((1296, n_int_base), dtype=bool)
+                    baseline = np.zeros((1296, n_int_base), dtype=int)
+                    time = np.zeros((n_int_base), dtype=int)
+                    i_int = 0
+                    cnt += 1
+
+                mean_prev = np.mean(prev_event, axis=-1)
+                mean_central = np.mean(central_event, axis=-1)
+                mean_next = np.mean(next_event, axis=-1)
+
+                # are the pixel baseline of the central to be used in the baseline calculation?
+                tmp_mask = mean_central - np.minimum(mean_prev, mean_next) < 50
+                for ii in range(50):
+                    # print(mask_baseline.shape,i_int*50+ii,i_int)
+                    mask_baseline[:, i_int * 50 + ii] = mean_central - np.minimum(mean_prev, mean_next) < 50
+                baseline[:, i_int * 50:(i_int + 1) * 50] = central_event
+                # try:
+                #    testbase[:,event_number*50:(event_number+1)*50] = central_event
+                # except:
+                #    print(event_number*50,(event_number+1)*50)
+                time[i_int] = central_event_time
+                i_int += 1
 
 
-            if prev_event is None:
-                continue
-
-            if i_int < 0 :
-                i_int = 0
-            ## Save the value if enough events
-            if i_int*50 > (n_int_base-1)  and event_number>0:
-                # Save the value...
-                #print(cnt,event_number,i_int*50 ,full_baseline.shape)
-                baseline = baseline.astype(dtype=float)
-                baseline[~mask_baseline]=np.nan
-                full_baseline[:,cnt] = np.nanmean(baseline,axis=-1)
-                full_std[:,cnt] = np.nanstd(baseline,axis=-1)
-                full_time[cnt] = np.mean(time)
-
-                mask_baseline = np.zeros((1296,n_int_base),dtype=bool)
-                baseline = np.zeros((1296,n_int_base),dtype=int)
-                time  = np.zeros((n_int_base),dtype=int)
-                i_int = 0
-                cnt+=1
-
-            mean_prev = np.mean(prev_event, axis=-1)
-            mean_central = np.mean(central_event, axis=-1)
-            mean_next = np.mean(next_event, axis=-1)
-
-            # are the pixel baseline of the central to be used in the baseline calculation?
-            tmp_mask =  mean_central-np.minimum(mean_prev,mean_next)<50
-            for ii in range(50):
-                #print(mask_baseline.shape,i_int*50+ii,i_int)
-                mask_baseline[:,i_int*50+ii] = mean_central-np.minimum(mean_prev,mean_next)<50
-            baseline[:,i_int*50:(i_int+1)*50] = central_event
-            #try:
-            #    testbase[:,event_number*50:(event_number+1)*50] = central_event
-            #except:
-            #    print(event_number*50,(event_number+1)*50)
-            time[i_int] = central_event_time
-            i_int+=1
             event_number += 1
 
 
@@ -143,6 +177,8 @@ def create_histo(options):
     # Save the histogram
     np.savez_compressed(options.output_directory + options.histo_filename,
                         baseline=full_baseline[:,:-1],rms=full_std[:,:-1],time=full_time[:-1])
+    np.savez_compressed(options.output_directory + 'signal_'+options.histo_filename,
+                        data=batch,max_int=hist,max_nonint=hist2)
 
     # Delete the histograms
     del full_baseline
@@ -163,6 +199,31 @@ def perform_analysis(options):
 
     :return:
     """
+
+    data = np.load(options.output_directory + 'signal_'+options.histo_filename)['data']
+    geom,pixid = geometry.generate_geometry(options.cts, all_camera= True)
+    fig, ax = plt.subplots(figsize=(8,6))
+    fig1, ax1 = plt.subplots(figsize=(8,6))
+    camera_visu1 = visualization.CameraDisplay(geom, ax=ax , title='', norm='lin', cmap='viridis')
+    camera_visu2 = visualization.CameraDisplay(geom, ax=ax1 , title='', norm='log', cmap='viridis')
+    camera_visu1.add_colorbar()
+
+    fig.show()
+    fig1.show()
+    i=0
+    colbar=True
+    while i < data.shape[1]:
+        i+=1
+        if np.sum(data[:,i])/22>5000:
+            tmp = np.copy(data[:,i]/23)
+            camera_visu1.image=data[:,i]/23
+            tmp[tmp<0.1]=np.sqrt(0.1)
+            tmp[tmp<np.sqrt(8*8*2)]=np.sqrt(8*8*2)
+            camera_visu2.image=tmp
+            if colbar :
+                camera_visu2.add_colorbar()
+                colbar=False
+            input('print enter to go to next event')
     return
 
 

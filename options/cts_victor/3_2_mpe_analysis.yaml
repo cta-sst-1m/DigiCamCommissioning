@@ -1,9 +1,20 @@
 # Analysis module
-analysis_module : analyse_charge_scan
+
+analysis_module : analyse_mpe
+
+# Steering
+create_histo      : False
+perform_analysis  : False
+display_results   : False
+
+# Logging
+verbose           : False
+log_file_basename : 20170309
 
 # Input files
+
 mc            :     False
-file_basename :     ac_scan_120/CameraDigicam@localhost.localdomain_0_000.%s.run_452.fits.fz
+file_basename :     ac_scan_0/CameraDigicam@localhost.localdomain_0_000.%s.run_456.fits.fz
 file_list     :     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
                      26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
 ac_level      :     [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 18, 22, 26, 31, 38, 46, 55, 66, 79, 95, 114, 137, 164,
@@ -12,20 +23,13 @@ ac_level      :     [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 18, 22, 26, 31, 38, 46,
 dc_level      :     [0]
 
 # Output files
-histo_filename    : mpe_0.npz
-full_histo_filename   : full_mpe_0.npz
-baseline_param_data : baseline_parameters.npz
 
-# Event processing
-integration_method : integration_saturation
-threshold_sat      : 20000
-central_sample    : 59
-timing_width      : 3
-events_per_level  : 20000
-min_event           : 0
-max_event           : 1240000
+# Output files
+full_histo_filename    : full_mpe_0.npz
+dark_histo_filename : dark_adc_baseline.npz
+histo_filename   : mpe_120.npz
+level_pickle : levels_120.p
 
-# Plot configuration
-adcs_min           : -500
-adcs_max           : 20100
-adcs_binwidth      : 4
+# Histo config
+mean_range_for_mpe : [40, 100000]
+mpe_max_peaks_to_fit : 100

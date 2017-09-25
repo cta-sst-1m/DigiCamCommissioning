@@ -8,16 +8,27 @@ def poisson(k, mu):
     return mu ** k * np.exp(-mu) / math.factorial(k)
 
 
-def gaussian(p, x, amplitude=1.):
+def gaussian(p, x, normalised = False):
 
     sigma = p[0]
     mean = p[1]
     amplitude = p[2]
 
-    if amplitude==1.:
+    print(sigma.shape,mean.shape,amplitude.shape)
+    if normalised :
         amplitude = 1.
 
-    return amplitude / np.sqrt(2 * sigma ** 2 * math.pi) * np.exp(-(x - mean) ** 2 / (2 * sigma ** 2))
+    if len(x.shape) == 1:
+        x = x.reshape(-1, 1)
+    if len(sigma.shape)==1:
+        sigma = sigma.reshape(-1,1)
+    if len(mean.shape)==1:
+        mean = mean.reshape(-1,1)
+    if len(amplitude.shape)==1:
+        amplitude = amplitude.reshape(-1,1)
+
+    return amplitude.T / np.sqrt(2 * sigma.T ** 2 * math.pi) * np.exp(-(x - mean.T) ** 2 / (2 * sigma.T ** 2))
+
 
 def generalized_poisson(k, mu, mu_xt, amplitude=1):
     if mu_xt < 0 or mu < 0 or k < 0:
