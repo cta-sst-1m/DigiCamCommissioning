@@ -184,23 +184,25 @@ def draw_chi2(axis, hist, display_fit):
     else:
         h = hist.fit_chi2_ndof[:,0]/ hist.fit_chi2_ndof[:,1]
 
-    limit = 100
+    good_fit_limit = 10
+    good = (~np.isnan(h) * np.isfinite(h) * (h <= good_fit_limit))
+    n_bad_fit = np.sum(~good)
+    n_good_fit = np.sum(good)
 
+    limit = 1E9
     h_to_return = h
-    mask = (~np.isnan(h) * np.isfinite(h) * (h<=limit))
+    mask = (~np.isnan(h) * np.isfinite(h) * (h <= limit))
     h_to_return[~mask] = limit
     h = h[mask]
 
 
     if np.sum(mask)>0:
 
-        histo = axis.hist(h, bins='auto', histtype='step', align='left', label='All pixels', color='k', linewidth=1)
+        histo = axis.hist(h, bins='auto', histtype='step', align='left', label='All pixels \n $\chi^2$ / ndf $\leq$ %d : %d \n $\chi^2$ / ndf > %d : %d' % (good_fit_limit, n_good_fit, good_fit_limit, n_bad_fit), color='k', linewidth=1)
 
         bin_edges = histo[1][0:-1]
         bin_width = bin_edges[1] - bin_edges[0]
         histo = histo[0]
-
-
 
         if display_fit:
 
@@ -452,7 +454,7 @@ def display_fit_pull(hist, geom = None , index_var=1, limits=None, true_value=No
 
     return fig
 
-def display_chi2(hist, geom = None, display_fit=False):
+def display_chi2(hist, geom = None, display_fit=False, limits_colorbar=[0, 100]):
     """
     A function to display a vaiable both as an histogram and as a camera view
 
@@ -475,7 +477,9 @@ def display_chi2(hist, geom = None, display_fit=False):
         vis_gain.add_colorbar()
         vis_gain.colorbar.set_label('$\chi^2 / ndf$')
         h = draw_chi2(ax_right, hist, display_fit=display_fit)
-        vis_gain.image = h
+        vis_gain.cmap.set_bad(color='w')
+        vis_gain.image = np.ma.masked_where(np.logical_or(h <= limits_colorbar[0], h >= limits_colorbar[1]), h)
+
     else:
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(1, 1, 1)

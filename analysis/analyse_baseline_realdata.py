@@ -43,7 +43,7 @@ def create_histo(options):
     suprious_mask = np.zeros((432),dtype = bool)
     suprious_mask[[391,392,403,404,405,416,417]]= True
 
-    n_int_base = 20000
+    n_int_base = 50000
 
     # the final arrays
     # testbase = np.zeros((1296,(options.max_event) * 50 ), dtype=int)
@@ -66,6 +66,7 @@ def create_histo(options):
     for file in options.file_list:
         if event_number > options.max_event :
             break
+        if event_number%100000==0: print('################### event NUM %d'%event_number)
         # Open the file
         _url = options.directory + options.file_basename % file
 
@@ -78,14 +79,18 @@ def create_histo(options):
         for event in inputfile_reader:
             if event_number > options.max_event:
                 break
-            if event_number%int(float(options.max_event)/100) == 0 :
-                pbar.update(int(float(options.max_event)/100))
+            if event_number%int(1000) == 0 :
+                pbar.update(int(1000))
 
             prev_event = central_event
             central_event = next_event
             central_event_time = next_event_time
             telid = event.r0.tels_with_data[0]
-            trigger_out = np.array(list(event.r0.tel[telid].trigger_output_patch7.values()), dtype=int)
+            trigger_out = np.array(list(event.r0.tel[telid].trigger_output_patch7.values()))
+
+
+            # Check if the central event was ok:
+            event_number+=1
             # Skip non-spurious events
             if np.sum(trigger_out[suprious_mask])<0.5 or np.sum(trigger_out[~suprious_mask])>0.5:
                 continue
@@ -93,8 +98,6 @@ def create_histo(options):
             next_event = np.array(list(event.r0.tel[telid].adc_samples.values()))
             next_event_time = event.r0.tel[telid].local_camera_clock
 
-            # Check if the central event was ok:
-            event_number+=1
 
             if prev_event is None:
                 continue

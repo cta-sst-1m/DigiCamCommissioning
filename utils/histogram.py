@@ -341,7 +341,7 @@ class Histogram:
         self.errors[self.errors == 0.] = 1.
 
     def _axis_fit(self, idx, func, p0, slice_list=None, bounds=None, fixed_param=None, force_quiet=None):
-        #TODO pout the full jacobian in option
+        # TODO pout the full jacobian in option
         """
         Perform a fit on this specific Histogram
 
@@ -434,7 +434,9 @@ class Histogram:
                                            axis=1)
 
             except Exception as inst:
-                self.logger.error('Could not fit index %s'%idx[-1])
+                print(idx)
+                print('hello')
+                self.logger.error('Could not fit index %s' %idx)
                 #self.logger.error(inst)
                 print(inst)
                 print('p0:', reduced_p0)

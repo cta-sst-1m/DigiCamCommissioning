@@ -16,7 +16,7 @@ histo_dark          : dark_adc_baseline.npz
 pixel_list : all
 
 # Output file
-histo_filename    : dark_spe.npz
+histo_filename    : dark_spe_dev.npz
 analysis_type     : single_photo_electron
 
 # Event processing
