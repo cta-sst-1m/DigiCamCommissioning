@@ -81,7 +81,7 @@ def perform_analysis(options):
         avg = np.average(x, weights=y)
         return np.sqrt(np.average((x - avg) ** 2, weights=y))
 
-    g_logs = logs(2000)
+    g_logs = logs(10000)
     reduced_func = lambda p, x1, x2 : fit_function(p, x1, x2, g_logs)
     ## Now perform the mu and mu_XT fits
 
@@ -91,48 +91,48 @@ def perform_analysis(options):
         patch = options.cts.camera.Pixels[real_pix].patch
         levels = np.array(b[patch])[0:40]
         slice_list = slice_function(mpes.data[0,0:40,pixel])
-        bound_min,bound_max = bounds(None, mpes.data[0,0:40,pixel],levels,mpes.bin_centers)
-        reduced_p0 = p0(None, mpes.data[0,0:40,pixel],levels,mpes.bin_centers)
-        print('p0',reduced_p0)
+        X_1 = levels
+        X_2 = mpes.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]]
+        Y = mpes.data[0, 0:40, pixel, slice_list[0]:slice_list[1]:slice_list[2]]
+        Y_err = mpes.errors[0,0:40,pixel,slice_list[0]:slice_list[1]:slice_list[2]]
+        mask = np.nonzero(Y_err)
 
-        for i, level in enumerate(levels):
-            if i > 15: continue
-            plt.subplot(4, 4, 1 + i)
+        reduced_p0 = p0_eval(None, Y,X_1,X_2)
+        bound_min,bound_max = bounds(None, Y,X_1,X_2)
 
         residual = lambda p, x1,x2, y, y_err: residuals(reduced_func, p, x1,x2, y, y_err)
-        out = scipy.optimize.least_squares(residual, reduced_p0, args=(levels,
-            mpes.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]],
-            mpes.data[0,0:40,pixel,slice_list[0]:slice_list[1]:slice_list[2]],
-            mpes.errors[0,0:40,pixel,slice_list[0]:slice_list[1]:slice_list[2]]),loss='soft_l1',bounds=(bound_min,bound_max))
+        out = scipy.optimize.least_squares(residual, reduced_p0, args=(X_1,X_2,Y[mask],Y_err[mask]),loss='soft_l1',bounds=(bound_min,bound_max))
                                           # bounds=(bound_min,bound_max),
 
         param = out.x
-        #weight_matrix = np.diag(1. / mpes.errors[0,i,pixel,slice_list[0]:slice_list[1]:slice_list[2]])
-        #weight_matrix = 1.  # TODO changed to one since pull study showed previous config is fine
-        #cov = np.sqrt(np.diag(inv(np.dot(np.dot(out.jac.T, weight_matrix), out.jac))))
-        #fit_result = np.append(out.x.reshape(out.x.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
+        try:
+            weight_matrix = np.diag(1. / mpes.errors[0,i,pixel,slice_list[0]:slice_list[1]:slice_list[2]])
+            #weight_matrix = 1.  # TODO changed to one since pull study showed previous config is fine
+            cov = np.sqrt(np.diag(inv(np.dot(np.dot(out.jac.T, weight_matrix), out.jac))))
+            fit_result = np.append(out.x.reshape(out.x.shape + (1,)), cov.reshape(cov.shape + (1,)), axis=1)
     #param=
+        except Exception as inst:
+            print(inst)
+            print(out.jac)
 
     ys = reduced_func(param, levels, mpes.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]])
+    plt.subplots(4,4)
     for i, y in enumerate(ys):
         if i>15: continue
         plt.subplot(4, 4, 1 + i)
         plt.errorbar(mpes.bin_centers[slice_list[0]:slice_list[1]:slice_list[2]],
                      (y-mpes.data[0,i,pixel,slice_list[0]:slice_list[1]:slice_list[2]])/mpes.errors[0,i,pixel,slice_list[0]:slice_list[1]:slice_list[2]],fmt='ok')
 
-
-    reduced_func = lambda p, x : led_polynomial(p, x)
-
-    reduced_p0 = np.poly1d(np.polyfit(levels, param[0:40], 4))
-    reduced_p0 = list(reduced_p0.coeffs)
-    print(reduced_p0)
-    residual = lambda p, x1, y, y_err: residuals_1D(reduced_func, p, x1, y, y_err)
-    out = scipy.optimize.least_squares(residual, list(reduced_p0)+[1.2], args=(levels,param[0:40],np.sqrt(param[0:40])))
-
-
+    mu = out.x#fit_result[:X_1.shape[0],0]
+    mu_err = np.minimum(np.sqrt(out.x),out.x*0.1) #fit_result[:X_1.shape[0],1]
+    modmu = mu-mu[0]
+    p0 = list(np.poly1d(np.polyfit(X_1[modmu > 2.e-2], modmu[modmu > 2.e-2], 4)).coeffs)
+    p0.append(mu[0])
+    residual = lambda p, x1, y, y_err: residuals_1D(led_polynomial_2, p, x1, y, y_err)
+    out = scipy.optimize.least_squares(residual, list(p0), args=(X_1, mu, mu_err))  # ,bounds=bounds)
     plt.subplots(1, 1)
-    plt.errorbar(levels[0:40], param[0:40],fmt = 'ok')
-    plt.plot(np.arange(levels[0],levels[-1],0.1),led_polynomial(out.x,np.arange(levels[0],levels[-1],0.1)))
+    plt.errorbar(X_1, led_polynomial_2(param[:5],X_1),fmt = 'ok')
+    plt.plot(np.arange(X_1[0],X_1[-1],0.1),led_polynomial_2(out.x[:5],np.arange(X_1[0],X_1[-1],0.1)))
     plt.yscale('log')
     plt.show()
 
@@ -150,7 +150,7 @@ def display_results(options):
 
 
 
-def p0(prev_fit,y,x1,x2):
+def p0_eval(prev_fit,y,x1,x2):
     mus = np.zeros(x1.shape,dtype=float)
     for i in range(x1.shape[0]):
         mus[i] = np.average(x2.astype(dtype=float)/23.,weights=y[i],axis=-1)*0.92
@@ -168,38 +168,27 @@ def p0(prev_fit,y,x1,x2):
     '''
     return p
 
+def p0_2(prev_fit,y,x1,x2):
+    mus = np.zeros(x1.shape,dtype=float)
+    for i in range(x1.shape[0]):
+        mus[i] = np.average(x2.astype(dtype=float)/23.,weights=y[i],axis=-1)*0.92
+
+    p0 = list(np.poly1d(np.polyfit(x1[(mus-mus[0]) > 2.e-2], (mus-mus[0])[(mus-mus[0]) > 2.e-2], 4)).coeffs)
+    p = [p0[0],p0[1],p0[2],100.,mus[0]]
+    p +=[ 0.08 , 19., 0., 4.,1. ]
+    p+=list(np.sum(y,axis=-1).reshape(-1)*3.)
+    '''
+    yy = np.zeros(x1.shape,dtype=float)
+    for i in range(x1.shape[0]):
+        yy[i] = np.average(x2.astype(dtype=float)/23.,weights=y[i],axis=-1)*0.92
+    pol = np.poly1d(np.polyfit(x1.astype(dtype=float)[yy>1], yy[yy>1], 4))
+    p = list(pol.coeffs)
+    p +=[1.2, 0.08 , 19., 0., 4.,1. ]
+    p+=list(np.sum(y,axis=-1).reshape(-1)*3.)
+    '''
+    return p
+
 def bounds(prev_fit,y,x1,x2):
-    '''
-    bound_min = [-np.inf,
-                 -np.inf,
-                 -np.inf,
-                 -np.inf,
-                 -np.inf,
-                 0.,
-                 0.,
-                 15.,
-                 -10.,
-                 0.,
-                 0.,
-                 ]+list(np.maximum(np.sum(y,axis=-1)-5* np.sqrt(np.sum(y,axis=-1)),0.).reshape(-1))
-    #for a in np.maximum(np.sum(y,axis=-1)-5* np.sqrt(np.sum(y,axis=-1)),0.) :
-    #    bound_min.append(float(a))
-
-    bound_max = [np.inf,
-                 np.inf,
-                 np.inf,
-                 np.inf,
-                 np.inf,
-                 2.,
-                 0.2,
-                 27.,
-                 10.,
-                 10.,
-                 10.,
-                 ]+list(3. * np.maximum(np.sum(y,axis=-1)+5* np.sqrt(np.sum(y,axis=-1)),0.).reshape(-1)*np.inf)
-    return bound_min,bound_max
-    '''
-
     mus = np.zeros(x1.shape,dtype=float)
     for i in range(x1.shape[0]):
         mus[i] = np.average(x2.astype(dtype=float)/23.,weights=y[i],axis=-1)*0.92
@@ -221,6 +210,27 @@ def bounds(prev_fit,y,x1,x2):
     ] + list(np.maximum(3.*np.sum(y, axis=-1) + 5 * np.sqrt(3.*np.sum(y, axis=-1)), 0.).reshape(-1)*np.inf)
     return bound_min, bound_max
 
+
+def bounds_2(prev_fit,y,x1,x2,_p0):
+    print()
+    bound_min = list(np.minimum(np.array(_p0[:5])*0.01,np.array(_p0[:5])*100.))+ [
+                 0.,
+                 15.,
+                 -10.,
+                 0.,
+                 0.,
+                 ] + list(np.maximum(np.sum(y, axis=-1) - 5 * np.sqrt(np.sum(y, axis=-1)), 0.).reshape(-1))
+    # for a in np.maximum(np.sum(y,axis=-1)-5* np.sqrt(np.sum(y,axis=-1)),0.) :
+    #    bound_min.append(float(a))
+    bound_max = list(np.maximum(np.array(_p0[:5])*0.01,np.array(_p0[:5])*100.)) + [
+                 0.2,
+                 27.,
+                 10.,
+                 10.,
+                 10.,
+    ] + list(np.maximum(3.*np.sum(y, axis=-1) + 5 * np.sqrt(3.*np.sum(y, axis=-1)), 0.).reshape(-1)*np.inf)
+    return bound_min, bound_max
+
 def led_polynomial(p , x):
     # p[0] is the level at which the LED do not produce light anymore
     # p[1],p[2],p[3] are negative
@@ -228,6 +238,17 @@ def led_polynomial(p , x):
     poly = np.poly1d(p[0:5]) (x)
     poly[poly<0] = 0.
     poly+=p[5]
+    return poly
+
+
+def led_polynomial_2(p , x):
+    # p[0] is the level at which the LED do not produce light anymore
+    # p[1],p[2],p[3] are negative
+    # p[4] is the mu_dark
+    d = (4*p[0]*p[3]**3+ 3*p[1]*p[3]**2+ 2*p[2]*p[3])
+    e = p[4]-(p[0]*p[3]**4 +p[1]*p[3]**3 +p[2]*p[3]**2 +d*p[3])
+    poly = np.poly1d([p[0],p[1],p[2],d,e])(x)
+    poly[x<p[3]]=p[4]
     return poly
 
 def gaussian_array(p, x, normalised = False):
@@ -269,6 +290,27 @@ def fit_function(p, x1, x2, g_logs):
     mu = np.array(p[0:x1.shape[0]])
     mu_xt, gain, baseline, sigma_e, sigma_1, amplitudes = p[x1.shape[0]], p[x1.shape[0]+1], p[x1.shape[0]+2], p[x1.shape[0]+3], p[x1.shape[0]+4],\
                                                           np.array(p[x1.shape[0]+5:])
+    central_n = mu * (1 + mu_xt)
+    n_peakmin = np.round(np.maximum(central_n - 4 * np.sqrt(central_n), 0),0).astype(dtype = int)
+    n_peakmin[n_peakmin<0]=0
+    n_peakmax = np.round(central_n + 4 * np.sqrt(central_n),0).astype(dtype = int)
+    if n_peakmax[-1]>100000:
+        return np.ones(x1.shape+x2.shape,dtype=float)*1.e8
+    # Generate the gaussians that will be used
+    N = np.arange(0, n_peakmax[-1] + 1)
+    sigma_n = np.sqrt(sigma_e ** 2 + N * sigma_1 ** 2 + 1. / 12.)
+    gaussian_pdfs = gaussian_array([sigma_n, N * gain, np.ones(N.shape, dtype=float)], x2)
+    generalised_poisson_pdfs = generalized_poisson(N, mu.T, mu_xt,g_logs)
+    y = np.dot(generalised_poisson_pdfs, gaussian_pdfs.T)* amplitudes.reshape(-1,1)
+    return y
+
+def fit_function_2(p, x1, x2, g_logs):
+    # get the mu as function of DAC
+    #mu = led_polynomial(p[0:6],x1)
+    #mu_xt, gain, baseline, sigma_e, sigma_1, amplitudes = p[6], p[7], p[8], p[9], p[10], np.array(p[11:])
+    mu = led_polynomial_2(p[0:5],x1)
+    mu_xt, gain, baseline, sigma_e, sigma_1, amplitudes = p[5], p[6], p[7], p[8], p[9],\
+                                                          np.array(p[10:])
     central_n = mu * (1 + mu_xt)
     n_peakmin = np.round(np.maximum(central_n - 4 * np.sqrt(central_n), 0),0).astype(dtype = int)
     n_peakmin[n_peakmin<0]=0
